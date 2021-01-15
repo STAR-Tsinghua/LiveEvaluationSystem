@@ -1,0 +1,78 @@
+dtp_server(host, port, conf);
+main start
+ev_io_init(&watcher, recv_cb, sock, EV_READ);
+dplay.h network_working :=======
+dtp_client.h dtp_client :=======
+conn_io = create_conn(loop, odcid, odcid_len);
+live_produce Function Start =================================
+Init cam.get(CAP_PROP_FRAME_WIDTH): 1280
+Init cam.get(CAP_PROP_FRAME_HEIGHT): 720
+Init cam.get(CAP_PROP_FPS): 12
+1. 打开摄像机 : 成功！
+2. 初始化视频像素转换上下文 : 成功！
+avcodec_alloc_context3 success!
+!(vc = CreateCodec(AV_CODEC_ID_H264)) Pass
+Function OpenCodec(&vc);
+bool OpenCodec(AVCodecContext **c)!
+avcodec_open2 success!
+3. 初始化视频编码器 : 成功！
+av_malloc
+avio_alloc_context
+avformat_alloc_output_context2
+ic->pb=avio_out;
+ic->pb=avio_out; return true
+4. MemoryOutByFIFO : 成功！
+AddStream
+after AddStream
+after avformat_new_stream
+if (c->codec_type == AVMEDIA_TYPE_VIDEO)
+st->index : 0
+5. 添加视频流 : 成功！
+cptr = std::make_shared<StreamContext>(ptr, id); id: 0
+StreamContext(AVFormatContext *ptr, int id)
+StreamContext ptr!=NULL
+pFmtCtx->streams[0] != NULL
+ptr->streams->time_base.num : 0
+ptr->streams->time_base.den : 0
+End StreamContext(AVFormatContext *ptr, int id) End========
+init_live_resource()==true
+liveConsumeThread success
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+ptr->push(block);
+worker->jbuffer.jptrs.size():1
+thread *pthd = new thread(video_viewer4, *it, &worker->splay, worker->path);
+int video_viewer4 decode and display the pictures.
+codec->pix_fmt : 0
+codec->width : 1280
+codec->height : 720
+codec->bit_rate : 409000
+codec->bits_per_coded_sample : 0
+codec->bits_per_raw_sample : 0
+lhs_copy_parameters_to_context Mid =================
+par->extradata_size : 37
+lhs_copy_parameters_to_context END =================
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
+lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
