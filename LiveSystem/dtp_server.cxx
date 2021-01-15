@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     else {
         conf = "./config/stream.conf";
     }
-    Print2File("dtp_server(host, port, conf);");
+    Print2File("#include <lhs_dtp_server.h> start!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     dtp_server(host, port, conf);
     Print2File("end =================================");
 }

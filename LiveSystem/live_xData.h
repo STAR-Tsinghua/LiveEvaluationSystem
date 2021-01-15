@@ -14,12 +14,10 @@ public:
     //创建空间，并且复制data内容
     XData(char *data, int size,long long p=0)
     {
-        // Print2File("cxx : XData::XData(char *data, int size,long long p)");
         this->data = new char[size];
         memcpy(this->data, data, size);
         this->size = size;
         this->pts = p;
-        // Print2File("XData this->pts:"+std::to_string(this->pts));
     }
 
     void Drop()

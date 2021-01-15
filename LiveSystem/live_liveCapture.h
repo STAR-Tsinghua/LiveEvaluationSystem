@@ -28,11 +28,9 @@ public:
 	//线程调用只能调用静态函数
 	void run()
 	{
-		// Print2File("LiveCapture void run()");
 		Mat frame;
 		while (!isExit)
 		{
-			// Print2File("while (!isExit)");
 			if (!cam.read(frame))
 			{
 				Print2File("!cam.read(frame)");
@@ -52,14 +50,11 @@ public:
 
 	bool Init(int camIndex = 0)
 	{
-		// Print2File("bool Init() cam.open(0);");
 		cam.open(camIndex);
 		if (!cam.isOpened())
 		{
-			// Print2File("bool Init() inside : cam open failed!");
 			return false;
 		}
-		// Print2File("bool Init() inside : cam open success");
 		width = cam.get(CAP_PROP_FRAME_WIDTH);
 		height = cam.get(CAP_PROP_FRAME_HEIGHT);
 		fps = cam.get(CAP_PROP_FPS);
@@ -74,10 +69,8 @@ public:
 		cam.open(url);
 		if (!cam.isOpened())
 		{
-			// cout << "cam open failed!" << endl;
 			return false;
 		}
-		// cout << url << " cam open success" << endl;
 		width = cam.get(CAP_PROP_FRAME_WIDTH);
 		height = cam.get(CAP_PROP_FRAME_HEIGHT);
 		fps = cam.get(CAP_PROP_FPS);

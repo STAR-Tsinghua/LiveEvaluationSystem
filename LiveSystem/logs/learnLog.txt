@@ -1,5 +1,5 @@
-dtp_server(host, port, conf);
 main start
+#include <lhs_dtp_server.h> start!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ev_io_init(&watcher, recv_cb, sock, EV_READ);
 dplay.h network_working :=======
 dtp_client.h dtp_client :=======
@@ -19,14 +19,7 @@ avcodec_open2 success!
 av_malloc
 avio_alloc_context
 avformat_alloc_output_context2
-ic->pb=avio_out;
-ic->pb=avio_out; return true
 4. MemoryOutByFIFO : 成功！
-AddStream
-after AddStream
-after avformat_new_stream
-if (c->codec_type == AVMEDIA_TYPE_VIDEO)
-st->index : 0
 5. 添加视频流 : 成功！
 cptr = std::make_shared<StreamContext>(ptr, id); id: 0
 StreamContext(AVFormatContext *ptr, int id)
