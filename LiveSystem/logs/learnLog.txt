@@ -1,13 +1,13 @@
-main start
 #include <lhs_dtp_server.h> start!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ev_io_init(&watcher, recv_cb, sock, EV_READ);
+main start
 dplay.h network_working :=======
 dtp_client.h dtp_client :=======
 conn_io = create_conn(loop, odcid, odcid_len);
 live_produce Function Start =================================
 Init cam.get(CAP_PROP_FRAME_WIDTH): 1280
 Init cam.get(CAP_PROP_FRAME_HEIGHT): 720
-Init cam.get(CAP_PROP_FPS): 12
+Init cam.get(CAP_PROP_FPS): 30
 1. 打开摄像机 : 成功！
 2. 初始化视频像素转换上下文 : 成功！
 avcodec_alloc_context3 success!
@@ -45,16 +45,6 @@ codec->bits_per_raw_sample : 0
 lhs_copy_parameters_to_context Mid =================
 par->extradata_size : 37
 lhs_copy_parameters_to_context END =================
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
 lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
 lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
 lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~

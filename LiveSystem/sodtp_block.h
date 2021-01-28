@@ -109,33 +109,6 @@ public:
 
 typedef std::shared_ptr<SodtpBlock>  SodtpBlockPtr;
 
-
-
-// Deprecated.
-static inline SodtpBlockPtr SodtpBlockCreate(uint8_t *data, int size, bool last_one, uint32_t block_id,
-                    uint32_t stream_id, uint64_t block_ts) {
-    SodtpBlockPtr ptr(new SodtpBlock());
-
-    ptr->last_one = last_one;
-
-    ptr->block_id = block_id;
-    ptr->stream_id = stream_id;
-
-    ptr->data = new uint8_t[size + AV_INPUT_BUFFER_PADDING_SIZE];
-    memcpy(ptr->data, data, size);
-    memset(ptr->data + size, 0, AV_INPUT_BUFFER_PADDING_SIZE);
-    ptr->size = size;
-
-    // The block_ts should be along with the insertion logic.
-    // So here we choose the DTS, rather than PTS, as the block_ts.
-    ptr->block_ts = block_ts;
-
-    return ptr;
-}
-
-
-
-
 class BlockData
 {
 public:

@@ -19,7 +19,7 @@ LIBS = 	-lswscale -lswresample -lavformat \
 		-L$(DTP_LIB) -lquiche \
 		-lm -lz -lev -ldl -pthread \
 
-TARGETS = dtp_server camera dplay
+TARGETS = dtp_server dplay
 
 LOGS = logs
 
@@ -30,9 +30,6 @@ dtp_server : dtp_server.cxx
 
 dplay : p_dplay.cxx p_sodtp_jitter.cxx sodtp_block.cxx
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
-
-camera : camera.cxx
-	$(CX) $(CXFLAGS) $(OPENCVFLAGS) -o $@ $^ $(INCS) $(LIBS)
 
 clean:
 	rm -rf $(TARGETS)

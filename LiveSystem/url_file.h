@@ -27,29 +27,6 @@ public:
     //TODO Add mediaEncoder
     // MediaEncoder *encoder;
 
-    //lhs 暴改参考版本
-    // StreamContext(AVFormatContext *ifmt_ctxPtr, AVFormatContext *ofmt_ctxPtr,int id) {
-    //     //  对ifmt_ctx初始化
-    //     ifmt = av_find_input_format("h264"); //if (!(vc = CreateCodec(AV_CODEC_ID_H264)))
-
-    //     unsigned char * iobuffer=(unsigned char *)av_malloc(32768);
-    //     AVIOContext *avio =avio_alloc_context(iobuffer, 32768,0,pp,HISON_FILL_Buffer,NULL,NULL);
-    //     ifmt_ctx->pb=avio;
-
-    //     avformat_open_input(&ifmt_ctx, NULL, ifmt, NULL);
-
-    //     avformat_find_stream_info(ifmt_ctx, 0);
-
-    //     // ofmt_ctx的初始化
-    //     avformat_alloc_output_context2(&ofmt_ctx, NULL, "flv", g_push_param->DestAddress);// bool Init(const char *url) //1
-
-    //     out_stream = avformat_new_stream(ofmt_ctx, NULL);// int AddStream(const AVCodecContext *c) //2
-
-    //     avcodec_parameters_copy(out_stream->codecpar, in_codecpar)// xPlayer
-
-    //     avio_open(&ofmt_ctx->pb, out_filename, AVIO_FLAG_WRITE);// bool SendHead() // 3
-    // }
-
     // TODO 改掉它，不然变废代码
     StreamContext(AVFormatContext *ptr, int id) {
         Print2File("StreamContext(AVFormatContext *ptr, int id)");
@@ -70,11 +47,6 @@ public:
         Print2File("ptr->streams->time_base.num : "+std::to_string(pFmtCtx->streams[0]->time_base.num));
         Print2File("ptr->streams->time_base.den : "+std::to_string(pFmtCtx->streams[0]->time_base.den));
         Print2File("End StreamContext(AVFormatContext *ptr, int id) End========");
-
-//         StreamContext ptr!=NULL
-// pFmtCtx->streams[0] != NULL
-// ptr->streams->time_base.num : 0
-// ptr->streams->time_base.den : 0
     }
 
     ~StreamContext() {
@@ -215,121 +187,6 @@ static inline int file_read_packet2(
     return av_read_frame(pFormatCtx, pPacket);
 }
 
-
-// @deprecated
-int file_read_packet3(
-    const char              *pFilename,
-    AVPacket                *pPacket) {
-
-
-    static AVFormatContext          *pFormatCtx = NULL;
-    static AVCodecContext           *pVCodecCtx = NULL;
-    static AVCodec                  *pVCodec = NULL;
-    static int                      i, videoStream;
-    static int                      initContext = 0;
-
-    if (!initContext) {
-        initContext = 1;
-
-        // Open video file
-        if (avformat_open_input(&pFormatCtx, pFilename, NULL, NULL) != 0)
-            return -1; // Couldn't open file
-
-        // Retrieve stream information
-        if (avformat_find_stream_info(pFormatCtx, NULL) < 0)
-            return -1; // Couldn't find stream information
-
-        // Dump information about file onto standard error
-        av_dump_format(pFormatCtx, 0, pFilename, 0);
-
-        // Find the first video stream
-        videoStream = -1;
-        for (i = 0; i < pFormatCtx->nb_streams; i++) {
-            if (pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-                videoStream = i;
-                break;
-            }
-        }
-        if (videoStream == -1)
-            return -1; // Didn't find a video stream
-
-        // Find the decoder for the video stream
-        // pVCodec = avcodec_find_decoder(pFormatCtx->streams[videoStream]->codecpar->codec_id);
-        // if (pVCodec == NULL) {
-        //     fprintf(stderr, "Unsupported codec!\n");
-        //     return -1; // Codec not found
-        // }
-        // printf("H265 = %d, Codec type = %d\n", AV_CODEC_ID_H265, pVCodec->id);
-
-        pVCodecCtx = avcodec_alloc_context3(pVCodec);
-        if (!pVCodecCtx) {
-            fprintf(stderr, "Could not allocate video codec context\n");
-            return -1;
-        }
-        pVCodecCtx->thread_count = 1;
-        avcodec_parameters_to_context(pVCodecCtx, pFormatCtx->streams[videoStream]->codecpar);
-
-        pVCodec = avcodec_find_decoder(pVCodecCtx->codec_id);
-        printf("H265 = %d, Codec type = %d\n", AV_CODEC_ID_H265, pVCodec->id);
-
-        // Open Codec
-        if (avcodec_open2(pVCodecCtx, pVCodec, NULL) < 0) {
-            printf("fail to open codec!\n");
-            return -1;
-        }
-
-    }
-
-    // av_packet_unref(&packet);
-    return av_read_frame(pFormatCtx, pPacket);
-}
-
-// @deprecated
-int file_read_packet4(
-    const char              *pFilename,
-    AVPacket                *pPacket) {
-
-
-    static AVFormatContext          *pFormatCtx = NULL;
-    static int                      initContext = 0;
-
-    if (!initContext) {
-        initContext = 1;
-
-        // Open video file
-        if (avformat_open_input(&pFormatCtx, pFilename, NULL, NULL) != 0)
-            return -1; // Couldn't open file
-
-        // Retrieve stream information
-        if (avformat_find_stream_info(pFormatCtx, NULL) < 0)
-            return -1; // Couldn't find stream information
-
-        // Dump information about file onto standard error
-        av_dump_format(pFormatCtx, 0, pFilename, 0);
-    }
-
-    // av_packet_unref(&packet);
-    return av_read_frame(pFormatCtx, pPacket);
-}
-
-
-// @deprecated
-int sodtp_read_jitter_packet() {
-
-#define BUFFER_SIZE 4096
-
-    static uint8_t      buffer[BUFFER_SIZE + AV_INPUT_BUFFER_PADDING_SIZE];
-    static int          initBuffer = 0;
-    static size_t       data_size = 0;
-    static uint8_t      *data;
-    int                 ret;
-
-
-    return 0;
-}
-
-
-
 void init_resource(std::vector<AVFormatContext*> *pFmtCtxs) {
     const char files[][100] = {
         "/Users/yuming/Movies/bigbuckbunny/480x272_1.h265",
@@ -391,32 +248,6 @@ void init_resource(AVFormatContext **pFmtCtx, const char *filename) {
 int init_Live_AVFormatContext(
     AVFormatContext         **pFormatCtx,
     const char              *pFilename) {
-    Print2File("init_Live_AVFormatContext");
-
-
-
-    // 下面是不成功的案例
-    //&ic, 0, "flv", url
-    // int ret = avformat_alloc_output_context2(pFormatCtx, NULL, NULL, pFilename);
-    // int ret = avformat_alloc_output_context2(pFormatCtx, 0, "flv", pFilename);
-    // if (ret != 0)
-	// {
-    //     Print2File("init_Live_AVFormatContext return -1");
-    //     return -1;
-	// }
-//================= Old ==================
-    // // Open video file
-    // if (avformat_open_input(pFormatCtx, pFilename, NULL, NULL) != 0)
-    //     return -1; // Couldn't open file
-
-    // // Retrieve stream information
-    // if (avformat_find_stream_info(*pFormatCtx, NULL) < 0)
-    //     return -1; // Couldn't find stream information
-
-    // // Dump information about file onto standard error
-    // av_dump_format(*pFormatCtx, 0, pFilename, 0);
-//================= Old ==================
-    Print2File("init_Live_AVFormatContext return 0");
     return 0;
 }
 
