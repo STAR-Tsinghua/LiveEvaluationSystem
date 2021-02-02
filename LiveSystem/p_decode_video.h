@@ -570,7 +570,6 @@ end:
 }
 
 void worker_cb(EV_P_ ev_timer *w, int revents) {
-    Print2File("worker_cb===============");
     // AVPacket packet;
     Decoder *decoder = (Decoder *)w->data;
 
@@ -897,8 +896,8 @@ void worker_cb4(EV_P_ ev_timer *w, int revents) {
 }
 // decode and display the pictures.
 int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
-    Print2File("int video_viewer4 decode and display the pictures."); // 这里才是真正跑的video_viewer4
-    printf("viewer: viewing stream %u!\n", pJitter->stream_id);
+    Print2FileInfo("(p)video_viewer4函数");
+    // printf("viewer: viewing stream %u!\n", pJitter->stream_id);
 
     // Initalizing these to NULL prevents segfaults!
     AVFormatContext         *pVFormatCtx = NULL;
@@ -941,10 +940,6 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
         ret = pJitter->front(pBlock);
 
         if ((ret == SodtpJitter::STATE_NORMAL) && pBlock->key_block) {
-            // Print2File("video_viewer4 sniffing: stream "); // 这里才是真正跑的video_viewer4
-            // Print2File("pBlock->stream_id : "+std::to_string(pBlock->stream_id)); // 这里才是真正跑的video_viewer4
-            // Print2File("pBlock->block_id : "+std::to_string(pBlock->block_id)); // 这里才是真正跑的video_viewer4
-            // Print2File("video_viewer4 pBlock->size : "+std::to_string(pBlock->size)); // 这里才是真正跑的video_viewer4
             fprintf(stdout, "sniffing: stream %d,\t block %d,\t size %d\n",
                     pBlock->stream_id, pBlock->block_id, pBlock->size);
 
@@ -1111,7 +1106,7 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
     // Notification for clearing the jitter.
     sem_post(pJitter->_sem);
     ev_feed_signal(SIGUSR1);
-
+    timeMainPlayer.evalTime("p","video_viewer4End");
     return 0;
 }
 

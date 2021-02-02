@@ -200,7 +200,6 @@ public:
 		{
 			return false;
 		}
-		Print2File("!(vc = CreateCodec(AV_CODEC_ID_H264)) Pass");
 		vc->bit_rate = 50 * 1024 * 8;//压缩后每一秒视频的bit位大小50KB
 		vc->width = outWidth;
 		vc->height = outHeight;
@@ -211,7 +210,6 @@ public:
 		vc->gop_size = 50;//改过
 		vc->max_b_frames = 0;
 		vc->pix_fmt = AV_PIX_FMT_YUV420P;
-		Print2File("Function OpenCodec(&vc);");
 		return OpenCodec(&vc);
 	}
 
@@ -241,24 +239,9 @@ public:
 			r;
 		}
 		AVFrame *p = (AVFrame *)frame.data;
-		// Print2File("AVFrame *p = (AVFrame *)frame.data;");
 		//h264编码
 		//frame->pts = vpts;
 		//vpts++;
-
-		//Debug用
-		// if(vc==NULL){
-		// 	Print2File("vc==NULL");
-		// }else{
-		// 	Print2File("vc!=NULL");
-		// }
-		// if(p==NULL){
-		// 	Print2File("p==NULL");
-		// }else{
-		// 	Print2File("p!=NULL");
-		// }
-		//Debug用
-
 		int ret = avcodec_send_frame(vc, p);
 		// Print2File("int ret = avcodec_send_frame(vc, p);");
 		if (ret != 0)
@@ -318,7 +301,6 @@ protected:
 private:
 	bool OpenCodec(AVCodecContext **c)
 	{
-		Print2File("bool OpenCodec(AVCodecContext **c)!");
 		//打开音频编码器
 		int ret = avcodec_open2(*c, 0, 0);
 		if (ret != 0) {
@@ -328,10 +310,7 @@ private:
 			avcodec_free_context(c);
 			return false;
 		}
-		// 这里修复了一下，原来项目因为windows和mac不同导致bool返回默认值不同
-		Print2File("avcodec_open2 success!");
 		return true;
-		// cout << "avcodec_open2 success!" << endl;
 	}
 	AVCodecContext* CreateCodec(AVCodecID cid)
 	{
@@ -348,7 +327,6 @@ private:
 			Print2File("avcodec_alloc_context3  failed");
 			return NULL;
 		}
-		Print2File("avcodec_alloc_context3 success!");
 
 		c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 		// c->thread_count = XGetCpuNum();

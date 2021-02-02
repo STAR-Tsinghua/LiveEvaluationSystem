@@ -15,9 +15,17 @@ extern "C"
 #include <sstream>
 #include <string>
 
+#include <chrono>
+#include <type_traits>
+#include <iostream>
+#include <sys/time.h>
+#include <unistd.h>
+
 #define msleep(n) usleep(n*1000)
 #define LEARN_LOG "logs/learnLog.txt" // 文件名称
 #define DEBUG_LOG "logs/debugLog.txt" // 文件名称
+
+static bool showDebugLog = false;
 
 struct buffer_data_write {
 	uint8_t *buf;
@@ -40,15 +48,13 @@ static void Print2File(std::string inputStr)
 	return;
 }
 
-static void Print2FileDebug(std::string inputStr)
+static void Print2FileInfo(std::string inputStr)
 {
-    std::fstream f;
-	//追加写入,在原来基础上加了ios::app 
-	f.open(DEBUG_LOG,std::ios::out|std::ios::app);
-	//输入你想写入的内容 
-	f<<inputStr<<std::endl;
-	f.close();
-	return;
+    if(!showDebugLog){
+        return;
+    }
+    Print2File("[........Info........:"+inputStr+"]");
+    return;
 }
 
 //获取当前时间戳（微秒）
@@ -101,10 +107,104 @@ static int lhs_write_packet(void *opaque, uint8_t *buf, int buf_size)
 	bd->room -= buf_size;
 	return buf_size;
 }
-// static double r2d(AVRational r)
-// {
-// 	return r.den == 0 ? 0:(double)r.num / (double)r.den;
-// }
 
+static inline uint64_t getCurrentMicroseconds(){
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * 1000000 + tv.tv_usec;
+}
+
+namespace Tools {
+
+    namespace Time {
+
+        using ns = std::chrono::nanoseconds;
+        using us = std::chrono::microseconds;
+        using ms = std::chrono::milliseconds;
+        using s = std::chrono::seconds;
+        using m = std::chrono::minutes;
+        using h = std::chrono::hours;
+
+        template <typename DurationType> class AlgoTime;
+        using AlgoTimeNs = AlgoTime<ns>;
+        using AlgoTimeUs = AlgoTime<us>;
+        using AlgoTimeMs = AlgoTime<ms>;
+        using AlgoTimeS = AlgoTime<s>;
+        using AlgoTimeM = AlgoTime<m>;
+        using AlgoTimeH = AlgoTime<h>;
+
+        /**
+         * 用于计算代码运行的时间
+         * @tparam DurationType 类似于时间单位，默认以“毫秒”为单位
+         */
+        template <typename DurationType = ms>
+        class AlgoTime {
+        public:
+            void start() {
+                start_  = std::chrono::steady_clock::now();
+            }
+
+            void startAndWrite(std::string inStr){
+                // std::chrono::system_clock::now().time_since_epoch().count();//功能：获取系统时间戳，单位微秒(microsecond)
+                // std::chrono::steady_clock::now().time_since_epoch().count();//功能：获取系统时间戳，单位纳秒(nanosecond)
+                // gettimeofday //功能：获取系统时间戳，单位微秒(microsecond)
+                Print2File("[*****start:"+ inStr +";*****:"+ std::to_string(getCurrentMicroseconds()) +" ; "+ getTimeType()+"]");
+                // 注意下面和上面的时间戳不一样，因为上面只用来对比server和player时间差
+                start_  = std::chrono::steady_clock::now();
+            }
+
+            typename DurationType::rep elapsed() const {
+                auto elapsed = std::chrono::duration_cast<DurationType>(
+                        std::chrono::steady_clock::now() - start_);
+                return elapsed.count();
+            }
+
+            void printElapsed() {
+                auto time = elapsed();
+                if (std::is_same<DurationType, ns>::value) {
+                    std::cout << std::endl << "[AlgoTime: " << time << " ns]" << std::endl;
+                } else if (std::is_same<DurationType, us>::value) {
+                    std::cout << std::endl << "[AlgoTime: " << time << " us]" << std::endl;
+                } else if (std::is_same<DurationType, ms>::value) {
+                    std::cout << std::endl << "[AlgoTime: " << time << " ms]" << std::endl;
+                } else if (std::is_same<DurationType, s>::value) {
+                    std::cout << std::endl << "[AlgoTime: " << time << " s]" << std::endl;
+                } else if (std::is_same<DurationType, m>::value) {
+                    std::cout << std::endl << "[AlgoTime: " << time << " m]" << std::endl;
+                } else if (std::is_same<DurationType, h>::value) {
+                    std::cout << std::endl << "[AlgoTime: " << time << " h]" << std::endl;
+                }
+            }
+
+            void evalTime(std::string which , std::string detail){
+                auto time = elapsed();
+                Print2File("[==========Evaluation==========: Which:"+which+" ; AlgoTime:"+ std::to_string(time)+" ; TimeType:"+getTimeType()+" ; Detail:"+detail+" ; ]");
+            }
+
+        private:
+            std::chrono::steady_clock::time_point start_;
+            std::string getTimeType(){
+                if (std::is_same<DurationType, ns>::value) {
+                    return "ns";
+                } else if (std::is_same<DurationType, us>::value) {
+                    return "us";
+                } else if (std::is_same<DurationType, ms>::value) {
+                    return "ms";
+                } else if (std::is_same<DurationType, s>::value) {
+                    return "s";
+                } else if (std::is_same<DurationType, m>::value) {
+                    return "m";
+                } else if (std::is_same<DurationType, h>::value) {
+                    return "h";
+                }
+            }
+        };
+
+    } // namespace Time
+
+} // namespace Tools
+
+static Tools::Time::AlgoTimeMs timeMainServer;
+static Tools::Time::AlgoTimeMs timeMainPlayer;
 
 #endif // UTIL_LOG_H

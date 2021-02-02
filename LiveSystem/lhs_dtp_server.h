@@ -382,10 +382,13 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
 
     // 改的接口！！！
     // Print2File("-----------------------------改的接口-----------------------------");
+    Print2FileInfo("(s)启动live_produce线程处");
+    timeMainServer.evalTime("s","before_live_produce");
     conn_io->thd_produce = new std::thread(live_produce, &conn_io->buffer, conns->conf);
 
     // The magic number 1/25 = 0.4. should be updated according to the frame
     // rate of each stream. 
+    Print2FileInfo("(s)启动sender_cb线程处");
     ev_timer_init(&conn_io->sender, sender_cb, 0., 1.0/(double)FRAME_RATE);
     ev_timer_start(loop, &conn_io->sender);
     conn_io->sender.data = conn_io;
@@ -399,10 +402,9 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
 
 static void recv_cb(EV_P_ ev_io *w, int revents) {
     CONN_IO *tmp, *conn_io = NULL;
-
     static uint8_t buf[MAX_BLOCK_SIZE];
     static uint8_t out[MAX_DATAGRAM_SIZE];
-
+    
     while (1) {
         struct sockaddr_storage peer_addr;
         socklen_t peer_addr_len = sizeof(peer_addr);
@@ -509,7 +511,9 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                 fprintf(stderr, "invalid address validation token\n");
                 return;
             }
-            Print2File("conn_io = create_conn(loop, odcid, odcid_len);");
+            Print2FileInfo("(s)create_conn函数");
+            timeMainServer.evalTime("s","before_create_conn");
+            // 之前准备
             conn_io = create_conn(loop, odcid, odcid_len);
             if (conn_io == NULL) {
                 return;
@@ -662,7 +666,8 @@ int dtp_server(const char *host, const char *port, const char *conf) {
 
     struct ev_loop *loop = ev_default_loop(0);
 
-    Print2File("ev_io_init(&watcher, recv_cb, sock, EV_READ);");
+    timeMainServer.evalTime("s","Before_recv_cb");
+    Print2FileInfo("(s)启动recv_cb函数处");
     ev_io_init(&watcher, recv_cb, sock, EV_READ);
     ev_io_start(loop, &watcher);
     watcher.data = &c;

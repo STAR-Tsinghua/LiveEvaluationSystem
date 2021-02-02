@@ -45,6 +45,7 @@ public:
 			}
 			XData d((char*)frame.data, frame.cols*frame.rows*frame.elemSize(),GetCurTime());
 			Push(d);
+			// timeMain.evalTime("Push(d)");
 		}
 	}
 
@@ -58,9 +59,9 @@ public:
 		width = cam.get(CAP_PROP_FRAME_WIDTH);
 		height = cam.get(CAP_PROP_FRAME_HEIGHT);
 		fps = cam.get(CAP_PROP_FPS);
-		Print2File("Init cam.get(CAP_PROP_FRAME_WIDTH): "+std::to_string(width));
-		Print2File("Init cam.get(CAP_PROP_FRAME_HEIGHT): "+std::to_string(height));
-		Print2File("Init cam.get(CAP_PROP_FPS): "+std::to_string(fps)); //log显示mac电脑为12帧
+		// Print2FileInfo("Init cam.get(CAP_PROP_FRAME_WIDTH): "+std::to_string(width));
+		// Print2FileInfo("Init cam.get(CAP_PROP_FRAME_HEIGHT): "+std::to_string(height));
+		Print2FileInfo("Init cam.get(CAP_PROP_FPS): "+std::to_string(fps)); //log显示mac电脑为12帧
 		if (fps == 0) fps = 25;
 		return true;
 	}

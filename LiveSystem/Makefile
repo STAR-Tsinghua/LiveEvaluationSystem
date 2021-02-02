@@ -46,5 +46,9 @@ rb:
 r:
 	Open ../command/lhs_startBoth.command
 
+rr:
+	make clog
+	Open ../command/lhs_startBoth.command
+
 k:
 	Open ../command/lhs_killBoth.command

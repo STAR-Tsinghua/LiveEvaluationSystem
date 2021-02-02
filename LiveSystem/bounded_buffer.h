@@ -182,41 +182,29 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
     int ret = 0;
     int stream_num = 0; // 先暂时设定死
     int block_id = 0;
-    Print2File("liveConsumeThread success");
-    
     StreamPktVecPtr pStmPktVec = NULL;
     // (*ptr) already exists, then we can just resize it.
-
     // 摄像头消费xData线程
     long long beginTime = GetCurTime();
     for (;;){
         XData vd = lc->Pop();
-        // Print2File("XData vd = lc->Pop();～～～～～～～～～～～～");
-        // 如果取出数据为空，可能消耗比生产快
         if (vd.size <= 0){
             msleep(1);
             continue;
         }
         //处理视频
         if (vd.size > 0){
-            // Print2File("vd.size ================== : "+lltoString(vd.pts));
             vd.pts = vd.pts - beginTime;
-            // Print2File("vd.pts = vd.pts - beginTime;");
             XData yuv = xe->RGBToYUV(vd);
-            // Print2File("XData yuv = xe->RGBToYUV(vd);");
             vd.Drop();
-            // Print2File("vd.Drop();");
-            XData dpkt = xe->EncodeVideo(yuv); //问题在这
-            // Print2File("dpkt : "+std::to_string(dpkt.pts));
+            XData dpkt = xe->EncodeVideo(yuv);
             if (dpkt.size > 0){
-                // Print2File("===============推流=================");
+                // timeMain.evalTime("dpkt.size > 0");
                 if (!dpkt.data || dpkt.size <= 0){
                     Print2File("!pkt.data || pkt.size <= 0");
                     continue;
                 }
-                //  原迁移代码段
                 stream_num = vStmCtx->size();
-                // Print2File("stream_num:"+std::to_string(stream_num));
                 if (!pStmPktVec) {
                     pStmPktVec = std::make_shared<std::vector<StreamPktPtr>>(stream_num);
                     for (auto &item : *pStmPktVec) {
@@ -229,9 +217,7 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
                         pStmPktVec->resize(stream_num);
                     }
                 }
-                i = 0;  // packet index
-                // Print2File("i = 0; : "+std::to_string(i));
-                //  如果init_resource里有多个vStmCtx那么 i 会有多条流
+                i = 0;
                 for (auto it = vStmCtx->begin(); it != vStmCtx->end(); i++) {
                     // 这里注意 ret=1 设置为直播1
                     ret = 1;
@@ -248,56 +234,18 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
                     {
                         stime = xt->vc->time_base;
                         dtime = xt->vs->time_base;
-                        // Print2File("stime.num : "+std::to_string(stime.num));
-                        // Print2File("stime.den : "+std::to_string(stime.den));
-                        // Print2File("dtime.num : "+std::to_string(dtime.num));
-                        // Print2File("dtime.den : "+std::to_string(dtime.den));
                     }
                     else if(xt->as && xt->ac &&pack->stream_index == xt->as->index)
                     {
                         stime = xt->ac->time_base;
                         dtime = xt->as->time_base;
-                        // Print2File(" else if(xt->as && xt->ac &&pack->stream_index == xt->as->index)");
                     }
                     //推流
-                    // Print2File("pack->pts = av_rescale_q(pack->pts, stime, dtime);");
                     pack->pts = av_rescale_q(pack->pts, stime, dtime);
                     pack->dts = av_rescale_q(pack->dts, stime, dtime);
                     pack->duration = av_rescale_q(pack->duration, stime, dtime);//duration计算错误，改成拉流端控制
-
-                    // 原本FFmpeg工作流
-                    // int ret = av_write_frame(xt->ic, &(*pStmPktVec)[i]->packet);//其中源码包含 av_packet_unref()
-
-                    // Print2File("pack->pts : "+std::to_string(pack->pts));
-                    // Print2File("pack->dts : "+std::to_string(pack->dts));
-                    // Print2File("pack->duration : "+std::to_string(pack->duration));
-                    // Print2File("！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！");
-                    // pack->duration为负数或者为0不需要传递
-                    // if(pack->pts==AV_NOPTS_VALUE){
-                    //     AVRational time_base1=(*it)->pFmtCtx->streams[streamIndex]->time_base;
-                    //     int64_t calc_duration=(double)AV_TIME_BASE/av_q2d((*it)->pFmtCtx->streams[streamIndex]->r_frame_rate);
-                    //     pack->duration=(double)calc_duration/(double)(av_q2d(time_base1)*AV_TIME_BASE);
-                    //     Print2File("pack->pts==AV_NOPTS_VALUE");
-                    // }
-
-                    // 这里可能要改！！！！！！
-                    // AVRational time_base1=(*it)->pFmtCtx->streams[streamIndex]->time_base;
-                    // int64_t calc_duration=(double)AV_TIME_BASE/av_q2d((*it)->pFmtCtx->streams[streamIndex]->r_frame_rate);
-                    // pack->duration=(double)calc_duration/(double)(av_q2d(time_base1)*AV_TIME_BASE);
-                    // Print2File("pack->pts==AV_NOPTS_VALUE");
-                    // 这里可能要改！！！！！！
-
-                    // Print2File("(*pStmPktVec)[i]->header.duration 1 : "+std::to_string((*pStmPktVec)[i]->header.duration));
-                    // Print2File("(*pStmPktVec)[i]->packet.duration 1 : "+std::to_string((*pStmPktVec)[i]->packet.duration));
-                    //  上面是有值的
                     (*pStmPktVec)[i]->header.duration = (*pStmPktVec)[i]->packet.duration * 1000;
-                    // Print2File("(*pStmPktVec)[i]->header.duration 2 : "+std::to_string((*pStmPktVec)[i]->header.duration));
-                    // Print2File("(*it)->pFmtCtx->streams[0]->time_base.num 2 : "+std::to_string((*it)->pFmtCtx->streams[0]->time_base.num));
                     (*pStmPktVec)[i]->header.duration *= (*it)->pFmtCtx->streams[0]->time_base.num;
-                    // Print2File("(*pStmPktVec)[i]->header.duration 3 : "+std::to_string((*pStmPktVec)[i]->header.duration));
-                    // Print2File("(*it)->pFmtCtx->streams[0]->time_base.den 3 : "+std::to_string((*it)->pFmtCtx->streams[0]->time_base.den));
-                    // (*pStmPktVec)[i]->header.duration /= (*it)->pFmtCtx->streams[0]->time_base.den;
-                    // Print2File("(*pStmPktVec)[i]->header.duration End : "+std::to_string((*pStmPktVec)[i]->header.duration));
 
                     //原设置相关代码段
                     if (ret < 0) {
@@ -307,10 +255,6 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
                     }
                     
                     if ((*pStmPktVec)[i]->packet.flags & AV_PKT_FLAG_KEY) {
-                        // Print2File("!!!!!!!!!!!!!!!!!!!!!!AV_PKT_FLAG_KEY!!!!!!!!!!!!!!!!!!!!!!!");//关键帧
-                        // Print2File("xt->ic->streams[0]->codecpar->extradata 1 : "+std::to_string(sizeof(xt->ic->streams[0]->codecpar->extradata)));//关键帧
-                        // Print2File("codecpar->extradata 2 *(): "+std::to_string(sizeof(*(xt->ic->streams[0]->codecpar->extradata))));//关键帧
-                        // Print2File("codecpar->extradata_size : "+std::to_string(xt->ic->streams[0]->codecpar->extradata_size));//关键帧
                         (*pStmPktVec)[i]->header.flag |= HEADER_FLAG_KEY;
                         (*pStmPktVec)[i]->header.haveFormatContext = true;
                         // 拷贝 xt->ic->streams[0]->codecpar 信息
@@ -318,42 +262,25 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
                         // 拷贝codecpar其他变量
                         int ret3 = lhs_copy_parameters_to_myParameters(codeparPtr,xt->ic->streams[0]->codecpar);
                         (*pStmPktVec)[i]->codecParExtradata = xt->ic->streams[0]->codecpar->extradata;
-                        // 拷贝codecpar的codecParExtradata
-                        // Print2File("*((*pStmPktVec)[i]->codecParExtradata)) :"+std::to_string(sizeof(*((*pStmPktVec)[i]->codecParExtradata))));
                     }
-                    // 这样写毫无意义
-                    // (*pStmPktVec)[i]->context = *(xt->ic);
-                    // if(xt->ic->streams[0]->codecpar->extradata!=NULL){
-                    //     Print2File("xt->ic->streams[0]->codecpar->extradata != NULL");
-                    // }else{
-                    //     Print2File("xt->ic->streams[0]->codecpar->extradata == NULL");
-                    // }
 
                     (*pStmPktVec)[i]->header.stream_id = (*it)->stream_id;
-                    // Print2File("(*it)->stream_id : "+std::to_string((*pStmPktVec)[i]->header.stream_id));
                     (*pStmPktVec)[i]->header.block_id = block_id;
-                    // Print2File("(*it)->stream_id : "+std::to_string((*pStmPktVec)[i]->header.block_id));
                     
                     if (ret < 0) {
-                        // Print2File("stderr, remove a format context");
                         it = vStmCtx->erase(it);
                     }
                     else {
-                        // Print2File("for (auto it = vStmCtx->begin(); it != vStmCtx->end(); i++) : it++;");
                         it++;
                     }
-                    // Print2File("For End=========================================================  ");
                 }
                 block_id ++;
                 // write a vec pointer of packet ptrs into the buffer, and get a stale vec pointer.
-                // Print2File("pStmPktVec = pBuffer->produce(pStmPktVec);");
                 pStmPktVec = pBuffer->produce(pStmPktVec);
                 pStmPktVec = NULL;
-                // 这里为什么判空就中断？
                 if (vStmCtx->empty()) {
-                    // Print2File("pBuffer->produce(NULL);");
                     pBuffer->produce(NULL);
-                    break; // while(true) 中断的地方
+                    break;
                 }
             }
         }
@@ -362,14 +289,14 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
 }
 
 bool prepareLiveMedia(LiveCapture *lc, MediaEncoder *xe, XTransport *xt) {
-
+    timeMainServer.evalTime("s","prepareLiveMedia");
     //  1.打开摄像机
 	if (!lc->Init(0)) {
         Print2File("1. 打开摄像机 : 失败！！");
 		return false;
 	}
-    Print2File("1. 打开摄像机 : 成功！");
 	lc->Start();
+    timeMainServer.evalTime("s","OpenCamera");
 
     //  音视频编码类
 	//  2 初始化格式转换上下文
@@ -377,68 +304,44 @@ bool prepareLiveMedia(LiveCapture *lc, MediaEncoder *xe, XTransport *xt) {
 	xe->inHeight = lc->height;
 	xe->outWidth = lc->width;
 	xe->outHeight = lc->height;
+
 	if (!xe->InitScale()){
         Print2File("2. 初始化视频像素转换上下文 : 失败！！");
 		return false;
 	}
-    Print2File("2. 初始化视频像素转换上下文 : 成功！");
+    timeMainServer.evalTime("s","InitScale");
 
-    // TODO
-	//  2 音频重采样 上下文初始化
-
-	//  3 初始化视频编码器
 	if (!xe->InitVideoCodec()){
         Print2File("3. 初始化视频编码器 : 失败！！");
 		return false;
 	}
-    Print2File("3. 初始化视频编码器 : 成功！");
+    timeMainServer.evalTime("s","InitVieoCodec");
 
-	//  5 封装器和音频流配置
-	//  a 创建输出封装器上下文
-	// if (!xt->Init(outUrl)){
-    //     Print2File("4. 创建输出封装器上下文 : 失败！！");
-	// 	return false;
-	// }
-    // Print2File("4. 创建输出封装器上下文 : 成功！");
-	//  b 添加视频流
-
-
-
+    // time.start();
     if(!xt->MemoryOutByFIFO()){
         Print2File("4. MemoryOutByFIFO : 失败！！");
 		return false;
     }
-    Print2File("4. MemoryOutByFIFO : 成功！");
+    timeMainServer.evalTime("s","MemoryOutByFIFO");
     
+    // time.start();
 	int vindex = 0;
 	vindex = xt->AddStream(xe->vc);
 	if (vindex<0){
         Print2File("5. 添加视频流 : 失败！！");
 		return false;
 	}
-    Print2File("5. 添加视频流 : 成功！");
+    timeMainServer.evalTime("s","AddStream");
 
-    // if(!xt->WriteHeader()){
-    //     Print2File("6. WriteHeader : 失败！！");
-	// 	return false;
-    // }
-    // Print2File("6. WriteHeader : 成功！");
-    
+    // Tools::Time::AlgoTimeMs time1;
+    // time1.start();
+    // Print2File("[============Info========)");
+    // time1.evalTime("Print2File");
 
-	//  打开rtmp 的网络输出IO
-	//写入封装头 有可能改time base
-	// if (!xt->SendHead())
-	// {
-    //     Print2File("6. 打开rtmp 的网络输出IO : 失败！！");
-	// 	return false;
-	// }
-    // Print2File("6. 打开rtmp 的网络输出IO : 成功！");
-	// lc->Clear();
     return true;
 }
 
 void live_produce(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf){
-    Print2File("live_produce Function Start =================================");
     int i = 0;      // packet index
     int ret = 0;
     int stream_num = 0;
@@ -447,6 +350,7 @@ void live_produce(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf){
     LiveCapture *lc = new LiveCapture();
     MediaEncoder *mc = new MediaEncoder();
     XTransport *xt = new XTransport();
+    timeMainServer.evalTime("s","BeforePrepareLiveMedia");
     if(prepareLiveMedia(&(*lc),&(*mc),&(*xt))){
         StreamPktVecPtr pStmPktVec = NULL;
         std::vector<StreamCtxPtr> vStmCtx;
@@ -454,19 +358,13 @@ void live_produce(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf){
             Print2File("init_live_resource()==false");
             return;
         }
-        Print2File("init_live_resource()==true");
+        timeMainServer.evalTime("s","Before2Thread");
         std::thread cameraCaptureProduceThread(&LiveCapture::run,lc);
         std::thread cameraCaptureConsumeThread(liveConsumeThread,&(*lc),&(*mc),&(*xt),&vStmCtx,&(*pBuffer));
         //这里执行并行的程序
-        // while(true){
-
-        // }
-        //
         cameraCaptureProduceThread.join();
         cameraCaptureConsumeThread.join();
     }
-
-    Print2File("live_produce Function End =================================");
     return;
 }
 

@@ -163,7 +163,6 @@ public:
 static int lhs_copy_parameters_to_context(AVCodecContext *codec,
                                   const CodecParWithoutExtraData *par)
 {
-    // Print2File("lhs_copy_parameters_to_context in ~~~~~~~~~~~~");
     // 编码器类型-视频？音频？字幕？
     codec->codec_type = par->codec_type;
     // 编码器id，可以找到唯一的编码器
@@ -238,26 +237,22 @@ static int lhs_copy_parameters_to_context(AVCodecContext *codec,
         codec->height = par->height;
         break;
     }
-    Print2File("codec->pix_fmt : "+std::to_string(codec->pix_fmt));
-    Print2File("codec->width : "+std::to_string(codec->width));
-    Print2File("codec->height : "+std::to_string(codec->height));
-    Print2File("codec->bit_rate : "+std::to_string(codec->bit_rate));
-    Print2File("codec->bits_per_coded_sample : "+std::to_string(codec->bits_per_coded_sample));
-    Print2File("codec->bits_per_raw_sample : "+std::to_string(codec->bits_per_raw_sample));
-    Print2File("lhs_copy_parameters_to_context Mid =================");
+    // Print2FileInfo("codec->pix_fmt : "+std::to_string(codec->pix_fmt));
+    // Print2FileInfo("codec->width : "+std::to_string(codec->width));
+    // Print2FileInfo("codec->height : "+std::to_string(codec->height));
+    // Print2FileInfo("codec->bit_rate : "+std::to_string(codec->bit_rate));
+    // Print2FileInfo("codec->bits_per_coded_sample : "+std::to_string(codec->bits_per_coded_sample));
+    // Print2FileInfo("codec->bits_per_raw_sample : "+std::to_string(codec->bits_per_raw_sample));
     // 拷贝extradata，对于h.264视频流来说，sps和pps存在此处
     if (par->extradata) {
         av_freep(&codec->extradata);
-        Print2File("par->extradata_size : "+std::to_string(par->extradata_size));
+        // Print2FileInfo("par->extradata_size : "+std::to_string(par->extradata_size));
         codec->extradata = (uint8_t*)av_mallocz(par->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
         if (!codec->extradata)
             return AVERROR(ENOMEM);
         memcpy(codec->extradata, par->extradata, par->extradata_size);
         codec->extradata_size = par->extradata_size;
     }
-
-    Print2File("lhs_copy_parameters_to_context END =================");
- 
     return 0;
 }
 
@@ -265,7 +260,6 @@ static int lhs_copy_parameters_to_context(AVCodecContext *codec,
 static int lhs_copy_context_to_parameters(CodecParWithoutExtraData *codec,
                                   const AVCodecContext *par)
 {
-    Print2File("~~~~~~~~~~~~ lhs_copy_context_to_parameters in ");
     // 编码器类型-视频？音频？字幕？
     codec->codec_type = par->codec_type;
     // 编码器id，可以找到唯一的编码器
@@ -357,7 +351,7 @@ static int lhs_copy_context_to_parameters(CodecParWithoutExtraData *codec,
 static int lhs_copy_parameters_to_myParameters(CodecParWithoutExtraData *codec,
                                   const AVCodecParameters *par)
 {
-    Print2File("lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~");
+    // Print2File("lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~");
     // 编码器类型-视频？音频？字幕？
     codec->codec_type = par->codec_type;
     // 编码器id，可以找到唯一的编码器
@@ -444,7 +438,7 @@ static int lhs_copy_parameters_to_myParameters(CodecParWithoutExtraData *codec,
         codec->extradata_size = par->extradata_size;
     }
     // 这一段只能在“同一个进程使用”
-    Print2File("lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~");
+    // Print2File("lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~");
     return 0;
 }
 

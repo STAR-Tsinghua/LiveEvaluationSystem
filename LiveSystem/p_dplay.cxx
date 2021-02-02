@@ -21,16 +21,11 @@ extern "C"
 #include <util_log.h>
 using namespace std;
 
-
-
-
-
 void network_working(struct ev_loop *loop, ev_timer *w, int revents) {
-    Print2File("dplay.h network_working :=======");
     StreamWorker *worker = (StreamWorker*)w->data;
+    Print2FileInfo("(p)启动dtp_client线程处");
     worker->thd_conn = new thread(dtp_client, worker->host, worker->port, &worker->jbuffer);
 }
-
 
 void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
     // Print2File("dplay.h sdl_play :=======");
@@ -89,9 +84,11 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
 
 
 int main(int argc, char *argv[]) {
+    timeMainPlayer.startAndWrite("player");
+    timeMainPlayer.evalTime("p","mainStartPlayer");
+    Print2FileInfo("(p)player程序入口");
     //程序执行5s后自动关闭,方便调试,不用在dplay设置时间！！！！！！
     // alarm(20); //这行代码无用！ 警惕自己
-    Print2File("main start");
     StreamWorker sworker;
 
     // int screen_w = 1280+540;
@@ -132,17 +129,23 @@ int main(int argc, char *argv[]) {
 
     struct ev_loop *loop = ev_default_loop(0);
     ev_signal watcher;
+    Print2FileInfo("(p)启动stream_working线程处");
+    timeMainPlayer.evalTime("p","stream_workingStart");
     ev_signal_init(&watcher, stream_working, SIGUSR1);
     ev_signal_start(loop, &watcher);
     watcher.data = &sworker;
 
 
     ev_timer player;
+    Print2FileInfo("(p)启动sdl_play线程处");
+    timeMainPlayer.evalTime("p","sdl_playStart");
     ev_timer_init(&player, sdl_play, 0, 0.04);
     ev_timer_start(loop, &player);
     player.data = &sworker;
 
     ev_timer networker;
+    Print2FileInfo("(p)启动network_working线程处");
+    timeMainPlayer.evalTime("p","network_workingStart");
     ev_timer_init(&networker, network_working, 0, 0);
     ev_timer_start(loop, &networker);
     networker.data = &sworker;

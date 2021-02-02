@@ -1,61 +1,20 @@
-#include <lhs_dtp_server.h> start!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-ev_io_init(&watcher, recv_cb, sock, EV_READ);
-main start
-dplay.h network_working :=======
-dtp_client.h dtp_client :=======
-conn_io = create_conn(loop, odcid, odcid_len);
-live_produce Function Start =================================
-Init cam.get(CAP_PROP_FRAME_WIDTH): 1280
-Init cam.get(CAP_PROP_FRAME_HEIGHT): 720
-Init cam.get(CAP_PROP_FPS): 30
-1. 打开摄像机 : 成功！
-2. 初始化视频像素转换上下文 : 成功！
-avcodec_alloc_context3 success!
-!(vc = CreateCodec(AV_CODEC_ID_H264)) Pass
-Function OpenCodec(&vc);
-bool OpenCodec(AVCodecContext **c)!
-avcodec_open2 success!
-3. 初始化视频编码器 : 成功！
-av_malloc
-avio_alloc_context
-avformat_alloc_output_context2
-4. MemoryOutByFIFO : 成功！
-5. 添加视频流 : 成功！
-cptr = std::make_shared<StreamContext>(ptr, id); id: 0
-StreamContext(AVFormatContext *ptr, int id)
-StreamContext ptr!=NULL
-pFmtCtx->streams[0] != NULL
-ptr->streams->time_base.num : 0
-ptr->streams->time_base.den : 0
-End StreamContext(AVFormatContext *ptr, int id) End========
-init_live_resource()==true
-liveConsumeThread success
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-ptr->push(block);
-worker->jbuffer.jptrs.size():1
-thread *pthd = new thread(video_viewer4, *it, &worker->splay, worker->path);
-int video_viewer4 decode and display the pictures.
-codec->pix_fmt : 0
-codec->width : 1280
-codec->height : 720
-codec->bit_rate : 409000
-codec->bits_per_coded_sample : 0
-codec->bits_per_raw_sample : 0
-lhs_copy_parameters_to_context Mid =================
-par->extradata_size : 37
-lhs_copy_parameters_to_context END =================
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters in ~~~~~~~~~~~~
-lhs_copy_parameters_to_myParameters End ~~~~~~~~~~~~
+[*****start:server;*****:1612271485828157 ; ms]
+[==========Evaluation==========: Which:s ; AlgoTime:0 ; TimeType:ms ; Detail:mainStart ; ]
+[*****start:player;*****:1612271485831544 ; ms]
+[==========Evaluation==========: Which:p ; AlgoTime:0 ; TimeType:ms ; Detail:mainStartPlayer ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:21 ; TimeType:ms ; Detail:Before_recv_cb ; ]
+[==========Evaluation==========: Which:p ; AlgoTime:457 ; TimeType:ms ; Detail:stream_workingStart ; ]
+[==========Evaluation==========: Which:p ; AlgoTime:457 ; TimeType:ms ; Detail:sdl_playStart ; ]
+[==========Evaluation==========: Which:p ; AlgoTime:457 ; TimeType:ms ; Detail:network_workingStart ; ]
+[==========Evaluation==========: Which:p ; AlgoTime:800 ; TimeType:ms ; Detail:recv_cb_Start ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:805 ; TimeType:ms ; Detail:before_create_conn ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:805 ; TimeType:ms ; Detail:before_live_produce ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:806 ; TimeType:ms ; Detail:BeforePrepareLiveMedia ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:806 ; TimeType:ms ; Detail:prepareLiveMedia ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:1449 ; TimeType:ms ; Detail:OpenCamera ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:1450 ; TimeType:ms ; Detail:InitScale ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:1466 ; TimeType:ms ; Detail:InitVieoCodec ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:1466 ; TimeType:ms ; Detail:MemoryOutByFIFO ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:1466 ; TimeType:ms ; Detail:AddStream ; ]
+[==========Evaluation==========: Which:s ; AlgoTime:1466 ; TimeType:ms ; Detail:Before2Thread ; ]
+[==========Evaluation==========: Which:p ; AlgoTime:3005 ; TimeType:ms ; Detail:video_viewer4Start ; ]

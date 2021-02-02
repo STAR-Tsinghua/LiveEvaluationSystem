@@ -40,11 +40,11 @@ void stream_working(struct ev_loop *loop, ev_signal *w, int revents) {
     scoped_lock lock(worker->jbuffer.mtx);
     auto it = worker->jbuffer.jptrs.begin();
     printf("searching signal source, jitter queue number %lu\n", worker->jbuffer.jptrs.size());
-    Print2File("worker->jbuffer.jptrs.size():"+std::to_string(worker->jbuffer.jptrs.size()));
     while (it != worker->jbuffer.jptrs.end()) {
         if (((*it)->state & SodtpJitter::STATE_INIT) == SodtpJitter::STATE_INIT &&
             (*it)->get_work_thread() == NULL) {
-            Print2File("thread *pthd = new thread(video_viewer4, *it, &worker->splay, worker->path);"); // 这里才是真正跑的video_viewer4
+            Print2FileInfo("(p)启动video_viewer4线程处");
+            timeMainPlayer.evalTime("p","video_viewer4Start");
             thread *pthd = new thread(video_viewer4, *it, &worker->splay, worker->path);
             (*it)->set_work_thread(pthd);
             worker->thds.push_back(pthd);

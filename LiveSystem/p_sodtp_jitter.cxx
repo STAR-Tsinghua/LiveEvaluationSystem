@@ -475,7 +475,6 @@ void JitterBuffer::push_back(SodtpStreamHeader *head, SodtpBlockPtr block) {
     // else {
     //     ptr->push(block);
     // }
-    Print2File("ptr->push(block);");
     ptr->push(block); //int SodtpJitter::push(SodtpBlockPtr block) {
     // Print2File("jptrs.push_back(ptr);!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     scoped_lock lock(mtx);

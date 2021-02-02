@@ -18,35 +18,15 @@ public:
     uint32_t stream_id;
     uint32_t flag_meta;
 
-    //lhs 改进版
-    AVFormatContext  *ifmt_ctx, *ofmt_ctx;
     AVInputFormat * ifmt;
     AVOutputFormat * ofmt; 
 
     AVStream *out_stream;
-    //TODO Add mediaEncoder
-    // MediaEncoder *encoder;
-
-    // TODO 改掉它，不然变废代码
+    
     StreamContext(AVFormatContext *ptr, int id) {
-        Print2File("StreamContext(AVFormatContext *ptr, int id)");
-        if(ptr==NULL){
-            Print2File("StreamContext ptr==NULL");
-        }else{
-            Print2File("StreamContext ptr!=NULL");
-
-        }
         pFmtCtx = ptr;
         stream_id = id;
         flag_meta = false;
-        if(pFmtCtx->streams[0]!=NULL){
-            Print2File("pFmtCtx->streams[0] != NULL");
-        }else{
-            Print2File("pFmtCtx->streams[0] == NULL");
-        }
-        Print2File("ptr->streams->time_base.num : "+std::to_string(pFmtCtx->streams[0]->time_base.num));
-        Print2File("ptr->streams->time_base.den : "+std::to_string(pFmtCtx->streams[0]->time_base.den));
-        Print2File("End StreamContext(AVFormatContext *ptr, int id) End========");
     }
 
     ~StreamContext() {
@@ -295,7 +275,6 @@ int addStream(AVFormatContext *fc, const AVCodecContext *vc, AVStream *&vs, cons
 
 bool set_StmCtxPtrsAndId(std::vector<StreamCtxPtr> *pStmCtxPtrs, AVFormatContext *fc){
     int id = 0;
-    Print2File("cptr = std::make_shared<StreamContext>(ptr, id); id: "+std::to_string(id));
     StreamCtxPtr cptr = std::make_shared<StreamContext>(fc, id);
     if(cptr==NULL){
         Print2File("ptr==NULL return false");
@@ -324,10 +303,7 @@ bool init_live_resource1(std::vector<StreamCtxPtr> *pStmCtxPtrs, AVCodecContext 
             Print2File("ptr==NULL return false");
             return false;
         }
-        Print2File("ptr!=NULL return false");
-        Print2File("cptr = std::make_shared<StreamContext>(ptr, id); id: "+std::to_string(id));
         cptr = std::make_shared<StreamContext>(ptr, id);
-        // Print2File("init_live_resource : pStmCtxPtrs->push_back(cptr);");
         pStmCtxPtrs->push_back(cptr);
         id++;
     }

@@ -227,6 +227,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
 
 
             if (fin) {
+                // timeMainPlayer.evalTime("p","if (fin)");
                 // Print2File("SodtpBlockPtr BlockDataBuffer::read(uint32_t id, SodtpStreamHeader *head) {");
                 SodtpBlockPtr bk_ptr = bk_buf.read(s, &header);
                 if (bk_ptr) {
@@ -285,7 +286,7 @@ static void timeout_cb(EV_P_ ev_timer *w, int revents) {
 //     const char *host = argv[1];
 //     const char *port = argv[2];
 int dtp_client(const char *host, const char *port, JitterBuffer *pJBuffer) {
-    Print2File("dtp_client.h dtp_client :=======");
+    Print2FileInfo("(p)dtp_client函数");
     struct addrinfo hints;
 
     memset(&hints, 0, sizeof(addrinfo));
@@ -378,6 +379,8 @@ int dtp_client(const char *host, const char *port, JitterBuffer *pJBuffer) {
 
     // recv_cb refrence to dtp_client , important!
     
+    Print2FileInfo("(p)启动recv_cb函数处");
+    timeMainPlayer.evalTime("p","recv_cb_Start");
     ev_io_init(&watcher, recv_cb, conn_io->sock, EV_READ);
     ev_io_start(loop, &watcher);
     watcher.data = conn_io;

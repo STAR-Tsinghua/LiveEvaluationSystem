@@ -94,7 +94,6 @@ public:
 		}
 		bd.size = bd.room = bd_buf_size;
 		// 1. 分配缓冲区
-		Print2File("av_malloc");
 		avio_ctx_buffer = (uint8_t *)av_malloc(avio_ctx_buffer_size);
 		if (!avio_ctx_buffer) {
 			ret = AVERROR(ENOMEM);
@@ -103,7 +102,6 @@ public:
 			return false;
 		}
 		// 2. 分配AVIOContext，第三个参数write_flag为1
-		Print2File("avio_alloc_context");
 		AVIOContext *avio_out = avio_alloc_context(avio_ctx_buffer, avio_ctx_buffer_size, 1, &bd, NULL, &lhs_write_packet, NULL); 
 		if (!avio_out) {
 			ret = AVERROR(ENOMEM);
@@ -112,7 +110,6 @@ public:
 			return false;
 		} 
 		// 3. 分配AVFormatContext，并指定AVFormatContext.pb字段。必须在调用avformat_write_header()之前完成
-		Print2File("avformat_alloc_output_context2");
 		const char *outPutName = "flv";
 		AVOutputFormat* outPutFormatPtr = av_guess_format(outPutName, outPutName, NULL);
 		ret = avformat_alloc_output_context2(&ic, outPutFormatPtr, NULL, NULL);
