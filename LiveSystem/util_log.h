@@ -148,7 +148,7 @@ namespace Tools {
                 // std::chrono::system_clock::now().time_since_epoch().count();//功能：获取系统时间戳，单位微秒(microsecond)
                 // std::chrono::steady_clock::now().time_since_epoch().count();//功能：获取系统时间戳，单位纳秒(nanosecond)
                 // gettimeofday //功能：获取系统时间戳，单位微秒(microsecond)
-                Print2File("[*****start:"+ inStr +";*****:"+ std::to_string(getCurrentMicroseconds()) +" ; "+ getTimeType()+"]");
+                // Print2File("[LogType:start:"+ inStr +";*****:"+ std::to_string(getCurrentMicroseconds()) +" ; "+ getTimeType()+"]");
                 // 注意下面和上面的时间戳不一样，因为上面只用来对比server和player时间差
                 start_  = std::chrono::steady_clock::now();
             }
@@ -177,12 +177,16 @@ namespace Tools {
             }
 
             void evalTime(std::string which , std::string detail){
+                //当前从开始到现在的时间戳
                 auto time = elapsed();
-                Print2File("[==========Evaluation==========: Which:"+which+" ; AlgoTime:"+ std::to_string(time)+" ; TimeType:"+getTimeType()+" ; Detail:"+detail+" ; ]");
+                int timeShow = time-lastTime;
+                lastTime = time;
+                Print2File("{'LogType': 'Latency', 'Which': '"+which+"', 'AlgoTime': '"+ std::to_string(timeShow)+"', 'TimeType': '"+getTimeType()+"', 'Detail': '"+detail+"'}");
             }
 
         private:
             std::chrono::steady_clock::time_point start_;
+            int lastTime;
             std::string getTimeType(){
                 if (std::is_same<DurationType, ns>::value) {
                     return "ns";

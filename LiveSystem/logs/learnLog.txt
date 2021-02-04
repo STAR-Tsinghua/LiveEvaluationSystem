@@ -1,20 +1,16 @@
-[*****start:server;*****:1612271485828157 ; ms]
-[==========Evaluation==========: Which:s ; AlgoTime:0 ; TimeType:ms ; Detail:mainStart ; ]
-[*****start:player;*****:1612271485831544 ; ms]
-[==========Evaluation==========: Which:p ; AlgoTime:0 ; TimeType:ms ; Detail:mainStartPlayer ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:21 ; TimeType:ms ; Detail:Before_recv_cb ; ]
-[==========Evaluation==========: Which:p ; AlgoTime:457 ; TimeType:ms ; Detail:stream_workingStart ; ]
-[==========Evaluation==========: Which:p ; AlgoTime:457 ; TimeType:ms ; Detail:sdl_playStart ; ]
-[==========Evaluation==========: Which:p ; AlgoTime:457 ; TimeType:ms ; Detail:network_workingStart ; ]
-[==========Evaluation==========: Which:p ; AlgoTime:800 ; TimeType:ms ; Detail:recv_cb_Start ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:805 ; TimeType:ms ; Detail:before_create_conn ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:805 ; TimeType:ms ; Detail:before_live_produce ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:806 ; TimeType:ms ; Detail:BeforePrepareLiveMedia ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:806 ; TimeType:ms ; Detail:prepareLiveMedia ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:1449 ; TimeType:ms ; Detail:OpenCamera ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:1450 ; TimeType:ms ; Detail:InitScale ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:1466 ; TimeType:ms ; Detail:InitVieoCodec ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:1466 ; TimeType:ms ; Detail:MemoryOutByFIFO ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:1466 ; TimeType:ms ; Detail:AddStream ; ]
-[==========Evaluation==========: Which:s ; AlgoTime:1466 ; TimeType:ms ; Detail:Before2Thread ; ]
-[==========Evaluation==========: Which:p ; AlgoTime:3005 ; TimeType:ms ; Detail:video_viewer4Start ; ]
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '11', 'TimeType': 'ms', 'Detail': 'Before_recv_cb'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '194', 'TimeType': 'ms', 'Detail': 'stream_workingStart'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'sdl_playStart'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'network_workingStart'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '346', 'TimeType': 'ms', 'Detail': 'recv_cb_Start'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '528', 'TimeType': 'ms', 'Detail': 'before_create_conn'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'before_live_produce'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '1', 'TimeType': 'ms', 'Detail': 'BeforePrepareLiveMedia'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'prepareLiveMedia'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '639', 'TimeType': 'ms', 'Detail': 'OpenCamera'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '1', 'TimeType': 'ms', 'Detail': 'InitScale'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '15', 'TimeType': 'ms', 'Detail': 'InitVieoCodec'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '1', 'TimeType': 'ms', 'Detail': 'MemoryOutByFIFO'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'AddStream'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'Before2Thread'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '2189', 'TimeType': 'ms', 'Detail': 'video_viewer4Start'}

@@ -85,7 +85,7 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
 
 int main(int argc, char *argv[]) {
     timeMainPlayer.startAndWrite("player");
-    timeMainPlayer.evalTime("p","mainStartPlayer");
+    // timeMainPlayer.evalTime("p","mainStartPlayer");
     Print2FileInfo("(p)player程序入口");
     //程序执行5s后自动关闭,方便调试,不用在dplay设置时间！！！！！！
     // alarm(20); //这行代码无用！ 警惕自己
