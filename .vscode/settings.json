@@ -102,7 +102,8 @@
         "ciso646": "cpp",
         "climits": "cpp",
         "ctgmath": "cpp",
-        "cstdbool": "cpp"
+        "cstdbool": "cpp",
+        "util_url_file.h": "c"
     },
     "git.ignoreLimitWarning": true
 }

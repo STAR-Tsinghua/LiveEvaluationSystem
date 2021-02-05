@@ -1,4 +1,4 @@
-#include <lhs_dtp_server.h>
+#include <s_dtp_server.h>
 #include <util_log.h>
 #include <unistd.h> // 一段时间后中断程序alarm用
 int main(int argc, char *argv[]) {

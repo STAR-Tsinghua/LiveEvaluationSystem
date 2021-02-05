@@ -25,7 +25,7 @@ extern "C"
 #define LEARN_LOG "logs/learnLog.txt" // 文件名称
 #define DEBUG_LOG "logs/debugLog.txt" // 文件名称
 
-static bool showDebugLog = false;
+static bool showDebugLog = true;
 
 struct buffer_data_write {
 	uint8_t *buf;

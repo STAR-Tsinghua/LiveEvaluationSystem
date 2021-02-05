@@ -17,5 +17,5 @@ data_latency.csv: txt2csv_lantency.py $(shell find $(LOG_PATH))
 data_latency.svg: csv2svg_latency.py $(shell find $(LOG_PATH))
 	python $< $(DATA_PATH)data_latency.csv $(DATA_PATH)
 
-svg2pic: svg2pic_latency.py
+svg2pic: tool_svg2pic.py
 	python3 $< $(DATA_PATH) $(PIC_PATH)

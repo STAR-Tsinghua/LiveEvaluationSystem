@@ -19,17 +19,34 @@ LIBS = 	-lswscale -lswresample -lavformat \
 		-L$(DTP_LIB) -lquiche \
 		-lm -lz -lev -ldl -pthread \
 
-TARGETS = dtp_server dplay
+TARGETS = r_dtp_server r_dtp_play r_udp_server r_udp_play r_quiche_server r_quiche_play
 
 LOGS = logs
 
 all: $(TARGETS)
 
-dtp_server : dtp_server.cxx
+# ================= dtp =================
+r_dtp_server : s_dtp_server.cxx
 	$(CX) $(CXFLAGS) $(OPENCVFLAGS) -o $@ $^ $(INCS) $(LIBS)
 
-dplay : p_dplay.cxx p_sodtp_jitter.cxx sodtp_block.cxx
+r_dtp_play : p_dtp_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
+
+# ================= udp =================
+r_udp_server : s_udp_server.cxx
+	$(CX) $(CXFLAGS) $(OPENCVFLAGS) -o $@ $^ $(INCS) $(LIBS)
+
+r_udp_play : p_udp_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
+	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
+
+# ================= quiche =================
+r_quiche_server : s_quiche_server.cxx
+	$(CX) $(CXFLAGS) $(OPENCVFLAGS) -o $@ $^ $(INCS) $(LIBS)
+
+r_quiche_play : p_quiche_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
+	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
+
+
 
 clean:
 	rm -rf $(TARGETS)
