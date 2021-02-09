@@ -30,6 +30,7 @@ public:
 // Check the state of jitter buffer and network.
 // And then take actions according to the state.
 void stream_working(struct ev_loop *loop, ev_signal *w, int revents) {
+    timeMainPlayer.evalTime("p","stream_working_Started");
     StreamWorker *worker = (StreamWorker*)w->data;
 
     bool found = false;

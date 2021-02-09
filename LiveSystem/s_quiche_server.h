@@ -244,9 +244,17 @@ static void sender_cb1(EV_P_ ev_timer *w, int revents) {
                 header.flag |= HEADER_FLAG_KEY;
             }
 
-            memcpy(buf, &header, sizeof(header));
-            memcpy(buf + sizeof(header), packet.data, packet.size);
+            // 原来代码
+            // memcpy(buf, &header, sizeof(header));
+            // memcpy(buf + sizeof(header), packet.data, packet.size);
 
+            //深拷贝修改
+            // memcpy(buf, &item->header, sizeof(item->header));
+            memcpy(buf, &header, sizeof(header));
+            int extradataSize = header.codecPar.extradata_size;
+            memcpy(buf + sizeof(item->header), item->codecParExtradata, extradataSize);
+            memcpy(buf + sizeof(item->header) + extradataSize, item->packet.data, item->packet.size);
+            // Print2File("if (quiche_conn_stream_send_full(conn_io->conn, quiche_sid, buf");
             if (quiche_conn_stream_send_full(conn_io->conn, quiche_sid, buf,
                         sizeof(header) + packet.size, true, 99999, 0) < 0) {
                 fprintf(stdout, "failed round %d,\t stream %d,\t block %d,\t size %d\n",
@@ -519,7 +527,10 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
     conn_io->buffer.reset(MAX_BOUNDED_BUFFER_SIZE);
     // Init the stream format context.
     // init_resource(&conn_io->vStmCtxPtrs, conns->conf);
-    conn_io->thd_produce = new std::thread(produce, &conn_io->buffer, conns->conf);
+    // conn_io->thd_produce = new std::thread(produce, &conn_io->buffer, conns->conf);
+
+    // 改的接口
+    conn_io->thd_produce = new std::thread(live_produce, &conn_io->buffer, conns->conf);
 
 
     // The magic number 1/25 = 0.4. should be updated according to the frame

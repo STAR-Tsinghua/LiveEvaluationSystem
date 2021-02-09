@@ -609,6 +609,7 @@ void worker_cb(EV_P_ ev_timer *w, int revents) {
         printf("decoding: buffering stream %d\n", decoder->iStream);
     }
     else if (ret == SodtpJitter::STATE_SKIP) {
+        //计算卡顿的地方？
         printf("decoding: skip one block of stream %d\n", decoder->iStream);
     }
     else {
@@ -896,9 +897,7 @@ void worker_cb4(EV_P_ ev_timer *w, int revents) {
 }
 // decode and display the pictures.
 int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
-    Print2FileInfo("(p)video_viewer4函数");
     // printf("viewer: viewing stream %u!\n", pJitter->stream_id);
-
     // Initalizing these to NULL prevents segfaults!
     AVFormatContext         *pVFormatCtx = NULL;
     AVCodecContext          *pVCodecCtx = NULL;
@@ -959,16 +958,20 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
             }
             break;
         }
-        Print2File("decoding: waiting for the key block of stream %u. sleep round");
+        // 弱网发生
+        // Print2File("decoding: waiting for the key block of stream %u. sleep round");
         fprintf(stderr, "decoding: waiting for the key block of stream %u. sleep round %d!\n", pJitter->stream_id, i);
 
         if (++i > WAITING_ROUND) {
-            Print2File("decoding: fail to read the key block of stream");
+            // 弱网发生
+            // Print2File("decoding: fail to read the key block of stream");
             fprintf(stderr, "decoding: fail to read the key block of stream %u.\n", pJitter->stream_id);
             break;
         }
         usleep(WAITING_UTIME);
     }
+    timeMainPlayer.evalTime("p","video_viewer4_while_pass");
+    
     // Print2File("if (!pVFormatCtx)");
     // if (!pVFormatCtx) {
     //     Print2File("viewer: quit stream");
@@ -977,7 +980,8 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
     // }
     // Print2File("beafore if (!myCodecPar)");
     if (!myCodecPar) {
-        Print2File("viewer: quit stream");
+        //弱网发生
+        // Print2File("viewer: quit stream");
         fprintf(stderr, "viewer: quit stream %u.\n", pJitter->stream_id);
         return -1;
     }
@@ -1020,8 +1024,8 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
         printf("fail to allocate frame!\n");
         return -1;
     }
-    // Print2File("av_image_get_buffer_size");
     // Determine required buffer size and allocate buffer
+    timeMainPlayer.evalTime("p","av_image_get_buffer_size");
     numBytes = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, pVCodecCtx->width, pVCodecCtx->height, 1);
     buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
     // Print2File("av_image_fill_arrays");
@@ -1105,8 +1109,9 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
 
     // Notification for clearing the jitter.
     sem_post(pJitter->_sem);
+    timeMainPlayer.evalTime("p","ev_feed_signal(SIGUSR1);");
     ev_feed_signal(SIGUSR1);
-    timeMainPlayer.evalTime("p","video_viewer4End");
+    
     return 0;
 }
 

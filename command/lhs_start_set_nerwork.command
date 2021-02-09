@@ -1,0 +1,1 @@
+sudo throttle --up 330 --down 780 --rtt 100

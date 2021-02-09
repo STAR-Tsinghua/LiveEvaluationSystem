@@ -2,7 +2,7 @@
 #include <thread>
 
 #include <p_sodtp_jitter.h>
-#include <p_udp_client.h>
+#include <p_quiche_client.h>
 #include <p_decode_video.h>
 #include <p_stream_worker.h>
 #include <p_sdl_play.h>
@@ -25,7 +25,7 @@ void network_working(struct ev_loop *loop, ev_timer *w, int revents) {
     StreamWorker *worker = (StreamWorker*)w->data;
     Print2FileInfo("(p)启动dtp_client线程处");
     // 三种协议处
-    worker->thd_conn = new thread(udp_client, worker->host, worker->port, &worker->jbuffer);
+    worker->thd_conn = new thread(quiche_client, worker->host, worker->port, &worker->jbuffer);
 }
 
 void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {

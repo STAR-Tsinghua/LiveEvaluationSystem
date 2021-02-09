@@ -159,6 +159,8 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
 
         fprintf(stderr, "recv %zd bytes\n", done);
     }
+    // 循环进入
+    // timeMainPlayer.evalTime("p","recv_cb_while_pass");
 
     if (quiche_conn_is_closed(conn_io->conn)) {
         fprintf(stderr, "connection closed\n");
@@ -168,6 +170,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
     }
 
     if (quiche_conn_is_established(conn_io->conn) && !req_sent) {
+        // timeMainPlayer.evalTime("p","(conn_io->conn) && !req_sent");
         const uint8_t *app_proto;
         size_t app_proto_len;
 
@@ -189,23 +192,29 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
 
 
     if (quiche_conn_is_established(conn_io->conn)) {
+        // timeMainPlayer.evalTime("p","quiche_conn_is_established(conn_io->conn)");
+        // 循环进入
+        timeMainPlayer.evalTime("p","conn_io->conn");
         // Print2File("if (quiche_conn_is_established(conn_io->conn))");
         uint64_t s = 0;
 
         quiche_stream_iter *readable = quiche_conn_readable(conn_io->conn);
+        timeMainPlayer.evalTime("p","quiche_conn_readable");
 
         while (quiche_stream_iter_next(readable, &s)) {
             fprintf(stderr, "stream %" PRIu64 " is readable\n", s);
-
+            timeMainPlayer.evalTime("p","quiche_stream_iter_next");
             // Print2File("while (quiche_stream_iter_next(readable, &s))");
             bool fin = false;
             ssize_t recv_len = quiche_conn_stream_recv(conn_io->conn, s,
                                                        buf, sizeof(buf),
                                                        &fin);
             if (recv_len < 0) {
-                Print2File("if (recv_len < 0) break ");
+                // 弱网环境出现
+                // Print2File("if (recv_len < 0) break ");
                 break;
             }
+            timeMainPlayer.evalTime("p","recv_len < 0 Pass");
 
             // printf("%.*s", (int) recv_len, buf);
             fprintf(stderr, "quiche recv len = %d\n", (int)recv_len);
@@ -219,6 +228,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                 fprintf(stderr, "fail to write data to buffer.\n");
                 Print2File("fail to write data to buffer ");
             }
+            timeMainPlayer.evalTime("p","bk_buf.write");
 
             // quiche_conn_get_block_info
 
@@ -227,7 +237,6 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
 
 
             if (fin) {
-                // timeMainPlayer.evalTime("p","if (fin)");
                 // Print2File("SodtpBlockPtr BlockDataBuffer::read(uint32_t id, SodtpStreamHeader *head) {");
                 SodtpBlockPtr bk_ptr = bk_buf.read(s, &header);
                 if (bk_ptr) {
@@ -240,6 +249,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                     // Print2File("conn_io->jitter->push_back(&header, bk_ptr); 真正");
                     conn_io->jitter->push_back(&header, bk_ptr);
                     conn_io->recv_round++;
+                    
                 }
             }
 
@@ -255,7 +265,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
 
         quiche_stream_iter_free(readable);
     }
-
+    timeMainPlayer.evalTime("p","flush_egress(loop, conn_io);");
     flush_egress(loop, conn_io);
 }
 
@@ -286,6 +296,7 @@ static void timeout_cb(EV_P_ ev_timer *w, int revents) {
 //     const char *host = argv[1];
 //     const char *port = argv[2];
 int dtp_client(const char *host, const char *port, JitterBuffer *pJBuffer) {
+    timeMainPlayer.evalTime("p","dtp_client");
     Print2FileInfo("(p)dtp_client函数");
     struct addrinfo hints;
 
@@ -301,7 +312,7 @@ int dtp_client(const char *host, const char *port, JitterBuffer *pJBuffer) {
         perror("failed to resolve host");
         return -1;
     }
-
+    timeMainPlayer.evalTime("p","socket(peer->ai_family");
     int sock = socket(peer->ai_family, SOCK_DGRAM, 0);
     if (sock < 0) {
         perror("failed to create socket");
@@ -356,6 +367,7 @@ int dtp_client(const char *host, const char *port, JitterBuffer *pJBuffer) {
 
     quiche_conn *conn = quiche_connect(host, (const uint8_t *) scid,
                                        sizeof(scid), config);
+    timeMainPlayer.evalTime("p","quiche_connect");
     if (conn == NULL) {
         fprintf(stderr, "failed to create connection\n");
         return -1;

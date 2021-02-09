@@ -2,7 +2,7 @@
 #include <thread>
 
 #include <p_sodtp_jitter.h>
-#include <p_quiche_client.h>
+#include <p_dtp_client.h>
 #include <p_decode_video.h>
 #include <p_stream_worker.h>
 #include <p_sdl_play.h>
@@ -24,8 +24,9 @@ using namespace std;
 void network_working(struct ev_loop *loop, ev_timer *w, int revents) {
     StreamWorker *worker = (StreamWorker*)w->data;
     Print2FileInfo("(p)启动dtp_client线程处");
+    timeMainPlayer.evalTime("p","dtp_client Thead");
     // 三种协议处
-    worker->thd_conn = new thread(quiche_client, worker->host, worker->port, &worker->jbuffer);
+    worker->thd_conn = new thread(dtp_client, worker->host, worker->port, &worker->jbuffer);
 }
 
 void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
@@ -131,7 +132,7 @@ int main(int argc, char *argv[]) {
     struct ev_loop *loop = ev_default_loop(0);
     ev_signal watcher;
     Print2FileInfo("(p)启动stream_working线程处");
-    timeMainPlayer.evalTime("p","stream_workingStart");
+    timeMainPlayer.evalTime("p","ev_signal_init(stream_working)");
     ev_signal_init(&watcher, stream_working, SIGUSR1);
     ev_signal_start(loop, &watcher);
     watcher.data = &sworker;
@@ -139,14 +140,12 @@ int main(int argc, char *argv[]) {
 
     ev_timer player;
     Print2FileInfo("(p)启动sdl_play线程处");
-    timeMainPlayer.evalTime("p","sdl_playStart");
     ev_timer_init(&player, sdl_play, 0, 0.04);
     ev_timer_start(loop, &player);
     player.data = &sworker;
 
     ev_timer networker;
     Print2FileInfo("(p)启动network_working线程处");
-    timeMainPlayer.evalTime("p","network_workingStart");
     ev_timer_init(&networker, network_working, 0, 0);
     ev_timer_start(loop, &networker);
     networker.data = &sworker;

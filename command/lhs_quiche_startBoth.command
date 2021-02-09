@@ -1,0 +1,3 @@
+cd /Users/lihongsheng/Desktop/LiveEvaluationSystem/command
+open lhs_quiche_server.command
+open lhs_quiche_player.command

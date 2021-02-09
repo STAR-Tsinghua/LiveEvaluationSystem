@@ -20,12 +20,13 @@ extern "C"
 #include <iostream>
 #include <sys/time.h>
 #include <unistd.h>
+#include <unordered_map>
 
 #define msleep(n) usleep(n*1000)
 #define LEARN_LOG "logs/learnLog.txt" // 文件名称
 #define DEBUG_LOG "logs/debugLog.txt" // 文件名称
 
-static bool showDebugLog = true;
+static bool showDebugLog = false;
 
 struct buffer_data_write {
 	uint8_t *buf;
@@ -108,10 +109,16 @@ static int lhs_write_packet(void *opaque, uint8_t *buf, int buf_size)
 	return buf_size;
 }
 
+//微秒
 static inline uint64_t getCurrentMicroseconds(){
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return tv.tv_sec * 1000000 + tv.tv_usec;
+}
+
+//毫秒
+static inline uint64_t getCurrentMillisecond(){
+    return getCurrentMicroseconds()/1000;
 }
 
 namespace Tools {
@@ -127,9 +134,9 @@ namespace Tools {
 
         template <typename DurationType> class AlgoTime;
         using AlgoTimeNs = AlgoTime<ns>;
-        using AlgoTimeUs = AlgoTime<us>;
-        using AlgoTimeMs = AlgoTime<ms>;
-        using AlgoTimeS = AlgoTime<s>;
+        using AlgoTimeUs = AlgoTime<us>;//微秒
+        using AlgoTimeMs = AlgoTime<ms>;//毫秒
+        using AlgoTimeS = AlgoTime<s>;//秒
         using AlgoTimeM = AlgoTime<m>;
         using AlgoTimeH = AlgoTime<h>;
 
@@ -178,14 +185,25 @@ namespace Tools {
 
             void evalTime(std::string which , std::string detail){
                 //当前从开始到现在的时间戳
+                if(map_str.find(detail) != map_str.end()){
+                    return;
+                }else{
+                    map_str[detail] = true;
+                }
                 auto time = elapsed();
                 int timeShow = time-lastTime;
                 lastTime = time;
                 Print2File("{'LogType': 'Latency', 'Which': '"+which+"', 'AlgoTime': '"+ std::to_string(timeShow)+"', 'TimeType': '"+getTimeType()+"', 'Detail': '"+detail+"'}");
             }
 
+            void evalTimeStamp(std::string which , std::string detail){
+                //当前从开始到现在的时间戳
+                Print2File("{'LogType': 'FrameTime', 'Which': '"+which+"', 'AlgoTime': '"+ std::to_string(getCurrentMillisecond())+"', 'TimeType': '"+getTimeType()+"', 'Detail': '"+detail+"'}");
+            }
+
         private:
             std::chrono::steady_clock::time_point start_;
+            std::unordered_map<std::string, bool> map_str;
             int lastTime;
             std::string getTimeType(){
                 if (std::is_same<DurationType, ns>::value) {
@@ -210,5 +228,8 @@ namespace Tools {
 
 static Tools::Time::AlgoTimeMs timeMainServer;
 static Tools::Time::AlgoTimeMs timeMainPlayer;
+
+static Tools::Time::AlgoTimeMs timeFrameServer;
+static Tools::Time::AlgoTimeMs timeFramePlayer;
 
 #endif // UTIL_LOG_H

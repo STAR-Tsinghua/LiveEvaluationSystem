@@ -286,11 +286,16 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
             // tag the time stamp.
             item->header.block_ts = current_mtime();
 
+            //深拷贝修改
             memcpy(buf, &item->header, sizeof(item->header));
-            memcpy(buf + sizeof(item->header), item->packet.data, item->packet.size);
-            // 三种协议处
+            // uint8_t     *codecParExtradata;
+            // Print2File("*(item->codecParExtradata) : "+std::to_string(sizeof(*(item->codecParExtradata))));
             int extradataSize = item->header.codecPar.extradata_size;
+            // Print2File("extradataSize ====== : "+std::to_string(extradataSize));
+            // codecParExtradataPtr = (uint8_t*)av_mallocz(extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
+            memcpy(buf + sizeof(item->header), item->codecParExtradata, extradataSize);
             memcpy(buf + sizeof(item->header) + extradataSize, item->packet.data, item->packet.size);
+            // Print2File("if (quiche_conn_stream_send_full(conn_io->conn, quiche_sid, buf");
 
             ssize_t sent = sendto(conn_io->sock, buf, sizeof(item->header) + item->packet.size, 0,
                               (struct sockaddr *) &conn_io->peer_addr,
@@ -359,9 +364,9 @@ static CONN_IO *create_conn(EV_P_ struct sockaddr_storage *addr, socklen_t addr_
     // Init the stream format context.
     // init_resource(&conn_io->vStmCtxPtrs, conns->conf);
 
-    // 三种协议处
-    // 暂时注释,尚未改完
     // conn_io->thd_produce = new std::thread(produce, &conn_io->buffer, conns->conf);
+    
+    // 改的接口
     conn_io->thd_produce = new std::thread(live_produce, &conn_io->buffer, conns->conf);
 
     HASH_ADD(hh, conns->h, peer_addr, addr_len, conn_io);

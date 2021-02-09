@@ -195,10 +195,12 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
         //处理视频
         if (vd.size > 0){
             vd.pts = vd.pts - beginTime;
+            timeFrameServer.evalTimeStamp("s","RGB_Pop");
             XData yuv = xe->RGBToYUV(vd);
             vd.Drop();
             XData dpkt = xe->EncodeVideo(yuv);
             if (dpkt.size > 0){
+                timeFrameServer.evalTimeStamp("s","FrameToYUV");
                 // timeMain.evalTime("dpkt.size > 0");
                 if (!dpkt.data || dpkt.size <= 0){
                     Print2File("!pkt.data || pkt.size <= 0");

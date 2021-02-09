@@ -19,7 +19,9 @@ LIBS = 	-lswscale -lswresample -lavformat \
 		-L$(DTP_LIB) -lquiche \
 		-lm -lz -lev -ldl -pthread \
 
-TARGETS = r_dtp_server r_dtp_play r_udp_server r_udp_play r_quiche_server r_quiche_play
+TARGETS = r_dtp_server r_dtp_play r_udp_server r_udp_play 
+# r_quiche_server r_quiche_play
+# 先放着只为实验图的"实验"
 
 LOGS = logs
 
@@ -40,32 +42,37 @@ r_udp_play : p_udp_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
 
 # ================= quiche =================
-r_quiche_server : s_quiche_server.cxx
-	$(CX) $(CXFLAGS) $(OPENCVFLAGS) -o $@ $^ $(INCS) $(LIBS)
+# r_quiche_server : s_quiche_server.cxx
+# 	$(CX) $(CXFLAGS) $(OPENCVFLAGS) -o $@ $^ $(INCS) $(LIBS)
 
-r_quiche_play : p_quiche_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
-	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
+# r_quiche_play : p_quiche_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
+# 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
 
 
 
 clean:
 	rm -rf $(TARGETS)
 
-clog:
+cl:
 	rm -rf $(LOGS)
 	mkdir $(LOGS)
 
 rb:
 	rm -rf $(TARGETS)
-	make clog
+	make cl
 	make all
 
-r:
-	Open ../command/lhs_startBoth.command
+# dtp
+rd:
+	Open ../command/lhs_dtp_startBoth.command
 
-rr:
-	make clog
-	Open ../command/lhs_startBoth.command
+# udp
+ru:
+	Open ../command/lhs_udp_startBoth.command
+
+# quiche
+# rq:
+# 	Open ../command/lhs_quiche_startBoth.command
 
 k:
 	Open ../command/lhs_killBoth.command

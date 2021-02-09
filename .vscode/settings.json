@@ -103,7 +103,8 @@
         "climits": "cpp",
         "ctgmath": "cpp",
         "cstdbool": "cpp",
-        "util_url_file.h": "c"
+        "util_url_file.h": "c",
+        "unistd.h": "c"
     },
     "git.ignoreLimitWarning": true
 }
