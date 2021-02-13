@@ -45,6 +45,17 @@ def filteByDetail(root,detail):
 
     return rt
 
+def filteByLogType(root,logType):
+    csv2Data(root)
+    rt = list()
+    for i in range(1, length_zu):  # 从第二行开始读取
+        if exampleData[i][0] != logType:
+            continue
+        rt.append(exampleData[i])
+        # print(exampleData[i])
+
+    return rt
+
 # LogType,Which,AlgoTime,TimeType,Detail
 def calculate2DeltimeList(lst1,lst2):
 

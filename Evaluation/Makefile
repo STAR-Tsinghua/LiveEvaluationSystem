@@ -9,7 +9,7 @@ all: data fig pdf
 
 data: data_latency.csv
 
-fig: data_serverLatency.svg data_playerLatency.svg data_RGB_YUV_buffer.svg
+fig: data_serverLatency.svg data_playerLatency.svg data_frames_jitter.svg data_buffer_container.svg
 
 pdf:svg2pic
 
@@ -24,7 +24,10 @@ data_serverLatency.svg: csv2svg_serverLatency.py $(shell find $(LOG_PATH))
 data_playerLatency.svg: csv2svg_playerLatency.py $(shell find $(LOG_PATH))
 	python $< $(DATA_PATH)data_latency.csv $(DATA_PATH)
 
-data_RGB_YUV_buffer.svg: csv2svg_RGB_YUV_buffer.py $(shell find $(LOG_PATH))
+data_frames_jitter.svg: csv2svg_frames_jitter.py $(shell find $(LOG_PATH))
+	python $< $(DATA_PATH)data_latency.csv $(DATA_PATH)
+
+data_buffer_container.svg: csv2svg_buffer_container.py $(shell find $(LOG_PATH))
 	python $< $(DATA_PATH)data_latency.csv $(DATA_PATH)
 
 # svg2pic

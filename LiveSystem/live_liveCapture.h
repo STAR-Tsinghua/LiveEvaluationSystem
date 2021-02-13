@@ -14,6 +14,7 @@ public:
 	int height = 0;
 	int fps = 0;
 	bool isExit = false;
+	int buffered_RGB;
 	~LiveCapture(){};
 	LiveCapture(){};
 	LiveCapture(const LiveCapture&){};
@@ -28,16 +29,15 @@ public:
 	//线程调用只能调用静态函数
 	void run()
 	{
-		
+		//设置buffered_RGB大小，因为多线程，在这里设置
+		buffered_RGB_MAX = 6;
 		Mat frame;
 		while (!isExit)
 		{
 			timeFrameServer.start();
-			timeFrameServer.evalTimeStamp("s","start_CatchFrame");
-			// timeTmp.start();
+			timeFrameServer.evalTimeStamp("FrameTime","s","start_CatchFrame");
 			if (!cam.read(frame))
 			{
-				Print2File("!cam.read(frame)");
 				msleep(1);
 				continue;
 			}
@@ -47,9 +47,16 @@ public:
 				msleep(1);
 				continue;
 			}
+			// Print2FileInfo("buffered_RGB========:"+std::to_string(buffered_RGB)); 
+			// Print2FileInfo("buffered_RGB_MAX=======:"+std::to_string(buffered_RGB_MAX)); 
+			if(buffered_RGB>buffered_RGB_MAX){
+				// Print2FileInfo("buffered_RGB>buffered_RGB_MAX"); //log显示mac电脑为30帧
+				msleep(5);
+				continue;
+			}
+			++buffered_RGB;
 			XData d((char*)frame.data, frame.cols*frame.rows*frame.elemSize(),GetCurTime());
-			// timeTmp.evalTime("s","DurringOfgetRGB");
-			timeFrameServer.evalTimeStamp("s","RGB_Push");
+			timeFrameServer.evalTimeStamp("FrameTime","s","RGB_Push");
 			Push(d);
 		}
 	}
@@ -91,5 +98,5 @@ public:
 		}
 	}
 private:
-
+	int buffered_RGB_MAX;
 };

@@ -49,7 +49,7 @@ public:
 	int outWidth = 1280;
 	int outHeight = 720;
 	int bitrate = 4000000;//压缩后每一秒视频的bit位大小50KB
-	int fps = 25;
+	int fps = 60;//帧率
 	int nbSample = 1024;
 	XSampleFMT outSampleFmt = X_FLAPT;
 	long long lasta = -1;

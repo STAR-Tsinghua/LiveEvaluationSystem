@@ -133,7 +133,7 @@ public:
         end_ = (end_ + 1) % circular_buffer_.size();
 
         ++buffered_;
-        // Print2File("++buffered_");
+        timeFrameServer.evalTimeStamp("Net_Buffer_Count","s",std::to_string(buffered_));
         // 通知前，手动解锁。
         lock.unlock();
         // 通知消费者。
@@ -155,7 +155,7 @@ public:
         begin_ = (begin_ + 1) % circular_buffer_.size();
 
         --buffered_;
-        // Print2File("--buffered_;");
+        timeFrameServer.evalTimeStamp("Net_Buffer_Count","s",std::to_string(buffered_));
         // unlock manually.
         lock.unlock();
         // notify producer.
@@ -195,12 +195,13 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
         //处理视频
         if (vd.size > 0){
             vd.pts = vd.pts - beginTime;
-            timeFrameServer.evalTimeStamp("s","RGB_Pop");
             XData yuv = xe->RGBToYUV(vd);
             vd.Drop();
+            --lc->buffered_RGB;
+            timeFrameServer.evalTimeStamp("FrameTime","s","RGB_Pop");
             XData dpkt = xe->EncodeVideo(yuv);
             if (dpkt.size > 0){
-                timeFrameServer.evalTimeStamp("s","FrameToYUV");
+                timeFrameServer.evalTimeStamp("FrameTime","s","FrameToYUV");
                 // timeMain.evalTime("dpkt.size > 0");
                 if (!dpkt.data || dpkt.size <= 0){
                     Print2File("!pkt.data || pkt.size <= 0");
@@ -278,6 +279,7 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
                 }
                 block_id ++;
                 // write a vec pointer of packet ptrs into the buffer, and get a stale vec pointer.
+                timeFrameServer.evalTimeStamp("FrameTime","s","Net_Produce");
                 pStmPktVec = pBuffer->produce(pStmPktVec);
                 pStmPktVec = NULL;
                 if (vStmCtx->empty()) {

@@ -45,8 +45,6 @@ def drawLatencyBarServer(exData,saveName):
 
 if __name__ == '__main__':
 
-
-
     argv = sys.argv
     argc = len(argv)
 

@@ -49,6 +49,10 @@ static void Print2File(std::string inputStr)
 	return;
 }
 
+static void logTxtInDic(std::string logType, std::string which, std::string algoTime,std::string timeType, std::string detail){
+    Print2File("{'LogType': '"+logType+"', 'Which': '"+which+"', 'AlgoTime': '"+algoTime+"', 'TimeType': '"+timeType+"', 'Detail': '"+detail+"'}");
+}
+
 static void Print2FileInfo(std::string inputStr)
 {
     if(!showDebugLog){
@@ -193,17 +197,28 @@ namespace Tools {
                 auto time = elapsed();
                 int timeShow = time-lastTime;
                 lastTime = time;
-                Print2File("{'LogType': 'Latency', 'Which': '"+which+"', 'AlgoTime': '"+ std::to_string(timeShow)+"', 'TimeType': '"+getTimeType()+"', 'Detail': '"+detail+"'}");
+                std::string logTpye = "Latency";
+                logTxtInDic(logTpye,which,std::to_string(timeShow),getTimeType(),detail);
             }
 
-            void evalTimeStamp(std::string which , std::string detail){
+            void evalTimeStamp(std::string logType, std::string which, std::string detail){
                 //当前从开始到现在的时间戳
-                Print2File("{'LogType': 'FrameTime', 'Which': '"+which+"', 'AlgoTime': '"+ std::to_string(getCurrentMillisecond())+"', 'TimeType': '"+getTimeType()+"', 'Detail': '"+detail+"'}");
+                std::string timeStampStr = std::to_string(getCurrentMillisecond());
+                std::string timeType = getTimeType();
+                logTxtInDic(logType,which,timeStampStr,timeType,detail);
+                if(detail=="RGB_Push"){
+                    ++RGB_Buffer_Count;
+                    logTxtInDic("RGB_Buffer_Count",which,timeStampStr,timeType,std::to_string(RGB_Buffer_Count));
+                }else if(detail=="RGB_Pop"){
+                    --RGB_Buffer_Count;
+                    logTxtInDic("RGB_Buffer_Count",which,timeStampStr,timeType,std::to_string(RGB_Buffer_Count));
+                }
             }
 
         private:
             std::chrono::steady_clock::time_point start_;
             std::unordered_map<std::string, bool> map_str;
+            int RGB_Buffer_Count = 0;
             int lastTime;
             std::string getTimeType(){
                 if (std::is_same<DurationType, ns>::value) {
