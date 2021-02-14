@@ -64,10 +64,12 @@ rb:
 
 # dtp
 rd:
+	make cl
 	Open ../command/lhs_dtp_startBoth.command
 
 # udp
 ru:
+	make cl
 	Open ../command/lhs_udp_startBoth.command
 
 # quiche

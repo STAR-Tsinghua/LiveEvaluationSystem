@@ -204,6 +204,7 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
     StreamPktVecPtr pStmPktVec = NULL;
 
     if (quiche_conn_is_established(conn_io->conn)) {
+        timeFrameServer.evalTimeStamp("Net_Consume","s","FrameTime");
         pStmPktVec = conn_io->buffer.consume();
         if (!pStmPktVec) {
             Print2File("stop sending");

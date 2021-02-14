@@ -23,6 +23,8 @@ extern "C"
 #include <unordered_map>
 
 #define msleep(n) usleep(n*1000)
+#define LOG_FATHER "logs/"
+#define LOG_TPYE_TXT ".txt"
 #define LEARN_LOG "logs/learnLog.txt" // 文件名称
 #define DEBUG_LOG "logs/debugLog.txt" // 文件名称
 
@@ -49,10 +51,6 @@ static void Print2File(std::string inputStr)
 	return;
 }
 
-static void logTxtInDic(std::string logType, std::string which, std::string algoTime,std::string timeType, std::string detail){
-    Print2File("{'LogType': '"+logType+"', 'Which': '"+which+"', 'AlgoTime': '"+algoTime+"', 'TimeType': '"+timeType+"', 'Detail': '"+detail+"'}");
-}
-
 static void Print2FileInfo(std::string inputStr)
 {
     if(!showDebugLog){
@@ -61,6 +59,24 @@ static void Print2FileInfo(std::string inputStr)
     Print2File("[........Info........:"+inputStr+"]");
     return;
 }
+
+static void LogInTheFile(std::string fileName, std::string inputStr)
+{
+    std::fstream f;
+	//追加写入,在原来基础上加了ios::app 
+	f.open(LOG_FATHER+fileName+LOG_TPYE_TXT,std::ios::out|std::ios::app);
+	//输入你想写入的内容 
+	f<<inputStr<<std::endl;
+	f.close();
+	return;
+}
+
+static void logTxtInDic(std::string logType, std::string which, std::string algoTime,std::string timeType, std::string detail){
+    std::string logs = "{'LogType': '"+logType+"', 'Which': '"+which+"', 'AlgoTime': '"+algoTime+"', 'TimeType': '"+timeType+"', 'Detail': '"+detail+"'}";
+    std::string fileName = logType;
+    LogInTheFile(fileName, logs);
+}
+
 
 //获取当前时间戳（微秒）
 static long long GetCurTime()
@@ -206,13 +222,13 @@ namespace Tools {
                 std::string timeStampStr = std::to_string(getCurrentMillisecond());
                 std::string timeType = getTimeType();
                 logTxtInDic(logType,which,timeStampStr,timeType,detail);
-                if(detail=="RGB_Push"){
-                    ++RGB_Buffer_Count;
-                    logTxtInDic("RGB_Buffer_Count",which,timeStampStr,timeType,std::to_string(RGB_Buffer_Count));
-                }else if(detail=="RGB_Pop"){
-                    --RGB_Buffer_Count;
-                    logTxtInDic("RGB_Buffer_Count",which,timeStampStr,timeType,std::to_string(RGB_Buffer_Count));
-                }
+                // if(logType=="RGB_Push"){
+                //     ++RGB_Buffer_Count;
+                //     logTxtInDic("RGB_Buffer_Count",which,timeStampStr,timeType,std::to_string(RGB_Buffer_Count));
+                // }else if(logType=="RGB_Pop"){
+                //     --RGB_Buffer_Count;
+                //     logTxtInDic("RGB_Buffer_Count",which,timeStampStr,timeType,std::to_string(RGB_Buffer_Count));
+                // }
             }
 
         private:

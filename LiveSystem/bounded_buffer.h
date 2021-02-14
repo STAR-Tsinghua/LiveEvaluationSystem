@@ -198,10 +198,11 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
             XData yuv = xe->RGBToYUV(vd);
             vd.Drop();
             --lc->buffered_RGB;
-            timeFrameServer.evalTimeStamp("FrameTime","s","RGB_Pop");
+            timeFrameServer.evalTimeStamp("RGB_Pop","s","FrameTime");
+            timeFrameServer.evalTimeStamp("RGB_Buffer_Count","s",std::to_string(lc->buffered_RGB));
             XData dpkt = xe->EncodeVideo(yuv);
             if (dpkt.size > 0){
-                timeFrameServer.evalTimeStamp("FrameTime","s","FrameToYUV");
+                timeFrameServer.evalTimeStamp("FrameToYUV","s","FrameTime");
                 // timeMain.evalTime("dpkt.size > 0");
                 if (!dpkt.data || dpkt.size <= 0){
                     Print2File("!pkt.data || pkt.size <= 0");
@@ -279,7 +280,7 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
                 }
                 block_id ++;
                 // write a vec pointer of packet ptrs into the buffer, and get a stale vec pointer.
-                timeFrameServer.evalTimeStamp("FrameTime","s","Net_Produce");
+                timeFrameServer.evalTimeStamp("Net_Produce","s","FrameTime");
                 pStmPktVec = pBuffer->produce(pStmPktVec);
                 pStmPktVec = NULL;
                 if (vStmCtx->empty()) {

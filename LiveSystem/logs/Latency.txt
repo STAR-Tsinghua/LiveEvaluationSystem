@@ -1,0 +1,27 @@
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '16', 'TimeType': 'ms', 'Detail': 'Before_recv_cb'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '233', 'TimeType': 'ms', 'Detail': 'ev_signal_init(stream_working)'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '338', 'TimeType': 'ms', 'Detail': 'dtp_client Thead'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'dtp_client'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '1', 'TimeType': 'ms', 'Detail': 'socket(peer->ai_family'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '11', 'TimeType': 'ms', 'Detail': 'quiche_connect'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '1', 'TimeType': 'ms', 'Detail': 'recv_cb_Start'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'flush_egress(loop, conn_io);'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '566', 'TimeType': 'ms', 'Detail': 'before_create_conn'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'before_live_produce'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'BeforePrepareLiveMedia'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'prepareLiveMedia'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '5', 'TimeType': 'ms', 'Detail': 'conn_io->conn'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'quiche_conn_readable'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '669', 'TimeType': 'ms', 'Detail': 'OpenCamera'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '1', 'TimeType': 'ms', 'Detail': 'InitScale'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '15', 'TimeType': 'ms', 'Detail': 'InitVieoCodec'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '1', 'TimeType': 'ms', 'Detail': 'MemoryOutByFIFO'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'AddStream'}
+{'LogType': 'Latency', 'Which': 's', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'Before2Thread'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '2236', 'TimeType': 'ms', 'Detail': 'quiche_stream_iter_next'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'recv_len < 0 Pass'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'bk_buf.write'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '2', 'TimeType': 'ms', 'Detail': 'stream_working_Started'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'video_viewer4Start'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '0', 'TimeType': 'ms', 'Detail': 'video_viewer4_while_pass'}
+{'LogType': 'Latency', 'Which': 'p', 'AlgoTime': '1', 'TimeType': 'ms', 'Detail': 'av_image_get_buffer_size'}

@@ -7,7 +7,7 @@ class XDataThread
 {
 public:
 	//（缓冲列表大小）列表最大值，超出删除最旧的数据
-	int maxList = 150;
+	int maxList = 6;
 	XDataThread(){};
 	~XDataThread(){};
 	//在列表结尾插入
