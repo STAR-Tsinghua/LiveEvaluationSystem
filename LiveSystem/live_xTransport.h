@@ -79,8 +79,8 @@ public:
 
 	bool MemoryOutByFIFO(){
 		uint8_t *avio_ctx_buffer = NULL;
-		size_t avio_ctx_buffer_size = 4096;
-		const size_t bd_buf_size = 1024;
+		size_t avio_ctx_buffer_size = 4096;//原来4096
+		const size_t bd_buf_size = 1024;//原来1024
 		char *input_filename = NULL;
 		int ret = 0;
 		struct buffer_data_write bd = { 0 };

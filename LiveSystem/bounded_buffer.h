@@ -19,7 +19,7 @@ extern "C"
 #include <live_liveCapture.h>
 #include <live_xTransport.h>
 #include <util_mediaEncoder.h>
-#define MAX_BOUNDED_BUFFER_SIZE  3
+#define MAX_BOUNDED_BUFFER_SIZE  1
 
 // class BoundedBuffer {
 // public:

@@ -28,33 +28,43 @@ y = {:.2f} + {:.2f}x'.format(a, b))
 def example_plot_Count(ax,dataCount1,dataCount2,title, fontsize=12):
     data1 = list()
     data2 = list()
+    data_1_2 = list()
     frams = list()
     num = 0
     print("len(dataCount1):"+str(len(dataCount1)))
     print("len(dataCount2):"+str(len(dataCount2)))
-    for i in range(30,480):  # 从第二行开始读取
-        data1.append(float(dataCount1[i][4]))
-        data2.append(float(dataCount2[i][4]))
+    for i in range(30,600):  # 从第二行开始读取
+        tmp1 = float(dataCount1[i][4])
+        tmp2 = float(dataCount2[i][4])
+        data1.append(tmp1)
+        data2.append(tmp2)
+        data_1_2.append(tmp1+tmp2)
         num = num + 1
         frams.append(num)
 
     data1_mean = list(more_itertools.windowed(data1,n=2, step=1))
     data2_mean = list(more_itertools.windowed(data2,n=2, step=1))
+    data_1_2_mean = list(more_itertools.windowed(data_1_2,n=2, step=1))
     dataMeanClear_1 = list()
     dataMeanClear_2 = list()
+    dataMeanClear_1_2 = list()
     for n in data1_mean:
         dataMeanClear_1.append(np.mean(n))
     
     for n in data2_mean:
         dataMeanClear_2.append(np.mean(n))
+
+    for n in data_1_2_mean:
+        dataMeanClear_1_2.append(np.mean(n))
     # data4 = [sum(x) / len(x) for x in chunked(data2, 2)]
     l1 ,= ax.plot(frams[:-1],dataMeanClear_1,color='blue')
     l2 ,= ax.plot(frams[:-1],dataMeanClear_2,color='red')
+    l3 ,= ax.plot(frams[:-1],dataMeanClear_1_2,color='green')
 
     ax.plot(frams,data1,linestyle=":",color='skyblue')
     ax.plot(frams,data2,linestyle=":",color='lightcoral')
 
-    ax.legend([l2,l1],['Net_Buffer_Count','RGB_Buffer_Count'],loc='upper right')
+    ax.legend([l3,l2,l1],['Sum_Net_RGB_Count','Net_Buffer_Count','RGB_Buffer_Count'],loc='upper right')
     # 绘制平均值线
     # ax.hlines(np.mean(data), frams[0], frams[-1:],
     #       linestyles='-.', colors='#dc5034')
@@ -76,7 +86,7 @@ def example_plot_Deltime(ax,dataDeltime1,dataDeltime2,title, fontsize=12):
     num = 0
     print("len(dataDeltime1):"+str(len(dataDeltime1)))
     print("len(dataDeltime2):"+str(len(dataDeltime2)))
-    for i in range(30,480):  # 从第二行开始读取
+    for i in range(30,600):  # 从第二行开始读取
         data1.append(float(dataDeltime1[i][2]))
         # print("len(dataDeltime1):"+dataDeltime1[i][2])
         data2.append(float(dataDeltime2[i][2]))

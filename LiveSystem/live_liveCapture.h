@@ -35,7 +35,6 @@ public:
 		Mat frame;
 		while (!isExit)
 		{
-			
 			if(buffered_RGB>buffered_RGB_MAX){
 				msleep(1);
 				continue;

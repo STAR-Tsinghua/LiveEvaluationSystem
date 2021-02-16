@@ -49,7 +49,7 @@ public:
 	int outWidth = 1280;
 	int outHeight = 720;
 	int bitrate = 4000000;//压缩后每一秒视频的bit位大小50KB
-	int fps = 60;//帧率
+	int fps = 25;//帧率
 	int nbSample = 1024;
 	XSampleFMT outSampleFmt = X_FLAPT;
 	long long lasta = -1;
@@ -192,7 +192,7 @@ public:
 
 
 
-	//编码器初始化
+	//视频编码器初始化
 	bool InitVideoCodec() {
 		//4 初始化编码上下文
 		//a 找到编码器
@@ -207,9 +207,13 @@ public:
 		vc->framerate = { fps,1 };
 
 		//画面组的大小。多少帧一个关键帧
-		vc->gop_size = 50;//改过
+		vc->gop_size = 25;//改过
 		vc->max_b_frames = 0;
 		vc->pix_fmt = AV_PIX_FMT_YUV420P;
+		// 下面设置反而延迟上升
+		// vc->thread_count = 8;//设置编码器核心数
+		// vc->thread_count = av_cpu_count();
+		// av_opt_set((&vc)->priv_data, "x264opts","no-mbtree:sliced-threads:sync-lookahead=0", 0);
 		return OpenCodec(&vc);
 	}
 
@@ -301,8 +305,15 @@ protected:
 private:
 	bool OpenCodec(AVCodecContext **c)
 	{
+		//视频编码器临时加入
+		AVDictionary *param = 0;
+		//此设置从2000ms降到500ms解码延迟
+		//superfast
+    	av_dict_set(&param, "preset", "superfast", 0);  //编码形式修改
+		// av_dict_set(&param, "tune", "zerolatency", 0);  //编码形式修改
+    	// av_dict_set(&param, "tune", "zerolatency", 0);  //实时编码
 		//打开音频编码器
-		int ret = avcodec_open2(*c, 0, 0);
+		int ret = avcodec_open2(*c, 0, &param);
 		if (ret != 0) {
 			char err[1024] = { 0 };
 			av_strerror(ret, err, sizeof(err) - 1);
@@ -331,8 +342,11 @@ private:
 		c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 		// c->thread_count = XGetCpuNum();
 		// TODO 这里改过，为了简化设为4，实验mac的CPU核心数，可以跨平台看CPU看有多少
-		c->thread_count = 4;
+		// 这里很奇怪,thread_count = 1 is the best
+		c->thread_count = 1;
 		c->time_base = { 1,1000000 };
+		// 此设置延迟变高
+		c->delay = 0;
 		return c;
 	}
 	SwsContext *vsc = NULL;//像素格式转换上下文
