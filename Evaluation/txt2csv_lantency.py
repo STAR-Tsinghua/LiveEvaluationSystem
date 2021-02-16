@@ -27,10 +27,14 @@ def writeData(root,save):
 # 合并同一个文件夹下多个txt
 def MergeTxt(filepath,outfile):
     if os.path.exists(filepath+outfile):
+        print("os.path.exists(filepath+outfile): true")
         os.remove(filepath+outfile)
     k = open(filepath+outfile, 'a+')
     for parent, dirnames, filenames in os.walk(filepath):
         for filepath in filenames:
+            if filepath == "MainLogs.txt":
+                continue
+            print("filenames: " + str(filepath))
             txtPath = os.path.join(parent, filepath)  # txtpath就是所有文件夹的路径
             f = open(txtPath)
             # 换行写入
@@ -53,6 +57,7 @@ if __name__ == "__main__":
     print("root path: " + root)
     print("save name: " + save)
     print("----------\n")
+    print("=============== start run one =================")
     MergeTxt(root,'/MainLogs.txt')
     writeData(root, save)
     print("--done!--")

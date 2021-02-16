@@ -13,7 +13,6 @@ def svg2pic(rootPath,savePath):
     for path,dir_list,file_list in g:  
         for file_name in file_list:  
             # print(os.path.join(path, file_name) )
-            print(file_name)
             if os.path.splitext(file_name)[1] == '.svg':
                 print(file_name)
                 nameTmp = os.path.splitext(file_name)[0]

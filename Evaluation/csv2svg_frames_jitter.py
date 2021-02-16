@@ -32,7 +32,8 @@ def example_plot(ax,dataEx,title, fontsize=12):
     ax.set_yticks(np.arange(0,120,30))
     ax.set_title(title, fontsize=fontsize)
 
-def drawRGB_YUV_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,Net_Produce_Data,saveName):
+def drawRGB_YUV_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,\
+    Net_Produce_Data,saveName):
     # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
     fig = plt.figure()
     gs1 = gridspec.GridSpec(4, 1)
@@ -137,6 +138,7 @@ if __name__ == '__main__':
     # exDataRGB_ToYUV_Delta = ft.calculate2DeltimeList(exDataRGB_ToYUV1,exDataRGB_ToYUV2)
     # exDataRGB_Push_Delta = ft.calculate2DeltimeList(exDataRGB_Push1,exDataRGB_Push2)
     # drawRGB_YUV_buffer(exDataRGB_Push_Delta,exDataRGB_ToYUV_Delta,save+'data_frames_jitter.svg')
-    drawRGB_YUV_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,Net_Produce_Data,save+'data_frames_jitter.svg')
+    drawRGB_YUV_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,Net_Produce_Data\
+    ,save+'data_frames_jitter.svg')
     print("--done!--")
     

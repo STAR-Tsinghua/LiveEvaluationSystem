@@ -61,7 +61,9 @@ def calculate2DeltimeList(lst1,lst2):
 
     rt = list()
     minLen = min(len(lst1),len(lst2))
-
+    # print('len(lst1)'+str(lst1[0][0])+' : '+str(len(lst1)))
+    # print('len(lst2)'+str(lst2[0][0])+' : '+str(len(lst2)))
+    # 输出一下数值
     # if minLen == len(lst1) :
     #     rt = lst1
     # else:
@@ -71,7 +73,6 @@ def calculate2DeltimeList(lst1,lst2):
         rtLine = ['LogType','Which','AlgoTime','TimeType','Detail']
         rtLine[2] = str(int(lst2[i][2])-int(lst1[i][2]))
         rtLine[4] = lst1[i][4]+"_To_"+lst2[i][4]
-        # print(rtLine)
         rt.append(rtLine)
 
     return rt

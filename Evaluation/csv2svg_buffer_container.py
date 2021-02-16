@@ -123,7 +123,8 @@ def example_plot_Deltime(ax,dataDeltime1,dataDeltime2,title, fontsize=12):
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 
-def draw_buffer_container(RGB_Buffer_Count_Data,FrameRGB_Deltime_Data,Net_Buffer_Count_Data,FrameNet_Deltime_Data,saveName):
+def draw_buffer_container(RGB_Buffer_Count_Data,FrameRGB_Deltime_Data,Net_Buffer_Count_Data,\
+    FrameNet_Deltime_Data,saveName):
     # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
     fig = plt.figure()
     gs1 = gridspec.GridSpec(2, 1)
@@ -210,5 +211,6 @@ if __name__ == '__main__':
     Net_Buffer_Pop_Data = ft.filteByLogType(root,"Net_Consume")
     FrameNet_Deltime_Data = ft.calculate2DeltimeList(Net_Buffer_Push_Data,Net_Buffer_Pop_Data)
     # drawRGB_YUV_buffer(RGB_Buffer_Count_Data,FrameRGB_Deltime_Data,save+'data_buffer_container.svg')
-    draw_buffer_container(RGB_Buffer_Count_Data,FrameRGB_Deltime_Data,Net_Buffer_Count_Data,FrameNet_Deltime_Data,save+'data_buffer_container.svg')
+    draw_buffer_container(RGB_Buffer_Count_Data,FrameRGB_Deltime_Data,Net_Buffer_Count_Data,\
+    FrameNet_Deltime_Data,save+'data_buffer_container.svg')
     print("--done!--")

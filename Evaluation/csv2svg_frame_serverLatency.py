@@ -8,7 +8,8 @@ import numpy as np
 import matplotlib.gridspec as gridspec
 import more_itertools
 
-def example_plot_Deltime(ax,CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,RGB_Pop_To_FrameToYUV,FrameToYUV_To_Net_Produce,Net_Produce_To_Net_Consume,title, fontsize=12):
+def example_plot_Deltime(ax,CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,RGB_Pop_To_FrameToYUV,\
+    FrameToYUV_To_Net_Produce,Net_Produce_To_Net_Consume,title, fontsize=12):
     data1 = list()
     data2 = list()
     data3 = list()
@@ -64,19 +65,27 @@ def example_plot_Deltime(ax,CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,RGB_
     ax.set_ylabel('time(ms)', fontsize=fontsize)
     ax.set_xlim(0)
     ax.set_ylim(0)
-    ax.legend([l1,l2,l3,l4,l5,l6],['CatchFrame_To_RGB_Push','RGB_Push_To_RGB_Pop','RGB_Pop_To_FrameToYUV','FrameToYUV_To_Net_Produce','Net_Produce_To_Net_Consume','Total'],loc='upper right')
+    ax.legend([l1,l2,l3,l4,l5,l6],['CatchFrame_To_RGB_Push','RGB_Push_To_RGB_Pop',\
+    'RGB_Pop_To_FrameToYUV','FrameToYUV_To_Net_Produce','Net_Produce_To_Net_Consume','Total'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
     ax.set_xticks(np.arange(0,max(frams),25))
     ax.set_yticks(np.arange(0,max(dataTotal),25))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 
-def draw_buffer_container(CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,RGB_Pop_To_FrameToYUV,FrameToYUV_To_Net_Produce,Net_Produce_To_Net_Consume,saveName):
+def draw_buffer_container(CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,\
+    RGB_Pop_To_FrameToYUV,FrameToYUV_To_Net_Produce,Net_Produce_To_Net_Consume,\
+    saveName):
     # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
     fig = plt.figure()
-    gs1 = gridspec.GridSpec(1, 1)
+    gs1 = gridspec.GridSpec(2, 1)
     ax1 = fig.add_subplot(gs1[0])
-    example_plot_Deltime(ax1,CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,RGB_Pop_To_FrameToYUV,FrameToYUV_To_Net_Produce,Net_Produce_To_Net_Consume,"Buffer_Deltime")
+    ax2 = fig.add_subplot(gs1[1])
+
+    example_plot_Deltime(ax1,CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,\
+    RGB_Pop_To_FrameToYUV,FrameToYUV_To_Net_Produce,Net_Produce_To_Net_Consume,"Frame_Deltime_Server")
+    example_plot_Deltime(ax2,CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,\
+    RGB_Pop_To_FrameToYUV,FrameToYUV_To_Net_Produce,Net_Produce_To_Net_Consume,"Frame_Deltime_Player")
     fig.set_size_inches(18,10)
     plt.tight_layout()
     # fig.set_title("frames_jitter", fontsize=20)
@@ -127,5 +136,6 @@ if __name__ == '__main__':
     # Net_Produce_Data->Net_Consume_Data
     Net_Produce_To_Net_Consume = ft.calculate2DeltimeList(Net_Produce_Data,Net_Consume_Data)
 
-    draw_buffer_container(CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,RGB_Pop_To_FrameToYUV,FrameToYUV_To_Net_Produce,Net_Produce_To_Net_Consume,save+'data_frame_serverLatency.svg')
+    draw_buffer_container(CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_Pop,RGB_Pop_To_FrameToYUV,\
+    FrameToYUV_To_Net_Produce,Net_Produce_To_Net_Consume,save+'data_frame_serverLatency.svg')
     print("--done!--")
