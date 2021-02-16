@@ -1,6 +1,6 @@
 *.h264
 *.mp4
-*.txt
+**/*.txt
 # Prerequisites
 *.d
 
