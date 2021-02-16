@@ -1,6 +1,7 @@
 *.h264
 *.mp4
-**/*.txt
+/LiveSystem/logs/*.txt
+
 # Prerequisites
 *.d
 
