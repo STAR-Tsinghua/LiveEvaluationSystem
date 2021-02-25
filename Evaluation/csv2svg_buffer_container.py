@@ -31,8 +31,8 @@ def example_plot_Count(ax,dataCount1,dataCount2,title, fontsize=12):
     data_1_2 = list()
     frams = list()
     num = 0
-    print("len(dataCount1):"+str(len(dataCount1)))
-    print("len(dataCount2):"+str(len(dataCount2)))
+    print("len(RGB_Buffer_Count):"+str(len(dataCount1)))
+    print("len(Net_Buffer_Count):"+str(len(dataCount2)))
     for i in range(30,600):  # 从第二行开始读取
         tmp1 = float(dataCount1[i][4])
         tmp2 = float(dataCount2[i][4])
@@ -84,8 +84,8 @@ def example_plot_Deltime(ax,dataDeltime1,dataDeltime2,title, fontsize=12):
     dataDeltime = list()
     frams = list()
     num = 0
-    print("len(dataDeltime1):"+str(len(dataDeltime1)))
-    print("len(dataDeltime2):"+str(len(dataDeltime2)))
+    print("len(FrameRGB_Deltime_Data):"+str(len(dataDeltime1)))
+    print("len(FrameNet_Deltime_Data):"+str(len(dataDeltime2)))
     for i in range(30,600):  # 从第二行开始读取
         data1.append(float(dataDeltime1[i][2]))
         # print("len(dataDeltime1):"+dataDeltime1[i][2])
@@ -119,7 +119,7 @@ def example_plot_Deltime(ax,dataDeltime1,dataDeltime2,title, fontsize=12):
     ax.legend([l3,l1,l2],['Total_buffer_time','RGB_buffer_time','Net_buffer_time'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
     # ax.set_xticks(np.arange(0,240,10))
-    ax.set_yticks(np.arange(0,max(dataDeltime),20))
+    ax.set_yticks(np.arange(0,max(dataDeltime)+2,1))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 

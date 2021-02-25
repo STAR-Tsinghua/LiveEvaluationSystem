@@ -29,6 +29,8 @@ void network_working(struct ev_loop *loop, ev_timer *w, int revents) {
     worker->thd_conn = new thread(dtp_client, worker->host, worker->port, &worker->jbuffer);
 }
 
+static int frameNum = -1;
+
 void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
     // Print2File("dplay.h sdl_play :=======");
     StreamWorker *worker = (StreamWorker*)w->data;
@@ -76,11 +78,16 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
         scoped_lock lock(ptr->decoder.mutex);
         // if (ptr->decoder.pTexture) {
         if (ptr->decoder.iStart) {
-            splay.update(ptr->decoder.pFrameShow, ptr->decoder.pTexture, &rect);
-            // splay.update(ptr->decoder->pFrameShow, ptr->decoder->pTexture, &rect);
+            if(ptr->decoder.iFrame>frameNum){
+                frameNum = ptr->decoder.iFrame;
+                splay.update(ptr->decoder.pFrameShow, ptr->decoder.pTexture, &rect);
+            }
+            // 为了方便测量，移动到这里
+            // splay.show();
         }
         i++;
     }
+    // 暂时注释，这里是为了保持输出是固定帧率
     splay.show();
 }
 
@@ -140,7 +147,9 @@ int main(int argc, char *argv[]) {
 
     ev_timer player;
     Print2FileInfo("(p)启动sdl_play线程处");
-    ev_timer_init(&player, sdl_play, 0, 0.04);
+    double frameRate = 0.033;
+    double interval = 0.040; 
+    ev_timer_init(&player, sdl_play, 0, frameRate);
     ev_timer_start(loop, &player);
     player.data = &sworker;
 

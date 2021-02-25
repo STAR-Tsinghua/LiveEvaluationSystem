@@ -1,11 +1,9 @@
 #include <sodtp_block.h>
 #include <util_log.h>
 
-
-
 int BlockDataBuffer::write(uint32_t id, uint8_t *src, int size) {
     int ret = 0;
-
+    timeFramePlayer.evalTimeStamp("buffer_write","p",std::to_string(id));
     // Find existing block, and push back the data.
     for (const auto &it : buffer) {
         if (it->id == id) {
@@ -29,7 +27,6 @@ int BlockDataBuffer::write(uint32_t id, uint8_t *src, int size) {
 }
 
 SodtpBlockPtr BlockDataBuffer::read(uint32_t id, SodtpStreamHeader *head) {
-    // Print2File("SodtpBlockPtr BlockDataBuffer::read(uint32_t id, SodtpStreamHeader *head) { server");
     SodtpBlockPtr ptr = NULL;
     int32_t size;
     uint8_t *data;
@@ -93,10 +90,10 @@ SodtpBlockPtr BlockDataBuffer::read(uint32_t id, SodtpStreamHeader *head) {
             // Print2File("memcpy(ptr->data, data, size); ");
             memset(ptr->data + size, 0, AV_INPUT_BUFFER_PADDING_SIZE);
             // Print2File("memset break");
+            timeFramePlayer.evalTimeStamp("buffer_read","p",std::to_string(id));
             break;
         }
     }
-    // printf("debug: %s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
     return ptr;
 }
 

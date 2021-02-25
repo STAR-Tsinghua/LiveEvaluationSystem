@@ -204,7 +204,6 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
     StreamPktVecPtr pStmPktVec = NULL;
 
     if (quiche_conn_is_established(conn_io->conn)) {
-        timeFrameServer.evalTimeStamp("Net_Consume","s","FrameTime");
         pStmPktVec = conn_io->buffer.consume();
         if (!pStmPktVec) {
             Print2File("stop sending");
@@ -212,6 +211,7 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
             ev_timer_stop(loop, &conn_io->sender);
         }
         else {
+            timeFrameServer.evalTimeStamp("Net_Consume","s","FrameTime");
             // Print2File("else stop sending else else");
             size = pStmPktVec->size();
             fprintf(stderr, "send frame once. stream num %d\n", size);
@@ -337,7 +337,10 @@ static bool validate_token(const uint8_t *token, size_t token_len,
 static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
     // The frame rate should be updated as you need.
     // To be more accurate, there should be a dynamic variable.
-    static const int FRAME_RATE = 25;
+    static const int FRAME_RATE = 30;
+    static const double interval = 0.040;
+    static const double frameRate = 0.033;
+    
 
     CONN_IO *conn_io = new CONN_IO();
     if (conn_io == NULL) {
@@ -388,7 +391,7 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
     // The magic number 1/25 = 0.4. should be updated according to the frame
     // rate of each stream. 
     Print2FileInfo("(s)启动sender_cb线程处");
-    ev_timer_init(&conn_io->sender, sender_cb, 0., 1.0/(double)FRAME_RATE);
+    ev_timer_init(&conn_io->sender, sender_cb, 0., frameRate);
     ev_timer_start(loop, &conn_io->sender);
     conn_io->sender.data = conn_io;
 

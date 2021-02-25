@@ -446,12 +446,10 @@ void SodtpJitter::_update_jitter(SodtpBlockPtr &block) {
 
 
 void JitterBuffer::push_back(SodtpStreamHeader *head, SodtpBlockPtr block) {
-    // Print2File("void JitterBuffer::push_back(S");
     // Search existing stream.
     for (auto it : jptrs) {
         if (it->stream_id == head->stream_id) {
             // Print2File("if (it->stream_id == head->stream_id)");
-
             // if (head->flag & HEADER_FLAG_META) {
             //     it->set_meta_data((SodtpMetaData*)(block->data));
             //     printf("meta data: stream %d,\twidth %d,\theight %d\n",
@@ -461,12 +459,14 @@ void JitterBuffer::push_back(SodtpStreamHeader *head, SodtpBlockPtr block) {
             //     it->push(block);
             // }
             it->push(block);
+            timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(head->stream_id));
             return;
         }
     }
     // Print2File("SodtpJitterPtr ptr(new SodtpJitter(DEPTH_NOMINAL, DEPTH_MAXIMUM, sem, head->stream_id));");
     // Else this block belongs to a new stream.
     SodtpJitterPtr ptr(new SodtpJitter(DEPTH_NOMINAL, DEPTH_MAXIMUM, sem, head->stream_id));
+    timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(head->stream_id));
     // if (head->flag & HEADER_FLAG_META) {
     //     ptr->set_meta_data((SodtpMetaData*)(block->data));
     //     printf("meta data: stream %d,\twidth %d,\theight %d\n",
@@ -490,11 +490,13 @@ void JitterBuffer::push_back(SodtpStreamHeader *head, SodtpBlockPtr block) {
 void JitterBuffer::erase(int i) {
     scoped_lock lock(mtx);
     jptrs.erase(jptrs.begin() + i);
+    timeFramePlayer.evalTimeStamp("pJitter_erase_1","p","FrameErase");
 }
 
 void JitterBuffer::erase(std::vector<SodtpJitterPtr>::iterator it) {
     scoped_lock lock(mtx);
     jptrs.erase(it);
+    timeFramePlayer.evalTimeStamp("pJitter_erase_2","p","FrameErase");
 }
 
 

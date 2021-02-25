@@ -218,7 +218,8 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
 
             // printf("%.*s", (int) recv_len, buf);
             fprintf(stderr, "quiche recv len = %d\n", (int)recv_len);
-
+            
+            timeFramePlayer.start();
             ///
             ///
             /// Read the frames.
@@ -236,6 +237,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
             //                 s, header.stream_id, header.block_ts);
 
 
+            //开始读数据
             if (fin) {
                 // Print2File("SodtpBlockPtr BlockDataBuffer::read(uint32_t id, SodtpStreamHeader *head) {");
                 SodtpBlockPtr bk_ptr = bk_buf.read(s, &header);

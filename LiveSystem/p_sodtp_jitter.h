@@ -142,8 +142,8 @@ class JitterBuffer
 {
 public:
 
-    static const int32_t DEPTH_NOMINAL      = 160;  // ms
-    static const int32_t DEPTH_MAXIMUM      = 800;  // ms
+    static const int32_t DEPTH_NOMINAL      = 30;  // ms 原来160
+    static const int32_t DEPTH_MAXIMUM      = 50;  // ms 原来800
 
 
     std::vector<SodtpJitterPtr>     jptrs;

@@ -36,7 +36,8 @@ public:
 		while (!isExit)
 		{
 			if(buffered_RGB>buffered_RGB_MAX){
-				msleep(1);
+				// 节约性能
+				// msleep(1);
 				continue;
 			}
 			timeFrameServer.evalTimeStamp("start_CatchFrame","s","FrameTime");
@@ -72,7 +73,13 @@ public:
 		// Print2FileInfo("Init cam.get(CAP_PROP_FRAME_WIDTH): "+std::to_string(width));
 		// Print2FileInfo("Init cam.get(CAP_PROP_FRAME_HEIGHT): "+std::to_string(height));
 		Print2FileInfo("Init cam.get(CAP_PROP_FPS): "+std::to_string(fps)); //log显示mac电脑为30帧
+		timeMainServer.evalTime("s","cam.get(CAP_PROP_FPS) Before : "+std::to_string(fps));
 		if (fps == 0) fps = 25;
+
+		//强制设置帧率,设置30，实际上根据摄像头只有30,待修复提高
+		cam.set(CV_CAP_PROP_FPS,25);
+		double fps_after = cam.get(CAP_PROP_FPS);
+		timeMainServer.evalTime("s","cam.get(CAP_PROP_FPS) After Set : "+std::to_string(fps_after));
 		return true;
 	}
 	// bool Init(const char *url)

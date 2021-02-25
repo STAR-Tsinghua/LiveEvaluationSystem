@@ -213,6 +213,8 @@ void DecodePacket(Decoder *decoder)
             SaveFrame(decoder);
         }
     }
+    //这里走不到！！
+    timeFramePlayer.evalTimeStamp("DecodePacket","p","FrameRate");
 }
 
 void DecodePacketPlay(Decoder *decoder)
@@ -225,7 +227,7 @@ void DecodePacketPlay(Decoder *decoder)
     int32_t             iStream     = decoder->iStream;
     int32_t             iFrame      = decoder->iFrame;
 
-
+    // timeFramePlayer.evalTimeStamp("start2AVFrame","p","FrameRate");
     int ret = avcodec_send_packet(pVCodecCtx, pPacket);
     if (ret < 0) {
         fprintf(stderr, "Error sending a packet for decoding\n");
@@ -233,6 +235,7 @@ void DecodePacketPlay(Decoder *decoder)
     }
 
     while (ret >= 0) {
+        // 获取到解码后的AVFrame数据
         ret = avcodec_receive_frame(pVCodecCtx, pFrame);
 
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
@@ -244,12 +247,13 @@ void DecodePacketPlay(Decoder *decoder)
             fprintf(stderr, "Error during decoding\n");
             exit(1);
         }
-
+        timeFramePlayer.evalTimeStamp("pYUV_Get","p","FrameRate");
         printf("saving: stream %d,\t frame %d,\t codec frame %d\n",
             iStream, iFrame, pVCodecCtx->frame_number);
         fflush(stdout);
 
-        // Convert the image from its native format to YUV
+        // Convert the image from its native format to YUV 错的！！
+        // Convert the image from its native format(YUV) to RGB
         sws_scale(pSwsCtx, (uint8_t const * const *)pFrame->data,
                 pFrame->linesize, 0, pVCodecCtx->height,
                 pFrameYUV->data, pFrameYUV->linesize);
@@ -259,8 +263,9 @@ void DecodePacketPlay(Decoder *decoder)
             decoder->iStart = 1;
             AVFrame *tmp = decoder->pFrameYUV;
             decoder->pFrameYUV = decoder->pFrameShow;
-            decoder->pFrameShow = tmp;
+            decoder->pFrameShow = tmp;    
         }
+        timeFramePlayer.evalTimeStamp("pRGB_Get","p","FrameRate");
     }
 }
 
@@ -587,6 +592,7 @@ void worker_cb(EV_P_ ev_timer *w, int revents) {
     if (ret == SodtpJitter::STATE_NORMAL) {
         // Receive one more block.
         decoder->iBlock++;
+        timeFramePlayer.evalTimeStamp("iBlock_Count","p",std::to_string(decoder->iBlock));
         // printf("decoding: stream %d,\t block %d,\t size %d,\t received block count %d\n",
         //     decoder->pBlock->stream_id, decoder->pBlock->block_id,
         //     decoder->pPacket->size, decoder->iBlock);
@@ -816,9 +822,10 @@ int video_viewer3(SodtpJitterPtr pJitter, const char *path) {
     struct ev_loop *loop = ev_loop_new(EVFLAG_AUTO);
 
     double nominal = (double)pJitter->get_nominal_depth() / 1000.0;
+    double frameRate = 0.033;
     double interval = 0.040;    // 40ms, i.e. 25fps
 
-    ev_timer_init(&worker, worker_cb, nominal, interval);
+    ev_timer_init(&worker, worker_cb, nominal, frameRate);
     ev_timer_start(loop, &worker);
     worker.data = &decoder;
 
@@ -859,6 +866,7 @@ void worker_cb4(EV_P_ ev_timer *w, int revents) {
         return;
     }
     if (ret == SodtpJitter::STATE_NORMAL) {
+        timeFramePlayer.evalTimeStamp("pJitter_Pop","p","FrameRate");
         // Receive one more block.
         decoder->iBlock++;
         // Print2File("ret == SodtpJitter::STATE_NORMAL");//这里跑的
@@ -869,6 +877,7 @@ void worker_cb4(EV_P_ ev_timer *w, int revents) {
             decoder->pBlock->stream_id, decoder->pBlock->block_id,
             decoder->pPacket->size, (int)(current_mtime() - decoder->pBlock->block_ts));
 
+        // i帧计数器,追查SDL显示Latency关键
         decoder->iFrame = decoder->pBlock->block_id + 1;
         if(decoder->pPacket->flags & AV_PKT_FLAG_KEY){
             // Print2File("iskey frame===========");
@@ -1084,9 +1093,10 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
     struct ev_loop *loop = ev_loop_new(EVFLAG_AUTO);
 
     double nominal = (double)pJitter->get_nominal_depth() / 1000.0;
+    double frameRate = 0.033;
     double interval = 0.040;    // 40ms, i.e. 25fps
 
-    ev_timer_init(&worker, worker_cb4, nominal, interval);
+    ev_timer_init(&worker, worker_cb4, nominal, frameRate);
     ev_timer_start(loop, &worker);
     worker.data = &decoder;
 

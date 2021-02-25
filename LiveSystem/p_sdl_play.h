@@ -66,12 +66,15 @@ int SDLPlay::init(int w, int h) {
 
     return 0;
 }
-
+//https://blog.csdn.net/leixiaohua1020/article/details/40895797
 void SDLPlay::update(AVFrame *frame, SDL_Texture *texture, SDL_Rect *rect) {
     // scoped_lock lock(_mutex);
+    // timeFramePlayer.evalTimeStamp("SDL_UpdateTexture","p","FrameRate");
     SDL_UpdateTexture(texture, NULL, frame->data[0], frame->linesize[0]);
     // SDL_RenderClear(renderer);
+    // timeFramePlayer.evalTimeStamp("SDL_RenderCopy","p","FrameRate");
     SDL_RenderCopy(renderer, texture, NULL, rect);
+    timeFramePlayer.evalTimeStamp("SDL_RenderPresent","p","FrameRate");
     // SDL_RenderPresent(renderer);
 }
 

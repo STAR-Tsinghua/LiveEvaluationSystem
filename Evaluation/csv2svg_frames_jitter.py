@@ -11,29 +11,30 @@ def example_plot(ax,dataEx,title, fontsize=12):
     data = list()
     frams = list()
     num = 0
-    print("len(dataEx):"+str(len(dataEx)))
-    for i in range(0,240):  # 从第二行开始读取
+    # 新生成的数据没有第一行说明
+    print("len(dataEx) : "+dataEx[3][0]+" : "+str(len(dataEx)))
+    for i in range(0,600):  # 从第二行开始读取
         data.append(float(dataEx[i][2])) 
         num = num + 1
         frams.append(num)
 
     ax.plot(frams,data)
-    # 绘制平均值线
-    ax.hlines(np.mean(data), frams[0], frams[-1:],
+    # 绘制中位数值线
+    ax.hlines(np.median(data), frams[0], frams[-1:],
           linestyles='-.', colors='#dc5034')
 
     ax.locator_params(nbins=3)
     ax.set_xlabel('frames(num)', fontsize=fontsize)
     ax.set_ylabel('time(ms)', fontsize=fontsize)
-    ax.set_xlim(0,240)
-    ax.set_ylim(0,80)
+    ax.set_xlim(0,600)
+    ax.set_ylim(0,70)
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
-    ax.set_xticks(np.arange(0,240,10))
-    ax.set_yticks(np.arange(0,120,30))
+    ax.set_xticks(np.arange(0,600,10))
+    ax.set_yticks(np.arange(0,80,10))
     ax.set_title(title, fontsize=fontsize)
 
-def drawRGB_YUV_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,\
-    Net_Produce_Data,saveName):
+def draw_server_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,\
+    saveName):
     # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
     fig = plt.figure()
     gs1 = gridspec.GridSpec(4, 1)
@@ -56,8 +57,59 @@ def drawRGB_YUV_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,
     # fig.xticks(my_x_ticks)
     # fig.yticks(my_y_ticks)
 
-    plt.savefig(saveName, format='svg') 
+    plt.savefig(saveName, format='svg')
 
+def draw_net_jitter(Net_Produce_Data,Net_Consume_Data,Net_buffer_read_Data,pJitter_Push_Data,\
+    saveName):
+    # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
+    fig = plt.figure()
+    gs1 = gridspec.GridSpec(4, 1)
+    ax1 = fig.add_subplot(gs1[0])
+    ax2 = fig.add_subplot(gs1[1])
+    ax3 = fig.add_subplot(gs1[2])
+    ax4 = fig.add_subplot(gs1[3])
+    # ax5 = fig.add_subplot(gs1[4])
+    example_plot(ax1,Net_Produce_Data,"Net_Produce")
+    example_plot(ax2,Net_Consume_Data,"Net_Consume")
+    example_plot(ax3,Net_buffer_read_Data,"buffer_read")
+    example_plot(ax4,pJitter_Push_Data,"pJitter_Push")
+    # example_plot(ax5,Net_Produce_Data,"Net_Produce_Data")
+    fig.set_size_inches(18,10)
+    plt.tight_layout()
+    # fig.set_title("frames_jitter", fontsize=20)
+    #设置坐标轴刻度
+    # my_x_ticks = np.arange(0,240,10)      #显示范围为-5至5，每0.5显示一刻度
+    # my_y_ticks = np.arange(5,60,5)      #显示范围为-2至2，每0.2显示一刻度
+    # fig.xticks(my_x_ticks)
+    # fig.yticks(my_y_ticks)
+
+    plt.savefig(saveName, format='svg')
+
+def draw_player_jitter(pJitter_Pop_Data,pYUV_Get_Data,pRGB_Get_Data,SDL_RenderPresent_Data,\
+    saveName):
+    # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
+    fig = plt.figure()
+    gs1 = gridspec.GridSpec(4, 1)
+    ax1 = fig.add_subplot(gs1[0])
+    ax2 = fig.add_subplot(gs1[1])
+    ax3 = fig.add_subplot(gs1[2])
+    ax4 = fig.add_subplot(gs1[3])
+    # ax5 = fig.add_subplot(gs1[4])
+    example_plot(ax1,pJitter_Pop_Data,"pJitter_Pop")
+    example_plot(ax2,pYUV_Get_Data,"pYUV_Get")
+    example_plot(ax3,pRGB_Get_Data,"pRGB_Get")
+    example_plot(ax4,SDL_RenderPresent_Data,"SDL_RenderPresent")
+    # example_plot(ax5,Net_Produce_Data,"Net_Produce_Data")
+    fig.set_size_inches(18,10)
+    plt.tight_layout()
+    # fig.set_title("frames_jitter", fontsize=20)
+    #设置坐标轴刻度
+    # my_x_ticks = np.arange(0,240,10)      #显示范围为-5至5，每0.5显示一刻度
+    # my_y_ticks = np.arange(5,60,5)      #显示范围为-2至2，每0.2显示一刻度
+    # fig.xticks(my_x_ticks)
+    # fig.yticks(my_y_ticks)
+
+    plt.savefig(saveName, format='svg')
 # def drawRGB_YUV_buffer(startToRGB_Data,RGB2YUV_Data,saveName):
 #     s2RGB = list()
 #     RGB2YUV = list()
@@ -118,7 +170,7 @@ if __name__ == '__main__':
     exDataStartGetRGB1 = ft.filteByLogType(root,"start_CatchFrame")
     exDataStartGetRGB2 = exDataStartGetRGB1[1:]
     cameraStartGet_Data = ft.calculate2DeltimeList(exDataStartGetRGB1,exDataStartGetRGB2)
-    # RGB_buffer_out->RGB_buffer_In的Pop抖动
+    # RGB_buffer_out->RGB_buffer_In的Push抖动
     exDataRGB_Push1 = ft.filteByLogType(root,"RGB_Push")
     exDataRGB_Push2 = exDataRGB_Push1[1:]
     RGBPush_Data = ft.calculate2DeltimeList(exDataRGB_Push1,exDataRGB_Push2)
@@ -134,11 +186,52 @@ if __name__ == '__main__':
     exDataNet_Produce1 = ft.filteByLogType(root,"Net_Produce")
     exDataNet_Produce2 = exDataNet_Produce1[1:]
     Net_Produce_Data = ft.calculate2DeltimeList(exDataNet_Produce1,exDataNet_Produce2)
+
+    # Net_Consume的抖动
+    exDataNet_Net_Consume1 = ft.filteByLogType(root,"Net_Consume")
+    exDataNet_Net_Consume2 = exDataNet_Net_Consume1[1:]
+    Net_Consume_Data = ft.calculate2DeltimeList(exDataNet_Net_Consume1,exDataNet_Net_Consume2)
+
+    # buffer_read的抖动
+    exDataNet_buffer_read1 = ft.filteByLogType(root,"buffer_read")
+    exDataNet_buffer_read2 = exDataNet_buffer_read1[1:]
+    Net_buffer_read_Data = ft.calculate2DeltimeList(exDataNet_buffer_read1,exDataNet_buffer_read2)
+
+    # pJitter_Push的抖动
+    exDataNet_pJitter_Push1 = ft.filteByLogType(root,"pJitter_Push")
+    exDataNet_pJitter_Push2 = exDataNet_pJitter_Push1[1:]
+    pJitter_Push_Data = ft.calculate2DeltimeList(exDataNet_pJitter_Push1,exDataNet_pJitter_Push2)
+
+    # pJitter_Pop的抖动
+    exDataNet_pJitter_Pop1 = ft.filteByLogType(root,"pJitter_Pop")
+    exDataNet_pJitter_Pop2 = exDataNet_pJitter_Pop1[1:]
+    pJitter_Pop_Data = ft.calculate2DeltimeList(exDataNet_pJitter_Pop1,exDataNet_pJitter_Pop2)
+
+    # pYUV_Get的抖动
+    exDataNet_pYUV_Get1 = ft.filteByLogType(root,"pYUV_Get")
+    exDataNet_pYUV_Get2 = exDataNet_pYUV_Get1[1:]
+    pYUV_Get_Data = ft.calculate2DeltimeList(exDataNet_pYUV_Get1,exDataNet_pYUV_Get2)
+
+    # pRGB_Get的抖动
+    exDataNet_pRGB_Get1 = ft.filteByLogType(root,"pRGB_Get")
+    exDataNet_pRGB_Get2 = exDataNet_pRGB_Get1[1:]
+    pRGB_Get_Data = ft.calculate2DeltimeList(exDataNet_pRGB_Get1,exDataNet_pRGB_Get2)
+
+    # SDL_RenderPresent的抖动
+    exDataNet_SDL_RenderPresent1 = ft.filteByLogType(root,"SDL_RenderPresent")
+    exDataNet_SDL_RenderPresent2 = exDataNet_SDL_RenderPresent1[1:]
+    SDL_RenderPresent_Data = ft.calculate2DeltimeList(exDataNet_SDL_RenderPresent1,exDataNet_SDL_RenderPresent2)
     # startToRGB = ft.calculate2DeltimeList(exDataStart,exDataRGB_Push)
     # exDataRGB_ToYUV_Delta = ft.calculate2DeltimeList(exDataRGB_ToYUV1,exDataRGB_ToYUV2)
     # exDataRGB_Push_Delta = ft.calculate2DeltimeList(exDataRGB_Push1,exDataRGB_Push2)
     # drawRGB_YUV_buffer(exDataRGB_Push_Delta,exDataRGB_ToYUV_Delta,save+'data_frames_jitter.svg')
-    drawRGB_YUV_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,Net_Produce_Data\
-    ,save+'data_frames_jitter.svg')
+    draw_server_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data\
+    ,save+'data_frames_jitter_server.svg')
+
+    draw_net_jitter(Net_Produce_Data,Net_Consume_Data,Net_buffer_read_Data,pJitter_Push_Data\
+    ,save+'data_frames_jitter_net.svg')
+
+    draw_player_jitter(pJitter_Pop_Data,pYUV_Get_Data,pRGB_Get_Data,SDL_RenderPresent_Data\
+    ,save+'data_frames_jitter_player.svg')
     print("--done!--")
     
