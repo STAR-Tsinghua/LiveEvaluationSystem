@@ -66,7 +66,7 @@ def example_plot_Deltime_Total(ax,All_Deltatime,Server_Deltatime,Net_Deltatime,P
     print("len(Server_Deltatime):"+str(len(Server_Deltatime)))
     print("len(Net_Deltatime):"+str(len(Net_Deltatime)))
     print("len(Player_Deltatime):"+str(len(Player_Deltatime)))
-    for i in range(30,600):  # 从第二行开始读取
+    for i in range(0,600):  # 从第二行开始读取
         # print("len(dataDeltime1):"+dataDeltime1[i][2])
         tmp1 = float(All_Deltatime[i][2])
         tmp2 = float(Server_Deltatime[i][2])
@@ -113,7 +113,7 @@ def example_plot_Deltime_Player(ax,buffer_read_To_pJitter_Push,pJitter_Push_To_p
     print("len(pJitter_Pop_To_pYUV_Get):"+str(len(pJitter_Pop_To_pYUV_Get)))
     print("len(pYUV_Get_To_pRGB_Get):"+str(len(pYUV_Get_To_pRGB_Get)))
     print("len(pRGB_Get_To_SDL_RenderPresent):"+str(len(pRGB_Get_To_SDL_RenderPresent)))
-    for i in range(30,600):  # 从第二行开始读取
+    for i in range(0,600):  # 从第二行开始读取
         # print("len(dataDeltime1):"+dataDeltime1[i][2])
         tmp1 = float(buffer_read_To_pJitter_Push[i][2])
         tmp2 = float(pJitter_Push_To_pJitter_Pop[i][2])
@@ -163,7 +163,7 @@ def example_plot_Deltime_Server(ax,CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_P
     print("len(RGB_Pop_To_FrameToYUV):"+str(len(RGB_Pop_To_FrameToYUV)))
     print("len(FrameToYUV_To_Net_Produce):"+str(len(FrameToYUV_To_Net_Produce)))
     print("len(Net_Produce_To_Net_Consume):"+str(len(Net_Produce_To_Net_Consume)))
-    for i in range(30,600):  # 从第二行开始读取
+    for i in range(0,600):  # 从第二行开始读取
         # print("len(dataDeltime1):"+dataDeltime1[i][2])
         tmp1 = float(CatchFrame_To_RGB_Push[i][2])
         tmp2 = float(RGB_Push_Data_To_RGB_Pop[i][2])
@@ -330,7 +330,7 @@ if __name__ == '__main__':
     data13 = list()
     data14 = list()
     #字典中的key值即为csv中列名
-    for i in range(30,600):  # 从第二行开始读取
+    for i in range(0,600):  # 从第二行开始读取
         # print("len(dataDeltime1):"+dataDeltime1[i][2])
         # Server
         tmp1 = float(CatchFrame_To_RGB_Push[i][2])

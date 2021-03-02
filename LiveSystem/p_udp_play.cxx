@@ -104,7 +104,10 @@ int main(int argc, char *argv[]) {
     const char *path = NULL;
     if (argc >= 4) {
         path = argv[3];
+    }else {
+        path = "./config/ev_udp.conf";
     }
+    logSysPrepare(path);
 
     SaveConfig scon;
     scon.parse("./config/save.conf");

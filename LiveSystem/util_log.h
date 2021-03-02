@@ -22,13 +22,18 @@ extern "C"
 #include <unistd.h>
 #include <unordered_map>
 
+#include <stdarg.h>
+#include <sys/stat.h>
+#include <sodtp_config.h>
+
 #define msleep(n) usleep(n*1000)
-#define LOG_FATHER "logs/"
 #define LOG_TPYE_TXT ".txt"
 #define LEARN_LOG "logs/learnLog.txt" // 文件名称
 #define DEBUG_LOG "logs/debugLog.txt" // 文件名称
 
-static bool showDebugLog = false;
+static std::string LOG_FATHER = "logs/";
+
+static bool showDebugLog = true;
 
 struct buffer_data_write {
 	uint8_t *buf;
@@ -58,6 +63,28 @@ static void Print2FileInfo(std::string inputStr)
     }
     Print2File("[........Info........:"+inputStr+"]");
     return;
+}
+
+static void createDir(std::string path)
+{
+    FILE *fp = NULL;
+    fp = fopen(path.c_str(), "w");
+    
+    if (!fp) {
+        mkdir(path.c_str(), 0775);
+    }
+    else
+    {
+        fclose(fp);
+    }
+}
+
+static void logSysPrepare(const char *configPath){
+    LogConfig logCf;
+    logCf.parse(configPath);
+    LOG_FATHER = logCf.logPathFather;
+    createDir(LOG_FATHER);  //如果文件夹不存在,则创建
+    Print2FileInfo("logCf.logPathFather:"+LOG_FATHER);
 }
 
 static void LogInTheFile(std::string fileName, std::string inputStr)

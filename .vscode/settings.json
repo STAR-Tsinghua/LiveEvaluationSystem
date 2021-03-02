@@ -104,7 +104,10 @@
         "ctgmath": "cpp",
         "cstdbool": "cpp",
         "util_url_file.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "stdarg.h": "c",
+        "stat.h": "c",
+        "sodtp_config.h": "c"
     },
     "git.ignoreLimitWarning": true
 }

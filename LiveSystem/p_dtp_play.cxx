@@ -112,10 +112,13 @@ int main(int argc, char *argv[]) {
     const char *path = NULL;
     if (argc >= 4) {
         path = argv[3];
+    }else {
+        path = "./config/ev_dtp.conf";
     }
+    logSysPrepare(path);
 
     SaveConfig scon;
-    scon.parse("./config/save.conf");
+    scon.parse("./config/save.conf");    
     if (!path) {
         path = scon.path.c_str();
     }

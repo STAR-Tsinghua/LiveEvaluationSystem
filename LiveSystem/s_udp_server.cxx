@@ -7,10 +7,9 @@ int main(int argc, char *argv[]) {
     const char *conf = NULL;
     if (argc >= 4) {
         conf = argv[3];
+    }else {
+        conf = "./config/ev_udp.conf";
     }
-    else {
-        conf = "./config/stream.conf";
-    }
-
+    logSysPrepare(conf);
     udp_server(host, port, conf);
 }
