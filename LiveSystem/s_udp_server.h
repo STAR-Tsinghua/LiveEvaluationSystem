@@ -139,6 +139,7 @@ static void send_meta_data(CONN_IO *conn_io, StreamCtxPtr sctx) {
     delete[] buf;
 }
 
+// 不走这里，往下看！！！
 // To simplify this process.
 // We can send frames each 1/25 second.
 static void sender_cb1(EV_P_ ev_timer *w, int revents) {
@@ -253,6 +254,7 @@ static void sender_cb1(EV_P_ ev_timer *w, int revents) {
     // printf("debug: %s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
 }
 
+// 走这里
 static void sender_cb(EV_P_ ev_timer *w, int revents) {
     CONN_IO *conn_io = (CONN_IO *)w->data;
     static uint8_t buf[2000000];    // 2Mbytes
@@ -270,7 +272,7 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
     else {
         size = pStmPktVec->size();
         fprintf(stderr, "send frame once. stream num %d\n", size);
-
+        timeFrameServer.evalTimeStamp("Net_Consume","s","FrameTime");
         // for (auto &item : *pStmPktVec) {
         // Reverse the iteration of packets.
         for (auto iter = pStmPktVec->rbegin(); iter != pStmPktVec->rend(); iter++) {
@@ -337,8 +339,10 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
 static CONN_IO *create_conn(EV_P_ struct sockaddr_storage *addr, socklen_t addr_len) {
     // The frame rate should be updated as you need.
     // To be more accurate, there should be a dynamic variable.
-    static const int FRAME_RATE = 25;
-
+    // static const int FRAME_RATE = 25;
+    static const int FRAME_RATE = 30;
+    static const double interval = 0.040;
+    static const double frameRate = 0.033;
     CONN_IO *conn_io = new CONN_IO();
     if (conn_io == NULL) {
         fprintf(stderr, "failed to allocate connection IO\n");
@@ -357,7 +361,7 @@ static CONN_IO *create_conn(EV_P_ struct sockaddr_storage *addr, socklen_t addr_
 
     // The magic number 1/25 = 0.4. should be updated according to the frame
     // rate of each stream. 
-    ev_timer_init(&conn_io->sender, sender_cb, 0., 1.0/(double)FRAME_RATE);
+    ev_timer_init(&conn_io->sender, sender_cb, 0., frameRate);
     ev_timer_start(loop, &conn_io->sender);
     conn_io->sender.data = conn_io;
     conn_io->buffer.reset(MAX_BOUNDED_BUFFER_SIZE);

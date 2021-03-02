@@ -25,6 +25,10 @@ TARGETS = r_dtp_server r_dtp_play r_udp_server r_udp_play
 
 LOGS = logs
 
+LOGS_DTP = logs/ev_dtp
+
+LOGS_UDP = logs/ev_udp
+
 all: $(TARGETS)
 
 # ================= dtp =================
@@ -53,23 +57,31 @@ r_udp_play : p_udp_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
 clean:
 	rm -rf $(TARGETS)
 
-cl:
+cl_all:
 	rm -rf $(LOGS)
 	mkdir $(LOGS)
 
+cl_dtp:
+	rm -rf $(LOGS_DTP)
+	mkdir $(LOGS_DTP)
+
+cl_udp:
+	rm -rf $(LOGS_UDP)
+	mkdir $(LOGS_UDP)
+
 rb:
 	rm -rf $(TARGETS)
-	make cl
+	make cl_all
 	make all
 
 # dtp
 rd:
-	make cl
+	make cl_dtp
 	Open ../command/lhs_dtp_startBoth.command
 
 # udp
 ru:
-	make cl
+	make cl_udp
 	Open ../command/lhs_udp_startBoth.command
 
 # quiche
