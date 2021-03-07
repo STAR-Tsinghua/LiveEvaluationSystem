@@ -12,3 +12,7 @@ sudo pmset -a GPUSwitch 1
 2 ，自动切换图形卡
 
 CAP_PROP_FPS
+
+sudo throttle --up 1000 --down 1000 --rtt 125
+sudo throttle --up 800 --down 800 --rtt 50
+sudo throttle --up 500 --down 500 --rtt 50

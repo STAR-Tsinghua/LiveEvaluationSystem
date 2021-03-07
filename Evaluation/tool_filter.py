@@ -58,7 +58,6 @@ def filteByLogType(root,logType):
 
 # LogType,Which,AlgoTime,TimeType,Detail
 def calculate2DeltimeList(lst1,lst2):
-
     rt = list()
     minLen = min(len(lst1),len(lst2))
     # print('len(lst1)'+str(lst1[0][0])+' : '+str(len(lst1)))
@@ -76,3 +75,33 @@ def calculate2DeltimeList(lst1,lst2):
         rt.append(rtLine)
 
     return rt
+
+def filteFrame(root):
+    csv2Data(root)
+    rt = list()
+    for i in range(1, length_zu):  # 从第二行开始读取
+        rt.append(exampleData[i][4])
+        # print(exampleData[i])
+
+    return rt
+
+def filteByFrameList(root,inList):
+    csv2Data(root)
+    rt = list()
+    # print(inList)
+    # print("exampleData[1][4]:"+exampleData[1][4])
+    # print("in")
+    # if str(exampleData[1][4]) in inList:
+        # print("in")
+    for i in range(1, length_zu):  # 从第二行开始读取
+        # print("filteByFrameList : "+exampleData[i][4])
+        if str(exampleData[i][4]) in inList:
+            # print("exampleData[i][4] : "+exampleData[i][4])
+            rt.append(exampleData[i])
+            continue
+
+        # print("Name : "+str(exampleData[i][0])+" ; not in inList Num : "+str(exampleData[i][4]))
+
+    return rt
+
+    

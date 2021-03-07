@@ -44,7 +44,7 @@ def example_plot_PerDeltime_Race(ax,title,fontsize=12):
     ax.set_ylabel('time(ms)', fontsize=fontsize)
     # ax.set(ylabel='Miles Per Gallon', ylim=(0, 30))
     plt.xticks(dataKey, rotation=30, horizontalalignment='right', fontsize=10)
-    ax.set_yticks(np.arange(0,200,20))
+    ax.set_yticks(np.arange(0,400,20))
     # Add patches to color the X axis labels
     # p1 = patches.Rectangle((.57, -0.005), width=.33, height=.13, alpha=.1, facecolor='green', transform=fig.transFigure)
     # p2 = patches.Rectangle((.124, -0.005), width=.446, height=.13, alpha=.1, facecolor='red', transform=fig.transFigure)
@@ -94,7 +94,7 @@ def example_plot_Deltime_Total(ax,All_Deltatime,Server_Deltatime,Net_Deltatime,P
     'Net_Deltatime','Player_Deltatime'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
     ax.set_xticks(np.arange(0,max(frams),25))
-    ax.set_yticks(np.arange(0,240,20))
+    ax.set_yticks(np.arange(0,400,20))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 
@@ -144,7 +144,7 @@ def example_plot_Deltime_Player(ax,buffer_read_To_pJitter_Push,pJitter_Push_To_p
     'pJitter_Pop_To_pYUV_Get','pYUV_Get_To_pRGB_Get','pRGB_Get_To_SDL_RenderPresent'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
     ax.set_xticks(np.arange(0,max(frams),25))
-    ax.set_yticks(np.arange(0,140,20))
+    ax.set_yticks(np.arange(0,240,20))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 
@@ -209,7 +209,7 @@ def example_plot_Deltime_Server(ax,CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_P
     'RGB_Pop_To_FrameToYUV','FrameToYUV_To_Net_Produce','Net_Produce_To_Net_Consume'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
     ax.set_xticks(np.arange(0,max(frams),25))
-    ax.set_yticks(np.arange(0,140,20))
+    ax.set_yticks(np.arange(0,240,20))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 
@@ -263,7 +263,14 @@ if __name__ == '__main__':
     global colorG
     colorG = ['mediumblue']
     # 获取每个节点时间戳
+    SDL_RenderPresent_n_List = ft.filteFrame('./data/data_SDL_RenderPresent.csv')
+    print("SDL_RenderPresent_n_List len :"+str(len(SDL_RenderPresent_n_List)))
+    SDL_RenderPresent_n_List = SDL_RenderPresent_n_List[0:-5]
+    frameRootFather = './data/'
     # ============= Server =============
+    # data_start_CatchFrame.csv
+    CatchFrame_F_Data = ft.filteByFrameList(frameRootFather+'data_start_CatchFrame.csv',SDL_RenderPresent_n_List)
+    # print("CatchFrame_F_Data len :"+str(len(CatchFrame_F_Data)))
     CatchFrame_Data = ft.filteByLogType(root,"start_CatchFrame")
     RGB_Push_Data = ft.filteByLogType(root,"RGB_Push")
     RGB_Pop_Data = ft.filteByLogType(root,"RGB_Pop")
@@ -272,12 +279,19 @@ if __name__ == '__main__':
     Net_Consume_Data = ft.filteByLogType(root,"Net_Consume")
 
     # ============= Player =============
-    buffer_read_Data = ft.filteByLogType(root,"buffer_read")
-    pJitter_Push_Data = ft.filteByLogType(root,"pJitter_Push")
-    pJitter_Pop_Data = ft.filteByLogType(root,"pJitter_Pop")
-    pYUV_Get_Data = ft.filteByLogType(root,"pYUV_Get")
-    pRGB_Get_Data = ft.filteByLogType(root,"pRGB_Get")
-    SDL_RenderPresent_Data = ft.filteByLogType(root,"SDL_RenderPresent")
+    # buffer_read_Data = ft.filteByLogType(root,"buffer_read")
+    # pJitter_Push_Data = ft.filteByLogType(root,"pJitter_Push")
+    # pJitter_Pop_Data = ft.filteByLogType(root,"pJitter_Pop")
+    # pYUV_Get_Data = ft.filteByLogType(root,"pYUV_Get")
+    # pRGB_Get_Data = ft.filteByLogType(root,"pRGB_Get")
+    # SDL_RenderPresent_Data = ft.filteByLogType(root,"SDL_RenderPresent")
+
+    buffer_read_Data = ft.filteByFrameList(frameRootFather+'data_buffer_read.csv',SDL_RenderPresent_n_List)
+    pJitter_Push_Data = ft.filteByFrameList(frameRootFather+'data_pJitter_Push.csv',SDL_RenderPresent_n_List)
+    pJitter_Pop_Data = ft.filteByFrameList(frameRootFather+'data_pJitter_Pop.csv',SDL_RenderPresent_n_List)
+    pYUV_Get_Data = ft.filteByFrameList(frameRootFather+'data_pYUV_Get.csv',SDL_RenderPresent_n_List)
+    pRGB_Get_Data = ft.filteByFrameList(frameRootFather+'data_pRGB_Get.csv',SDL_RenderPresent_n_List)
+    SDL_RenderPresent_Data = ft.filteByFrameList(frameRootFather+'data_SDL_RenderPresent.csv',SDL_RenderPresent_n_List)
 
     # Net_Consume到数据完全发送出去还有一段时间别忘了！！！
 
@@ -296,6 +310,7 @@ if __name__ == '__main__':
     # ============= Player =============
     # buffer_read_Data->pJitter_Push_Data
     buffer_read_To_pJitter_Push = ft.calculate2DeltimeList(buffer_read_Data,pJitter_Push_Data)
+    # print("buffer_read_To_pJitter_Push len :"+str(len(buffer_read_To_pJitter_Push)))
     # pJitter_Push_Data->pJitter_Pop_Data
     pJitter_Push_To_pJitter_Pop = ft.calculate2DeltimeList(pJitter_Push_Data,pJitter_Pop_Data)
     # pJitter_Pop_Data->pYUV_Get_Data
@@ -305,13 +320,16 @@ if __name__ == '__main__':
     # pRGB_Get_Data->SDL_RenderPresent_Data
     pRGB_Get_To_SDL_RenderPresent = ft.calculate2DeltimeList(pRGB_Get_Data,SDL_RenderPresent_Data)
 
+    
+
     # ============= Total =============
     # All Total
-    All_Deltatime = ft.calculate2DeltimeList(CatchFrame_Data,SDL_RenderPresent_Data)
+    All_Deltatime = ft.calculate2DeltimeList(CatchFrame_F_Data,SDL_RenderPresent_Data)
     # Server Total
     Server_Deltatime = ft.calculate2DeltimeList(CatchFrame_Data,Net_Consume_Data)
     # Net Total
-    Net_Deltatime = ft.calculate2DeltimeList(Net_Consume_Data,buffer_read_Data)
+    Net_Consume_F_Data = ft.filteByFrameList(frameRootFather+'data_Net_Consume.csv',SDL_RenderPresent_n_List)
+    Net_Deltatime = ft.calculate2DeltimeList(Net_Consume_F_Data,buffer_read_Data)
     # Player Total
     Player_Deltatime = ft.calculate2DeltimeList(buffer_read_Data,SDL_RenderPresent_Data)
 
@@ -331,6 +349,7 @@ if __name__ == '__main__':
     data14 = list()
     #字典中的key值即为csv中列名
     for i in range(0,600):  # 从第二行开始读取
+        # print(i)
         # print("len(dataDeltime1):"+dataDeltime1[i][2])
         # Server
         tmp1 = float(CatchFrame_To_RGB_Push[i][2])

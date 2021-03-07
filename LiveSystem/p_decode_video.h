@@ -199,16 +199,15 @@ void DecodePacket(Decoder *decoder)
             iStream, iFrame, pVCodecCtx->frame_number);
         fflush(stdout);
 
-
         if (!decoder->path) {
             // do not save the picture unless we need to.
             continue;
         }
-
         // Convert the image from its native format to RGB
         sws_scale(pSwsCtx, (uint8_t const * const *)pFrame->data,
                 pFrame->linesize, 0, pVCodecCtx->height,
                 pFrameRGB->data, pFrameRGB->linesize);
+        // 保存图片功能可以对比？
         if (iFrame < 2000) {
             SaveFrame(decoder);
         }
@@ -247,7 +246,7 @@ void DecodePacketPlay(Decoder *decoder)
             fprintf(stderr, "Error during decoding\n");
             exit(1);
         }
-        timeFramePlayer.evalTimeStamp("pYUV_Get","p","FrameRate");
+        timeFramePlayer.evalTimeStamp("pYUV_Get","p",std::to_string(decoder->pBlock->block_id));
         printf("saving: stream %d,\t frame %d,\t codec frame %d\n",
             iStream, iFrame, pVCodecCtx->frame_number);
         fflush(stdout);
@@ -265,7 +264,8 @@ void DecodePacketPlay(Decoder *decoder)
             decoder->pFrameYUV = decoder->pFrameShow;
             decoder->pFrameShow = tmp;    
         }
-        timeFramePlayer.evalTimeStamp("pRGB_Get","p","FrameRate");
+        timeFramePlayer.evalTimeStamp("pRGB_Get","p",std::to_string(decoder->pBlock->block_id));
+        decoder->iFrame = decoder->pBlock->block_id + 1;
     }
 }
 
@@ -332,20 +332,15 @@ int SodtpReadPacket(
     AVPacket                *pPacket,
     SodtpBlockPtr           &pBlock) {
 
-    // if(pPacket->flags & AV_PKT_FLAG_KEY){
-    //     Print2File("key frame===========");
-    // }else{
-    //     Print2File("Not key frame============");//跑这里
-    // }
-
-
     int ret;
     ret = pJitter->pop(pBlock);
+    // 多
     if (!pBlock) {
         pPacket->data = NULL;
         pPacket->size = 0;
         return ret;
     }
+
 
     // Warning!!!
     // Block buffer size should be size + AV_INPUT_BUFFER_PADDING_SIZE
@@ -600,7 +595,8 @@ void worker_cb(EV_P_ ev_timer *w, int revents) {
             decoder->pBlock->stream_id, decoder->pBlock->block_id,
             decoder->pPacket->size, (int)(current_mtime() - decoder->pBlock->block_ts));
 
-        decoder->iFrame = decoder->pBlock->block_id + 1;
+        // 原代码错误
+        // decoder->iFrame = decoder->pBlock->block_id + 1;
         // DecodePacket(
         //             decoder->pVCodecCtx,
         //             decoder->pSwsCtx,
@@ -852,13 +848,16 @@ int video_viewer3(SodtpJitterPtr pJitter, const char *path) {
     return 0;
 }
 
+static int pJitter_Pop_Count = 0;
 
 void worker_cb4(EV_P_ ev_timer *w, int revents) {
     // Print2File("========worker_cb4===============");//这里跑的
+    // pJitter_Pop 少于 pJitter_Push
     // AVPacket packet;
     Decoder *decoder = (Decoder *)w->data;
     int ret = SodtpReadPacket(decoder->pJitter, decoder->pPacket, decoder->pBlock);
     if (decoder->pJitter->state == SodtpJitter::STATE_CLOSE) {
+        timeFramePlayer.evalTimeStamp("pJitter_Pop_CLOSE","p",std::to_string(++pJitter_Pop_Count));
         // Stream is closed.
         // Thread will be closed by breaking event loop.
         ev_timer_stop(loop, w);
@@ -866,7 +865,15 @@ void worker_cb4(EV_P_ ev_timer *w, int revents) {
         return;
     }
     if (ret == SodtpJitter::STATE_NORMAL) {
-        timeFramePlayer.evalTimeStamp("pJitter_Pop","p","FrameRate");
+        // timeFramePlayer.evalTimeStamp("pJitter_Pop","p",std::to_string(decoder->pBlock->block_id));
+        // 状态正常才记录
+        if(decoder->pBlock->key_block){
+            timeFramePlayer.evalTimeStamp("pJitter_Pop","I_frame",std::to_string(decoder->pBlock->block_id),std::to_string(decoder->pBlock->size));
+            // timeFramePlayer.evalTimeStamp("FrameType_p","p","I_frame");
+        }else{
+            timeFramePlayer.evalTimeStamp("pJitter_Pop","P_frame",std::to_string(decoder->pBlock->block_id),std::to_string(decoder->pBlock->size));
+            // timeFramePlayer.evalTimeStamp("FrameType_p","p","P_frame");
+        }
         // Receive one more block.
         decoder->iBlock++;
         // Print2File("ret == SodtpJitter::STATE_NORMAL");//这里跑的
@@ -878,22 +885,28 @@ void worker_cb4(EV_P_ ev_timer *w, int revents) {
             decoder->pPacket->size, (int)(current_mtime() - decoder->pBlock->block_ts));
 
         // i帧计数器,追查SDL显示Latency关键
-        decoder->iFrame = decoder->pBlock->block_id + 1;
-        if(decoder->pPacket->flags & AV_PKT_FLAG_KEY){
-            // Print2File("iskey frame===========");
-        }else{
-            // Print2File("Not key frame============");//跑这里
-        }
+        // 不应当在这里加
+        // decoder->iFrame = decoder->pBlock->block_id + 1;
+        // if(decoder->pPacket->flags & AV_PKT_FLAG_KEY){
+        //     // Print2File("iskey frame===========");
+        //     timeFramePlayer.evalTimeStamp("FrameType_p","p","I");
+        // }else{
+        //     // Print2File("Not key frame============");//跑这里
+        //     timeFramePlayer.evalTimeStamp("FrameType_p","p",std::to_string(decoder->pPacket->flags));
+        // }
         DecodePacketPlay(decoder);
         // Print2File("DecodePacketPlay(decoder);");//这里断了！！！！！！！！！！！！！
     }
     else if (ret == SodtpJitter::STATE_BUFFERING) {
+        // timeFramePlayer.evalTimeStamp("pJitter_Pop_BUFFERING","p",std::to_string(++pJitter_Pop_Count));
         printf("decoding: buffering stream %d\n", decoder->iStream);
     }
     else if (ret == SodtpJitter::STATE_SKIP) {
+        // timeFramePlayer.evalTimeStamp("pJitter_Pop_SKIP","p",std::to_string(++pJitter_Pop_Count));
         printf("decoding: skip one block of stream %d\n", decoder->iStream);
     }
     else {
+        // timeFramePlayer.evalTimeStamp("pJitter_Pop_UNKNOWN","p",std::to_string(++pJitter_Pop_Count));
         printf("decoding: warning! unknown state of stream %d!\n", decoder->iStream);
     }
     // Free the packet that was allocated by av_read_frame

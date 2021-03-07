@@ -259,6 +259,7 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
                     }
                     
                     if ((*pStmPktVec)[i]->packet.flags & AV_PKT_FLAG_KEY) {
+                        timeFrameServer.evalTimeStamp("Net_Produce","I_frame",std::to_string(block_id));
                         (*pStmPktVec)[i]->header.flag |= HEADER_FLAG_KEY;
                         (*pStmPktVec)[i]->header.haveFormatContext = true;
                         // 拷贝 xt->ic->streams[0]->codecpar 信息
@@ -266,6 +267,8 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
                         // 拷贝codecpar其他变量
                         int ret3 = lhs_copy_parameters_to_myParameters(codeparPtr,xt->ic->streams[0]->codecpar);
                         (*pStmPktVec)[i]->codecParExtradata = xt->ic->streams[0]->codecpar->extradata;
+                    }else{
+                        timeFrameServer.evalTimeStamp("Net_Produce","P_frame",std::to_string(block_id));
                     }
 
                     (*pStmPktVec)[i]->header.stream_id = (*it)->stream_id;
@@ -278,9 +281,10 @@ bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::v
                         it++;
                     }
                 }
-                block_id ++;
+                
                 // write a vec pointer of packet ptrs into the buffer, and get a stale vec pointer.
-                timeFrameServer.evalTimeStamp("Net_Produce","s","FrameTime");
+                // 特别注意 block_id 多流改位置！
+                block_id ++;
                 pStmPktVec = pBuffer->produce(pStmPktVec);
                 pStmPktVec = NULL;
                 if (vStmCtx->empty()) {

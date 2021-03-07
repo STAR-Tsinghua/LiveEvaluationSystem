@@ -25,7 +25,6 @@ public:
 	// 	static LiveCapture lc;
 	// 	return lc;
 	// }
-	
 	//线程调用只能调用静态函数
 	void run()
 	{
@@ -33,6 +32,7 @@ public:
 		buffered_RGB_MAX = 1;
 		timeFrameServer.start();
 		Mat frame;
+		int frameCount = -1;
 		while (!isExit)
 		{
 			if(buffered_RGB>buffered_RGB_MAX){
@@ -40,7 +40,7 @@ public:
 				// msleep(1);
 				continue;
 			}
-			timeFrameServer.evalTimeStamp("start_CatchFrame","s","FrameTime");
+			timeFrameServer.evalTimeStamp("start_CatchFrame","s",std::to_string(++frameCount));
 			if (!cam.read(frame))
 			{
 				msleep(1);

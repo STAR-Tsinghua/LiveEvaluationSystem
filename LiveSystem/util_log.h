@@ -244,10 +244,12 @@ namespace Tools {
                 logTxtInDic(logTpye,which,std::to_string(timeShow),getTimeType(),detail);
             }
 
-            void evalTimeStamp(std::string logType, std::string which, std::string detail){
+            void evalTimeStamp(std::string logType, std::string which, std::string detail, std::string timeType = "NULL"){
                 //当前从开始到现在的时间戳
                 std::string timeStampStr = std::to_string(getCurrentMillisecond());
-                std::string timeType = getTimeType();
+                if(timeType == "NULL"){
+                    std::string timeType = getTimeType();
+                } 
                 logTxtInDic(logType,which,timeStampStr,timeType,detail);
                 // if(logType=="RGB_Push"){
                 //     ++RGB_Buffer_Count;

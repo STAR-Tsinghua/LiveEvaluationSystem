@@ -436,15 +436,6 @@ void SodtpJitter::_update_jitter(SodtpBlockPtr &block) {
     }
 }
 
-
-
-
-
-
-
-
-
-
 void JitterBuffer::push_back(SodtpStreamHeader *head, SodtpBlockPtr block) {
     // Search existing stream.
     for (auto it : jptrs) {
@@ -459,14 +450,13 @@ void JitterBuffer::push_back(SodtpStreamHeader *head, SodtpBlockPtr block) {
             //     it->push(block);
             // }
             it->push(block);
-            timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(head->stream_id));
+            
             return;
         }
     }
     // Print2File("SodtpJitterPtr ptr(new SodtpJitter(DEPTH_NOMINAL, DEPTH_MAXIMUM, sem, head->stream_id));");
     // Else this block belongs to a new stream.
     SodtpJitterPtr ptr(new SodtpJitter(DEPTH_NOMINAL, DEPTH_MAXIMUM, sem, head->stream_id));
-    timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(head->stream_id));
     // if (head->flag & HEADER_FLAG_META) {
     //     ptr->set_meta_data((SodtpMetaData*)(block->data));
     //     printf("meta data: stream %d,\twidth %d,\theight %d\n",
@@ -485,7 +475,6 @@ void JitterBuffer::push_back(SodtpStreamHeader *head, SodtpBlockPtr block) {
     sem_post(sem);
     ev_feed_signal(SIGUSR1);
 }
-
 
 void JitterBuffer::erase(int i) {
     scoped_lock lock(mtx);
