@@ -21,6 +21,15 @@ def csv2Data(root):
     length_yuan = len(exampleData[0])
     return
 
+def getcsv2List(root):
+    csv2Data(root)
+    rt = list()
+    for i in range(1, length_zu):  # 从第二行开始读取
+        rt.append(exampleData[i])
+        # print(exampleData[i])
+
+    return rt
+
 def filteByLogTypeWhich(root,logType,which):
     csv2Data(root)
     rt = list()
@@ -84,6 +93,57 @@ def filteFrame(root):
         # print(exampleData[i])
 
     return rt
+
+def countIFrame(root,start,end):
+    # start从0开始
+    csv2Data(root)
+    num = 0
+    for i in range(1+start, end+1):  # 从第二行开始读取
+        if exampleData[i][1] == "I_frame":
+            num += 1
+
+    return num
+
+def countPFrame(root,start,end):
+    # start从0开始
+    csv2Data(root)
+    num = 0
+    for i in range(1+start, end+1):  # 从第二行开始读取
+        if exampleData[i][1] == "P_frame":
+            num += 1
+
+    return num
+
+def countPFrameInList(root,start,end,inList):
+    # SDL_RenderPresent_n_List = ft.filteFrame('./data/data_SDL_RenderPresent.csv')
+    # start从0开始
+    csv2Data(root)
+    num = 0
+    for i in range(1, length_zu):  # 从第二行开始读取
+        index = i-1
+        if exampleData[i][1] == "P_frame":
+            if int(inList[index])+1>=start and int(inList[index])+1<=end:
+                if str(exampleData[i][4]) in inList:
+                    # print("P_frame:"+inList[index])
+                    num += 1
+
+    return num
+
+def countIFrameInList(root,start,end,inList):
+    # start从0开始
+    # inList Pop
+    csv2Data(root)
+    num = 0
+    # print("====================")
+    for i in range(1, length_zu):  # 从第二行开始读取
+        index = i-1
+        if exampleData[i][1] == "I_frame":
+            if int(inList[index])+1>=start and int(inList[index])+1<=end:
+                if str(exampleData[i][4]) in inList:
+                    # print(inList[index])
+                    num += 1
+
+    return num
 
 def filteByFrameList(root,inList):
     csv2Data(root)

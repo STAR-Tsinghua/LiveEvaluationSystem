@@ -262,7 +262,7 @@ void DecodePacketPlay(Decoder *decoder)
             decoder->iStart = 1;
             AVFrame *tmp = decoder->pFrameYUV;
             decoder->pFrameYUV = decoder->pFrameShow;
-            decoder->pFrameShow = tmp;    
+            decoder->pFrameShow = tmp;
         }
         timeFramePlayer.evalTimeStamp("pRGB_Get","p",std::to_string(decoder->pBlock->block_id));
         decoder->iFrame = decoder->pBlock->block_id + 1;
@@ -898,15 +898,18 @@ void worker_cb4(EV_P_ ev_timer *w, int revents) {
         // Print2File("DecodePacketPlay(decoder);");//这里断了！！！！！！！！！！！！！
     }
     else if (ret == SodtpJitter::STATE_BUFFERING) {
-        // timeFramePlayer.evalTimeStamp("pJitter_Pop_BUFFERING","p",std::to_string(++pJitter_Pop_Count));
+        // 这log会产生bug
+        // timeFramePlayer.evalTimeStamp("pJitter_Pop_BUFFERING","p",std::to_string(decoder->pBlock->block_id));
         printf("decoding: buffering stream %d\n", decoder->iStream);
     }
     else if (ret == SodtpJitter::STATE_SKIP) {
-        // timeFramePlayer.evalTimeStamp("pJitter_Pop_SKIP","p",std::to_string(++pJitter_Pop_Count));
+        // 这log会产生bug
+        // timeFramePlayer.evalTimeStamp("pJitter_Pop_SKIP","p",std::to_string(decoder->pBlock->block_id));
         printf("decoding: skip one block of stream %d\n", decoder->iStream);
     }
     else {
-        // timeFramePlayer.evalTimeStamp("pJitter_Pop_UNKNOWN","p",std::to_string(++pJitter_Pop_Count));
+        // 这log会产生bug
+        // timeFramePlayer.evalTimeStamp("pJitter_Pop_UNKNOWN","p",std::to_string(decoder->pBlock->block_id));
         printf("decoding: warning! unknown state of stream %d!\n", decoder->iStream);
     }
     // Free the packet that was allocated by av_read_frame

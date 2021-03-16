@@ -272,7 +272,7 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
     else {
         size = pStmPktVec->size();
         fprintf(stderr, "send frame once. stream num %d\n", size);
-        timeFrameServer.evalTimeStamp("Net_Consume","s","FrameTime");
+        // timeFrameServer.evalTimeStamp("Net_Consume","s","FrameTime");
         // for (auto &item : *pStmPktVec) {
         // Reverse the iteration of packets.
         for (auto iter = pStmPktVec->rbegin(); iter != pStmPktVec->rend(); iter++) {
@@ -311,6 +311,11 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
                 fprintf(stdout, "send round %d,\t stream %d,\t block %d,\t size %d\n",
                         conn_io->send_round, item->header.stream_id,
                         item->header.block_id, item->packet.size);
+                if (item->packet.flags & AV_PKT_FLAG_KEY) {
+                    timeFrameServer.evalTimeStamp("Net_Consume","I_frame",std::to_string(item->header.block_id),std::to_string(item->packet.size));
+                }else{
+                    timeFrameServer.evalTimeStamp("Net_Consume","P_frame",std::to_string(item->header.block_id),std::to_string(item->packet.size));
+                }
             }
 
             ///XData EncodeVideo(XData frame)

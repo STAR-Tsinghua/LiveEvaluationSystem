@@ -16,3 +16,5 @@ CAP_PROP_FPS
 sudo throttle --up 1000 --down 1000 --rtt 125
 sudo throttle --up 800 --down 800 --rtt 50
 sudo throttle --up 500 --down 500 --rtt 50
+sudo throttle --up 700 --down 700 --rtt 100
+Started throttler: Down:800kbit/s Up:800kbit/s RTT:100ms

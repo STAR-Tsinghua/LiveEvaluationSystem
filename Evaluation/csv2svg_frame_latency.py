@@ -36,7 +36,7 @@ def example_plot_PerDeltime_Race(ax,title,fontsize=12):
         ax.text(i, value+0.5, round(value, 1), horizontalalignment='center')
 
     # del sdf['All_Deltatime']
-    ax.vlines(x=dataKey, ymin=0, ymax=dataValue, alpha=0.8,color='firebrick', linewidth=20)
+    ax.vlines(x=dataKey, ymin=0, ymax=dataValue, alpha=0.8,color='firebrick', linewidth=20,label='Latency(mean)')
 
     # Title, Label, Ticks and Ylim
     # ax.set_title('Bar Chart for Highway Mileage', fontdict={'size':22})
@@ -44,7 +44,10 @@ def example_plot_PerDeltime_Race(ax,title,fontsize=12):
     ax.set_ylabel('time(ms)', fontsize=fontsize)
     # ax.set(ylabel='Miles Per Gallon', ylim=(0, 30))
     plt.xticks(dataKey, rotation=30, horizontalalignment='right', fontsize=10)
-    ax.set_yticks(np.arange(0,400,20))
+    # 好状态用
+    # ax.set_yticks(np.arange(0,400,20))
+    # 600 600 100 差状态用
+    ax.set_yticks(np.arange(0,800,40))
     # Add patches to color the X axis labels
     # p1 = patches.Rectangle((.57, -0.005), width=.33, height=.13, alpha=.1, facecolor='green', transform=fig.transFigure)
     # p2 = patches.Rectangle((.124, -0.005), width=.446, height=.13, alpha=.1, facecolor='red', transform=fig.transFigure)
@@ -52,6 +55,7 @@ def example_plot_PerDeltime_Race(ax,title,fontsize=12):
     # fig.add_artist(p2)
     # plt.show()
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
+    ax.legend(loc='upper left')
 
 def example_plot_Deltime_Total(ax,All_Deltatime,Server_Deltatime,Net_Deltatime,Player_Deltatime,\
     title, fontsize=12):
@@ -94,7 +98,10 @@ def example_plot_Deltime_Total(ax,All_Deltatime,Server_Deltatime,Net_Deltatime,P
     'Net_Deltatime','Player_Deltatime'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
     ax.set_xticks(np.arange(0,max(frams),25))
-    ax.set_yticks(np.arange(0,400,20))
+    # 好状态用
+    # ax.set_yticks(np.arange(0,400,20))
+    # 600 600 100 差状态用
+    ax.set_yticks(np.arange(0,800,40))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 
@@ -144,7 +151,10 @@ def example_plot_Deltime_Player(ax,buffer_read_To_pJitter_Push,pJitter_Push_To_p
     'pJitter_Pop_To_pYUV_Get','pYUV_Get_To_pRGB_Get','pRGB_Get_To_SDL_RenderPresent'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
     ax.set_xticks(np.arange(0,max(frams),25))
-    ax.set_yticks(np.arange(0,240,20))
+    # 好状态用
+    # ax.set_yticks(np.arange(0,240,20))
+    # 600 600 100 用（差状态用）
+    ax.set_yticks(np.arange(0,500,40))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 

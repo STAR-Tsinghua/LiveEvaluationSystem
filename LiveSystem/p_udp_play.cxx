@@ -28,7 +28,7 @@ void network_working(struct ev_loop *loop, ev_timer *w, int revents) {
     worker->thd_conn = new thread(udp_client, worker->host, worker->port, &worker->jbuffer);
 }
 
-static int frameNum = -1;
+static int frameNum = -2;
 
 void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
     // Print2File("dplay.h sdl_play :=======");
@@ -75,19 +75,25 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
 
         // lock the pFrameShow
         scoped_lock lock(ptr->decoder.mutex);
-        // if (ptr->decoder.pTexture) {
         if (ptr->decoder.iStart) {
+            //多
+            // timeFramePlayer.evalTimeStamp("iFrame","p",std::to_string(ptr->decoder.iFrame));
             if(ptr->decoder.iFrame>frameNum){
+                // 补一个log就知道丢了几帧
+                // 少
                 frameNum = ptr->decoder.iFrame;
                 splay.update(ptr->decoder.pFrameShow, ptr->decoder.pTexture, &rect);
-                // splay.update(ptr->decoder->pFrameShow, ptr->decoder->pTexture, &rect);
+                // 为了方便测量，移动到这里
+                splay.show();
+                timeFramePlayer.evalTimeStamp("SDL_RenderPresent","p",std::to_string(ptr->decoder.iFrame-1));
             }
         }
         i++;
     }
-    splay.show();
+    // timeFramePlayer.evalTimeStamp("iFrame_show","p",std::to_string(++splay_show_count));
+    // 暂时注释，这里是为了保持输出是固定帧率
+    // splay.show();
 }
-
 
 int main(int argc, char *argv[]) {
     timeMainPlayer.startAndWrite("player");

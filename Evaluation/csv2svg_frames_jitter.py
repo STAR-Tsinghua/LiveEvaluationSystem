@@ -18,7 +18,7 @@ def example_plot(ax,dataEx,title, fontsize=12):
         num = num + 1
         frams.append(num)
 
-    ax.plot(frams,data)
+    ax.plot(frams,data,label=title+'_frequency_time')
     # 绘制中位数值线
     ax.hlines(np.median(data), frams[0], frams[-1:],
           linestyles='-.', colors='#dc5034')
@@ -32,6 +32,7 @@ def example_plot(ax,dataEx,title, fontsize=12):
     ax.set_xticks(np.arange(0,600,10))
     ax.set_yticks(np.arange(0,80,10))
     ax.set_title(title, fontsize=fontsize)
+    ax.legend(loc='upper right')
 
 def draw_server_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,\
     saveName):
@@ -43,10 +44,10 @@ def draw_server_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,
     ax3 = fig.add_subplot(gs1[2])
     ax4 = fig.add_subplot(gs1[3])
     # ax5 = fig.add_subplot(gs1[4])
-    example_plot(ax1,cameraStartGet_Data,"cameraStartGet_Data")
-    example_plot(ax2,RGBPush_Data,"RGBPush_Data")
-    example_plot(ax3,RGBPop_Data,"RGBPop_Data")
-    example_plot(ax4,YUVGet_Data,"YUVGet_Data")
+    example_plot(ax1,cameraStartGet_Data,"cameraStartGet")
+    example_plot(ax2,RGBPush_Data,"RGBPush")
+    example_plot(ax3,RGBPop_Data,"RGBPop")
+    example_plot(ax4,YUVGet_Data,"YUVGet")
     # example_plot(ax5,Net_Produce_Data,"Net_Produce_Data")
     fig.set_size_inches(18,10)
     plt.tight_layout()
