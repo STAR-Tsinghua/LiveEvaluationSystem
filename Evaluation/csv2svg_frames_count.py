@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import matplotlib.gridspec as gridspec
-
+matplotlib.rcParams.update({'font.size': 20})
 def auto_label(ax,rects):
     for rect in rects:
         height = rect.get_height()
@@ -21,7 +21,7 @@ def auto_text(ax,rects):
     for rect in rects:
         ax.text(rect.get_x(), rect.get_height(), rect.get_height(), ha='left', va='bottom')
 
-def draw_frames_count(ax,path,titleName):
+def draw_frames_count(ax,path,titleName,fontsize=30):
     labels = [ '0-100', '100-200', '200-300', '300-400', '400-500', '500-600']
     # I_Frame = [4, 34, 30, 35, 27, 2, 1]
     # P_Frame = [96, 32, 34, 20, 25, 88, 66]
@@ -60,18 +60,19 @@ def draw_frames_count(ax,path,titleName):
     rect1 = ax.bar(index - width / 2, I_Frame, color ='lightcoral', width=width, label ='I_Frame')
     rect2 = ax.bar(index + width / 2, P_Frame, color ='springgreen', width=width, label ='P_Frame')
 
-    ax.set_title(titleName)
+    ax.set_title(titleName, fontsize=fontsize)
     ax.set_xticks(ticks=index)
     ax.set_xticklabels(labels)
-    ax.set_ylabel('Frames')
-
-    ax.set_ylim(0, 110)
+    ax.set_ylabel('Frames',fontsize=fontsize)
+    ax.tick_params(labelsize=20)
+    ax.set_ylim(0, 160)
+    ax.grid(linestyle="--")  # 设置背景网格线为虚线
     # auto_label(ax,rect1)
     # auto_label(ax,rect2)
     auto_text(ax,rect1)
     auto_text(ax,rect2)
 
-    ax.legend(loc='upper right', frameon=False)
+    ax.legend(loc='upper right', frameon=False,prop={'family' : 'Times New Roman', 'size'   : 20})
     # fig.tight_layout()
     # plt.savefig(saveName, format='svg') 
 

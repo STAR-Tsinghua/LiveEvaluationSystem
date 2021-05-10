@@ -83,11 +83,11 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
             if(ptr->decoder.iFrame>frameNum){
                 // 补一个log就知道丢了几帧
                 // 少
-                frameNum = ptr->decoder.iFrame;
                 splay.update(ptr->decoder.pFrameShow, ptr->decoder.pTexture, &rect);
                 // 为了方便测量，移动到这里
                 splay.show();
                 timeFramePlayer.evalTimeStamp("SDL_RenderPresent","p",std::to_string(ptr->decoder.iFrame-1));
+                frameNum = ptr->decoder.iFrame;
             }
 
         }

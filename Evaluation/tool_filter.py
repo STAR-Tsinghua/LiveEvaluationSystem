@@ -80,6 +80,9 @@ def calculate2DeltimeList(lst1,lst2):
     for i in range(minLen):  # 从第二行开始读取
         rtLine = ['LogType','Which','AlgoTime','TimeType','Detail']
         rtLine[2] = str(int(lst2[i][2])-int(lst1[i][2]))
+        if int(lst2[i][2])-int(lst1[i][2]) < 0:
+            print("LogType:"+lst2[i][0]+"; calculate2DeltimeList < 0")
+
         rtLine[4] = lst1[i][4]+"_To_"+lst2[i][4]
         rt.append(rtLine)
 

@@ -1,5 +1,3 @@
-
-
 LOG_PATH_DTP ?= ../LiveSystem/logs/ev_dtp
 LOG_PATH_UDP ?= ../LiveSystem/logs/ev_udp
 DATA_PATH ?= ./data/
@@ -10,6 +8,8 @@ SAVE_DTP_PDF_PATH ?= ./save/dtp/pdf/
 SAVE_DTP_DATA_PATH ?= ./save/dtp/data/
 SAVE_UDP_PDF_PATH ?= ./save/udp/pdf/
 SAVE_UDP_DATA_PATH ?= ./save/udp/data/
+
+all: all_dtp
 
 all_dtp: data_dtp fig_dtp pdf
 

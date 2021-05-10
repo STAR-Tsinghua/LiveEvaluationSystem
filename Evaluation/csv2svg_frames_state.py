@@ -9,8 +9,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import os
 import matplotlib.gridspec as gridspec
-
-def drawPerState(ax,dataE,dataP,dataI,labels,titleName):
+matplotlib.rcParams.update({'font.size': 20})
+def drawPerState(ax,dataE,dataP,dataI,labels,titleName,fontsize=23):
     # 空在最上面
     # P 在中间
     # I 在最下面
@@ -21,12 +21,13 @@ def drawPerState(ax,dataE,dataP,dataI,labels,titleName):
     ax.set_xlim(-8, 606)  # 限定横轴的范围
     ax.set_ylim(0,20000)
     ax.set_xticks(np.arange(0,600,6))
-    ax.set_yticks(np.arange(0,26000,2000))
+    ax.set_yticks(np.arange(0,40000,4000))
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
     # l1 ,= ax.plot(frams,data1)
     # ax.legend([l1],['I_Frame'],loc='upper right')
     # ax.legend(loc='upper right', frameon=False)
     ax.legend()
+    ax.set_ylabel('size (bytes)', fontsize=fontsize)
     ax.set_title(titleName)
     # ax.bar(range(len(sale8)),sale8,tick_label=labels,label="8月")
 

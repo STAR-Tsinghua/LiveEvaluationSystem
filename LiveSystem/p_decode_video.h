@@ -1109,7 +1109,7 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
     struct ev_loop *loop = ev_loop_new(EVFLAG_AUTO);
 
     double nominal = (double)pJitter->get_nominal_depth() / 1000.0;
-    double frameRate = 0.033;
+    double frameRate = 0.010;
     double interval = 0.040;    // 40ms, i.e. 25fps
 
     ev_timer_init(&worker, worker_cb4, nominal, frameRate);

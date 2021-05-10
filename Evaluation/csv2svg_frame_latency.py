@@ -47,7 +47,9 @@ def example_plot_PerDeltime_Race(ax,title,fontsize=12):
     # 好状态用
     # ax.set_yticks(np.arange(0,400,20))
     # 600 600 100 差状态用
-    ax.set_yticks(np.arange(0,800,40))
+    ax.set_xlim(0)
+    ax.set_ylim(0)
+    ax.set_yticks(np.arange(0,270,30))
     # Add patches to color the X axis labels
     # p1 = patches.Rectangle((.57, -0.005), width=.33, height=.13, alpha=.1, facecolor='green', transform=fig.transFigure)
     # p2 = patches.Rectangle((.124, -0.005), width=.446, height=.13, alpha=.1, facecolor='red', transform=fig.transFigure)
@@ -97,11 +99,11 @@ def example_plot_Deltime_Total(ax,All_Deltatime,Server_Deltatime,Net_Deltatime,P
     ax.legend([l1,l2,l3,l4],['All_Deltatime','Server_Deltatime',\
     'Net_Deltatime','Player_Deltatime'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
-    ax.set_xticks(np.arange(0,max(frams),25))
+    ax.set_xticks(np.arange(0,max(frams),50))
     # 好状态用
     # ax.set_yticks(np.arange(0,400,20))
     # 600 600 100 差状态用
-    ax.set_yticks(np.arange(0,800,40))
+    ax.set_yticks(np.arange(0,270,30))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 
@@ -150,11 +152,11 @@ def example_plot_Deltime_Player(ax,buffer_read_To_pJitter_Push,pJitter_Push_To_p
     ax.legend([l1,l2,l3,l4,l5],['buffer_read_To_pJitter_Push','pJitter_Push_To_pJitter_Pop',\
     'pJitter_Pop_To_pYUV_Get','pYUV_Get_To_pRGB_Get','pRGB_Get_To_SDL_RenderPresent'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
-    ax.set_xticks(np.arange(0,max(frams),25))
+    ax.set_xticks(np.arange(0,max(frams),50))
     # 好状态用
     # ax.set_yticks(np.arange(0,240,20))
     # 600 600 100 用（差状态用）
-    ax.set_yticks(np.arange(0,500,40))
+    ax.set_yticks(np.arange(0,120,15))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 
@@ -218,8 +220,8 @@ def example_plot_Deltime_Server(ax,CatchFrame_To_RGB_Push,RGB_Push_Data_To_RGB_P
     ax.legend([l1,l2,l3,l4,l5],['CatchFrame_To_RGB_Push','RGB_Push_To_RGB_Pop',\
     'RGB_Pop_To_FrameToYUV','FrameToYUV_To_Net_Produce','Net_Produce_To_Net_Consume'],loc='upper right')
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
-    ax.set_xticks(np.arange(0,max(frams),25))
-    ax.set_yticks(np.arange(0,240,20))
+    ax.set_xticks(np.arange(0,max(frams),50))
+    ax.set_yticks(np.arange(0,120,15))
     # ax.legend((rect,),("time ms",))
     ax.set_title(title, fontsize=fontsize)
 

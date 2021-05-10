@@ -24,30 +24,48 @@ def example_plot(ax,dataEx,title, fontsize=12):
           linestyles='-.', colors='#dc5034')
 
     ax.locator_params(nbins=3)
+    ax.tick_params(labelsize=20)
     ax.set_xlabel('frames(num)', fontsize=fontsize)
     ax.set_ylabel('time(ms)', fontsize=fontsize)
     ax.set_xlim(0,600)
-    ax.set_ylim(0,70)
+    ax.set_ylim(0,90)
     ax.grid(linestyle="--")  # 设置背景网格线为虚线
-    ax.set_xticks(np.arange(0,600,10))
-    ax.set_yticks(np.arange(0,80,10))
+    ax.set_xticks(np.arange(0,600,60))
+    ax.set_yticks(np.arange(0,90,30))
+
+
     ax.set_title(title, fontsize=fontsize)
-    ax.legend(loc='upper right')
+    ax.legend(loc='upper right',prop={'family' : 'Times New Roman', 'size'   : 20})
 
 def draw_server_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,\
     saveName):
     # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
     fig = plt.figure()
-    gs1 = gridspec.GridSpec(4, 1)
+
+
+    # gs1 = gridspec.GridSpec(4, 1)
+    # ax1 = fig.add_subplot(gs1[0])
+    # ax2 = fig.add_subplot(gs1[1])
+    # ax3 = fig.add_subplot(gs1[2])
+    # ax4 = fig.add_subplot(gs1[3])
+
+        
+    # 上面为系统测试用
+    # 下面为毕业论文用
+
+    gs1 = gridspec.GridSpec(2, 1)
     ax1 = fig.add_subplot(gs1[0])
     ax2 = fig.add_subplot(gs1[1])
-    ax3 = fig.add_subplot(gs1[2])
-    ax4 = fig.add_subplot(gs1[3])
+    # ax3 = fig.add_subplot(gs1[2])
+    # ax4 = fig.add_subplot(gs1[3])
+
+
     # ax5 = fig.add_subplot(gs1[4])
-    example_plot(ax1,cameraStartGet_Data,"cameraStartGet")
-    example_plot(ax2,RGBPush_Data,"RGBPush")
-    example_plot(ax3,RGBPop_Data,"RGBPop")
-    example_plot(ax4,YUVGet_Data,"YUVGet")
+    example_plot(ax1,cameraStartGet_Data,"cameraStartGet",30)
+    example_plot(ax2,RGBPush_Data,"RGBPush",30)
+    # example_plot(ax3,RGBPop_Data,"RGBPop")
+    # example_plot(ax4,YUVGet_Data,"YUVGet")
+
     # example_plot(ax5,Net_Produce_Data,"Net_Produce_Data")
     fig.set_size_inches(18,10)
     plt.tight_layout()
@@ -63,17 +81,32 @@ def draw_server_jitter(cameraStartGet_Data,RGBPush_Data,RGBPop_Data,YUVGet_Data,
 def draw_net_jitter(Net_Produce_Data,Net_Consume_Data,Net_buffer_read_Data,pJitter_Push_Data,\
     saveName):
     # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
+
+
     fig = plt.figure()
-    gs1 = gridspec.GridSpec(4, 1)
-    ax1 = fig.add_subplot(gs1[0])
-    ax2 = fig.add_subplot(gs1[1])
-    ax3 = fig.add_subplot(gs1[2])
-    ax4 = fig.add_subplot(gs1[3])
+    # gs1 = gridspec.GridSpec(4, 1)
+    # ax1 = fig.add_subplot(gs1[0])
+    # ax2 = fig.add_subplot(gs1[1])
+    # ax3 = fig.add_subplot(gs1[2])
+    # ax4 = fig.add_subplot(gs1[3])
+
+        
+    # 上面为系统测试用
+    # 下面为毕业论文用
+
+    gs1 = gridspec.GridSpec(2, 1)
+    # ax1 = fig.add_subplot(gs1[0])
+    # ax2 = fig.add_subplot(gs1[1])
+    ax3 = fig.add_subplot(gs1[0])
+    ax4 = fig.add_subplot(gs1[1])
+
+
+
     # ax5 = fig.add_subplot(gs1[4])
-    example_plot(ax1,Net_Produce_Data,"Net_Produce")
-    example_plot(ax2,Net_Consume_Data,"Net_Consume")
-    example_plot(ax3,Net_buffer_read_Data,"buffer_read")
-    example_plot(ax4,pJitter_Push_Data,"pJitter_Push")
+    # example_plot(ax1,Net_Produce_Data,"Net_Produce")
+    # example_plot(ax2,Net_Consume_Data,"Net_Consume")
+    example_plot(ax3,Net_buffer_read_Data,"buffer_read",30)
+    example_plot(ax4,pJitter_Push_Data,"pJitter_Push",30)
     # example_plot(ax5,Net_Produce_Data,"Net_Produce_Data")
     fig.set_size_inches(18,10)
     plt.tight_layout()
@@ -90,16 +123,30 @@ def draw_player_jitter(pJitter_Pop_Data,pYUV_Get_Data,pRGB_Get_Data,SDL_RenderPr
     saveName):
     # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
     fig = plt.figure()
-    gs1 = gridspec.GridSpec(4, 1)
-    ax1 = fig.add_subplot(gs1[0])
-    ax2 = fig.add_subplot(gs1[1])
-    ax3 = fig.add_subplot(gs1[2])
-    ax4 = fig.add_subplot(gs1[3])
+
+
+    # gs1 = gridspec.GridSpec(4, 1)
+    # ax1 = fig.add_subplot(gs1[0])
+    # ax2 = fig.add_subplot(gs1[1])
+    # ax3 = fig.add_subplot(gs1[2])
+    # ax4 = fig.add_subplot(gs1[3])
+
+        
+    # 上面为系统测试用
+    # 下面为毕业论文用
+
+    gs1 = gridspec.GridSpec(2, 1)
+    # ax1 = fig.add_subplot(gs1[0])
+    # ax2 = fig.add_subplot(gs1[1])
+    ax3 = fig.add_subplot(gs1[0])
+    ax4 = fig.add_subplot(gs1[1])
+
+
     # ax5 = fig.add_subplot(gs1[4])
-    example_plot(ax1,pJitter_Pop_Data,"pJitter_Pop")
-    example_plot(ax2,pYUV_Get_Data,"pYUV_Get")
-    example_plot(ax3,pRGB_Get_Data,"pRGB_Get")
-    example_plot(ax4,SDL_RenderPresent_Data,"SDL_RenderPresent")
+    # example_plot(ax1,pJitter_Pop_Data,"pJitter_Pop")
+    # example_plot(ax2,pYUV_Get_Data,"pYUV_Get")
+    example_plot(ax3,pRGB_Get_Data,"pRGB_Get",30)
+    example_plot(ax4,SDL_RenderPresent_Data,"SDL_RenderPresent",30)
     # example_plot(ax5,Net_Produce_Data,"Net_Produce_Data")
     fig.set_size_inches(18,10)
     plt.tight_layout()

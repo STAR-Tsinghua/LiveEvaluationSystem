@@ -81,11 +81,12 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
             if(ptr->decoder.iFrame>frameNum){
                 // 补一个log就知道丢了几帧
                 // 少
-                frameNum = ptr->decoder.iFrame;
+                
                 splay.update(ptr->decoder.pFrameShow, ptr->decoder.pTexture, &rect);
                 // 为了方便测量，移动到这里
                 splay.show();
                 timeFramePlayer.evalTimeStamp("SDL_RenderPresent","p",std::to_string(ptr->decoder.iFrame-1));
+                frameNum = ptr->decoder.iFrame;
             }
         }
         i++;
@@ -154,7 +155,7 @@ int main(int argc, char *argv[]) {
     ev_timer player;
     Print2FileInfo("(p)启动sdl_play线程处");
     timeMainPlayer.evalTime("p","sdl_playStart");
-    double frameRate = 0.033;
+    double frameRate = 0.010;
     double interval = 0.040;
     ev_timer_init(&player, sdl_play, 0, frameRate);
     ev_timer_start(loop, &player);
