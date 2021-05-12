@@ -2,7 +2,7 @@
 CC = gcc
 CX = g++
 
-
+# 注意对应目录的关系
 # DTP_DIR			= ../submodule/quiche
 DTP_DIR 		= ../submodule/DTP
 DTP_INC			= $(DTP_DIR)/include
@@ -90,3 +90,4 @@ ru:
 
 k:
 	Open ../command/lhs_killBoth.command
+
