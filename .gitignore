@@ -41,6 +41,10 @@
 *.i*86
 *.x86_64
 *.hex
+LiveSystem/r_dtp_play
+LiveSystem/r_udp_play
+LiveSystem/r_dtp_server
+LiveSystem/r_udp_server
 
 # Debug files
 *.dSYM/
@@ -64,3 +68,5 @@ dkms.conf
 
 # OS files
 *.DS_Store
+
+/**/*.log

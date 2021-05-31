@@ -114,6 +114,9 @@ static void flush_egress(struct ev_loop *loop, CONN_IO *conn_io) {
     }
 
     double t = quiche_conn_timeout_as_nanos(conn_io->conn) / 1e9f;
+    if(t < 0.00000001) {
+      t = 0.001;
+    }
     conn_io->timer.repeat = t;
     ev_timer_again(loop, &conn_io->timer);
 }
@@ -131,7 +134,8 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
     while (1) {
         //这里是不是读头info信息？
         ssize_t read = recv(conn_io->sock, buf, sizeof(buf), 0);
-        // Print2File("ssize_t read = recv(conn_io->sock, buf, sizeof(buf), 0);");
+        // Print2File("ssize_t read = recv(conn_io->sock, buf, sizeof(buf), 0); %ld");
+        // printf("read: %ld\n", read);
         if (read < 0) {
             if ((errno == EWOULDBLOCK) || (errno == EAGAIN)) {
                 // Print2File("recv would block");
@@ -432,3 +436,4 @@ int dtp_client(const char *host, const char *port, JitterBuffer *pJBuffer) {
 
 
 #endif // DTP_CLIENT_H
+

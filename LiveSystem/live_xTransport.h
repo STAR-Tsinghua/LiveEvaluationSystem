@@ -84,11 +84,14 @@ public:
 		char *input_filename = NULL;
 		int ret = 0;
 		struct buffer_data_write bd = { 0 };
+		char err_buf[512];
+		char err_buf_size = 512;
 		/* fill opaque structure used by the AVIOContext write callback */
  		bd.ptr  = bd.buf = (uint8_t *)av_malloc(bd_buf_size);
 		if (!bd.buf) {
 			ret = AVERROR(ENOMEM);
-			Print2File(av_err2str(ret));
+			av_make_error_string(err_buf, err_buf_size, ret);
+			Print2File(err_buf);
 			Print2File(" !bd.buf ret = AVERROR(ENOMEM) ERR : "+std::to_string(ret));
 			return false;
 		}
@@ -114,7 +117,8 @@ public:
 		AVOutputFormat* outPutFormatPtr = av_guess_format(outPutName, outPutName, NULL);
 		ret = avformat_alloc_output_context2(&ic, outPutFormatPtr, NULL, NULL);
 		if(ret<0){
-			Print2File(av_err2str(ret));
+			av_make_error_string(err_buf, err_buf_size, ret);
+			Print2File(err_buf);
 			Print2File("Could not create output context ret: "+std::to_string(ret));
 			return false;
 		}
