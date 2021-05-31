@@ -96,11 +96,11 @@ Go to `LiveSystem` and then use the commands
 
 ```sh 
 $ cp ../submodule/DTP/target/release/libquiche.so ./ # need to copy this file manually
-$ make rb # r(run)b(binary(maybe)) Compile the executable, and create log directory. You may need super user authorization for this.
-$ make rd # r(run)d(dtp). Run dtp server and client locally
-$ make k # k(kill) . Kill both server and client
-$ make ru # (run udp). Run udp server and client locally
-$ make k
+$ sudo make rb # r(run)b(binary(maybe)) Compile the executable, and create log directory.
+$ sudo make rd # r(run)d(dtp). Run dtp server and client locally
+$ sudo make k # k(kill) . Kill both server and client
+$ sudo make ru # (run udp). Run udp server and client locally
+$ sudo make k
 ```
 After running `make rd`, the system should be running with a pop-up window displaying live stream video from the camera.
 
