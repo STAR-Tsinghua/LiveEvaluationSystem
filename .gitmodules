@@ -1,0 +1,3 @@
+[submodule "submodule/DTP"]
+	path = submodule/DTP
+	url = https://github.com/STAR-Tsinghua/DTP.git

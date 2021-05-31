@@ -8,12 +8,18 @@ DTP_DIR 		= ../submodule/DTP
 DTP_INC			= $(DTP_DIR)/include
 DTP_LIB			= $(DTP_DIR)/target/release
 
+FFMPEG_ROOT = /usr/local/ffmpeg
+FFMPEG_LIB = $(FFMPEG_ROOT)/lib
+FFMPEG_INC = $(FFMPEG_ROOT)/include
+FFMPEG_SHARED = $(FFMPEG_ROOT)/shared
+FFMPEG_BIN = $(FFMPEG_ROOT)/bin
+
 CXFLAGS = -std=c++11 -g
 OPENCVFLAGS = `pkg-config --cflags --libs opencv`
 
-INCS = -I$(CURDIR) -I$(DTP_INC)
+INCS = -I$(CURDIR) -I$(DTP_INC) -I$(FFMPEG_INC)
 
-LIBS = 	-lswscale -lswresample -lavformat \
+LIBS = -L$(FFMPEG_LIB) -L$(FFMPEG_SHARED) -lswscale -lswresample -lavformat \
 		-lavdevice -lavcodec -lavutil -lavfilter \
 		-lSDL2 \
 		-L$(DTP_LIB) -lquiche \
@@ -33,14 +39,14 @@ all: $(TARGETS)
 
 # ================= dtp =================
 r_dtp_server : s_dtp_server.cxx
-	$(CX) $(CXFLAGS) $(OPENCVFLAGS) -o $@ $^ $(INCS) $(LIBS)
+	$(CX) $(CXFLAGS)  -o $@ $^ $(INCS) $(LIBS) $(OPENCVFLAGS)
 
 r_dtp_play : p_dtp_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
 
 # ================= udp =================
 r_udp_server : s_udp_server.cxx
-	$(CX) $(CXFLAGS) $(OPENCVFLAGS) -o $@ $^ $(INCS) $(LIBS)
+	$(CX) $(CXFLAGS)  -o $@ $^ $(INCS) $(LIBS) $(OPENCVFLAGS)
 
 r_udp_play : p_udp_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
@@ -77,17 +83,21 @@ rb:
 # dtp
 rd:
 	make cl_dtp
-	Open ../command/lhs_dtp_startBoth.command
+	LD_LIBRARY_PATH=. ./r_dtp_server 127.0.0.1 9093 1>dtp_server.log 2>&1 &
+	sleep 2s
+	LD_LIBRARY_PATH=. ./r_dtp_play 127.0.0.1 9093 1>dtp_play.log 2>&1 &
 
 # udp
 ru:
 	make cl_udp
-	Open ../command/lhs_udp_startBoth.command
+	./r_udp_server 127.0.0.1 9093 1> udp_server.log 2>&1 &
+	sleep 2s
+	./r_udp_play 127.0.0.1 9093 1> udp_player.log 2>&1 &
 
 # quiche
 # rq:
 # 	Open ../command/lhs_quiche_startBoth.command
 
 k:
-	Open ../command/lhs_killBoth.command
+	../command/lhs_killBoth.sh
 
