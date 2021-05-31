@@ -48,15 +48,15 @@ Then configure the source code with `./configure`. The following configuration i
 
 `./configure --enable-shared --enable-gpl --enable-libx264 --enable-libx265 --prefix=/usr/local/ffmpeg`
 
-You can reference this blog for further information about installing FFmpeg from src code [](https://blog.csdn.net/wangyjfrecky/article/details/80998303).
+You can reference this blog for further information about installing FFmpeg from src code https://blog.csdn.net/wangyjfrecky/article/details/80998303.
 
 You may have to install libx264 and/or libx265, just use `sudo apt install libx264-dev libx265-dev` to do so.
 
 ### Opencv 3.4.0
 
-It is similar to install Opencv as it is for FFmpeg. Use tag 3.4.0 for Opencv from github [](https://github.com/opencv/opencv.git). You need cmake to build Opencv
+It is similar to install Opencv as it is for FFmpeg. Use tag 3.4.0 for Opencv from github https://github.com/opencv/opencv.git. You need cmake to build Opencv
 
-You can reference this blog for some advice [](blog.csdn.net/m0_38076563/article/details/79709862)
+You can reference this blog for some advice https://blog.csdn.net/m0_38076563/article/details/79709862
 
 You don't need to configure other parameters for Opencv.
 
@@ -76,7 +76,7 @@ Rust may be fetched and installed like this:
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Go need to download src file and compile. Please refer to the golang official documentation for more information [](https://golang.google.cn/doc/install)
+Go need to download src file and compile. Please refer to the golang official documentation for more information https://golang.google.cn/doc/install .
 
 In Mainland China, it is better to configure source for both Rust and Go. The following websites may help.
 
@@ -133,25 +133,3 @@ sodtp_block.h 55
 
 //SodtpBlock结构体
 sodtp_block.h 81
-
-### (WIP) docker image 制作方法 
-
-基于实验室的 cpu-base
-
-1. apt install ffmpeg, build-essential, cmake
-2. git clone https://github.com/opencv/opencv.git
-3. git fetch --tags
-4. git checkout 3.4.0 -b 3.4.0
-5. mkdir build
-6. cd build && cmake ..
-7. make -j64
-8. apt install libev -y
-9. 安装 Rust and Go 编译 DTP 项目
-10. apt install libsdl2-2.0 
-11. apt install libsdl2-dev
-
-
-### 修改
-
-1. 修改了 livexTransport 中的两个 av_err2str macro 的用法。目前的用法会使得编译器报错。
-2. 修改了 Makefile 中 pkg-config 命令运行的位置，调整至最后
