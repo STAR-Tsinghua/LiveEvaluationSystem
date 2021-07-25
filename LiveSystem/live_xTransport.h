@@ -53,7 +53,7 @@ public:
 	int AddStream(const AVCodecContext *c) //2
 	{
 		if (!c)return -1;
-		//b 添加视频流 
+		//b 添加视频流
 		AVStream *st = avformat_new_stream(ic, NULL);
 		if (!st)
 		{
@@ -111,7 +111,7 @@ public:
 			Print2File("!avio_out");
 			Print2File("ret = AVERROR(ENOMEM) ERR : "+std::to_string(ret));
 			return false;
-		} 
+		}
 		// 3. 分配AVFormatContext，并指定AVFormatContext.pb字段。必须在调用avformat_write_header()之前完成
 		const char *outPutName = "flv";
 		AVOutputFormat* outPutFormatPtr = av_guess_format(outPutName, outPutName, NULL);

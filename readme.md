@@ -48,21 +48,35 @@ Then configure the source code with `./configure`. The following configuration i
 
 `./configure --enable-shared --enable-gpl --enable-libx264 --enable-libx265 --prefix=/usr/local/ffmpeg`
 
-You can reference this blog for further information about installing FFmpeg from src code https://blog.csdn.net/wangyjfrecky/article/details/80998303.
+You can reference this blog for further information about installing FFmpeg from src code https://blog.csdn.net/wangyjfrecky/article/details/80998303 .
 
 You may have to install libx264 and/or libx265, just use `sudo apt install libx264-dev libx265-dev` to do so.
 
 ### Opencv 3.4.0
 
-It is similar to install Opencv as it is for FFmpeg. Use tag 3.4.0 for Opencv from github https://github.com/opencv/opencv.git. You need cmake to build Opencv
+It is similar to install Opencv as it is for FFmpeg. Use tag 3.4.0 for Opencv from github https://github.com/opencv/opencv.git . You need cmake to build Opencv.
 
 You can reference this blog for some advice https://blog.csdn.net/m0_38076563/article/details/79709862
 
-You don't need to configure other parameters for Opencv.
+```sh
+$ git clone https://github.com/opencv/opencv.git
+$ cd opencv
+$ git fetch --tags
+$ git checkout 3.4.0 -b 3.4.0
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make -j8
+$ sudo make install
+```
+
+You need to check that after running `cmake ..`, options of FFMPEG should all be ON. If you cannot fine ffmpeg components, you may reference the following answer: https://stackoverflow.com/questions/5492919/cmake-cant-find-ffmpeg-in-custom-install-path .
+
+You may have to configure link libraries for opencv (and/or ffmpeg). You can reference the last several parts of https://blog.csdn.net/wangyjfrecky/article/details/80998303 for help of linking libraries.
 
 ### SDL 2.0
 
-Install this library by `sudo apt install libsdl2-2.0 libsdl2-dev`
+Install this library by `sudo apt install libsdl2-dev`
 
 ## Compilation process and toolchains
 
@@ -70,18 +84,26 @@ Install this library by `sudo apt install libsdl2-2.0 libsdl2-dev`
 
 You need to compile DTP first, which needs both Rust and Go language supports.
 
+#### Rust dependency
+
 Rust may be fetched and installed like this:
 
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
+#### Go dependency
+
 Go need to download src file and compile. Please refer to the golang official documentation for more information https://golang.google.cn/doc/install .
+
+#### Change source of Rust and Go
 
 In Mainland China, it is better to configure source for both Rust and Go. The following websites may help.
 
 * https://mirrors.tuna.tsinghua.edu.cn/help/crates.io-index.git/
 * https://blog.csdn.net/Kevin_lady/article/details/108700915
+
+#### Compile DTP
 
 Compile DTP first to get library in release mode.
 

@@ -45,44 +45,44 @@ svg2pic: tool_svg2pic.py
 
 # csv2svg # 生成多个svg    ============== dtp ==============
 data_frames_state.svg: csv2svg_frames_state.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)clean_frame_data.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)clean_frame_data.csv $(DATA_PATH)
 
 data_frames_count.svg: csv2svg_frames_count.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)clean_frame_data.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)clean_frame_data.csv $(DATA_PATH)
 
 data_serverLatency.svg: csv2svg_serverLatency.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
 
 data_playerLatency.svg: csv2svg_playerLatency.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
 
 data_frames_jitter: csv2svg_frames_jitter.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
 
 data_buffer_container.svg: csv2svg_buffer_container.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
 
 data_frame_latency.svg: csv2svg_frame_latency.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_dtp.csv $(DATA_PATH)
 
 # csv2svg # 生成多个svg    ============== udp ==============
 data_frames_state_udp.svg: csv2svg_frames_state.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)clean_frame_data.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)clean_frame_data.csv $(DATA_PATH)
 
 data_frames_count_udp.svg: csv2svg_frames_count.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)clean_frame_data.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)clean_frame_data.csv $(DATA_PATH)
 
 data_serverLatency_udp.svg: csv2svg_serverLatency.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)
 
 data_playerLatency_udp.svg: csv2svg_playerLatency.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)
 
 data_frames_jitter_udp: csv2svg_frames_jitter.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)
 
 data_buffer_container_udp.svg: csv2svg_buffer_container.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)
 
 data_frame_latency_udp.svg: csv2svg_frame_latency.py $(shell find $(LOG_PATH))
-	python $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)
+	python3 $< $(DATA_PATH)data_latency_udp.csv $(DATA_PATH)

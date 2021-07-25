@@ -1,3 +1,5 @@
+#ifndef LIVE_LIVECAPTURE_H
+#define LIVE_LIVECAPTURE_H
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <stdio.h>
@@ -8,7 +10,7 @@ using namespace cv;
 
 class LiveCapture: public XDataThread
 {
-public:	
+public:
 	VideoCapture cam;
 	int width = 0;
 	int height = 0;
@@ -105,3 +107,4 @@ public:
 private:
 	int buffered_RGB_MAX;
 };
+#endif // LIVE_LIVECAPTURE_H

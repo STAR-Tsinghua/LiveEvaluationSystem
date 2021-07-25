@@ -52,6 +52,7 @@
 #include <sodtp_block.h>
 #include <bounded_buffer.h>
 #include <util_log.h>
+#include <live_producer_consumer_func.h>
 
 #define LOCAL_CONN_ID_LEN 16
 

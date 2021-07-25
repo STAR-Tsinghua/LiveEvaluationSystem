@@ -34,22 +34,22 @@ enum XSampleFMT
 //	AV_SAMPLE_FMT_NB           ///< Number of sample formats. DO NOT USE if linking dynamically
 //};
 
-//ÒôÊÓÆµ±àÂë½Ó¿ÚÀà
+//éŸ³è§†é¢‘ç¼–ç æ¥å£ç±»
 class MediaEncoder
 {
 public:
-	//ÊäÈë²ÎÊı
+	//è¾“å…¥å‚æ•°
 	int inWidth = 1280;
 	int inHeight = 720;
 	int inPixSize = 3;
 	int channels = 2;
 	int sampleRate = 44100;
 	XSampleFMT inSampleFmt = X_S16;
-	//Êä³ö²ÎÊı
+	//è¾“å‡ºå‚æ•°
 	int outWidth = 1280;
 	int outHeight = 720;
-	int bitrate = 4000000;//Ñ¹ËõºóÃ¿Ò»ÃëÊÓÆµµÄbitÎ»´óĞ¡50KB
-	int fps = 25;//Ö¡ÂÊ
+	int bitrate = 4000000;//å‹ç¼©åæ¯ä¸€ç§’è§†é¢‘çš„bitä½å¤§å°50KB
+	int fps = 25;//å¸§ç‡
 	int nbSample = 1024;
 	XSampleFMT outSampleFmt = X_FLAPT;
 	long long lasta = -1;
@@ -57,24 +57,24 @@ public:
 	~MediaEncoder(){};
 	MediaEncoder(const MediaEncoder&){};
 	MediaEncoder& operator=(const MediaEncoder&);
-	//¹¤³§µÄÉú²ú·½·¨
+	//å·¥å‚çš„ç”Ÿäº§æ–¹æ³•
 	// static XMediaEncode *Get(unsigned char index = 0);
-	//·µ»ØÖµÎŞĞèµ÷ÓÃÕßÇåÀí
+	//è¿”å›å€¼æ— éœ€è°ƒç”¨è€…æ¸…ç†
 	XData RGBToYUV(XData d)
 	{
 		XData r;
 		r.pts = d.pts;
 		//rgb to yuv
-		//ÊäÈëµÄÊı¾İ½á¹¹ usb²âÓĞÎÊÌâ
+		//è¾“å…¥çš„æ•°æ®ç»“æ„ usbæµ‹æœ‰é—®é¢˜
 		uint8_t *indata[AV_NUM_DATA_POINTERS] = { 0 };
 		//indata[0] bgrbgrbgr
 		//plane indata[0] bbbbb indata[1] ggggg indata[2] rrrrr
 		indata[0] = (uint8_t*)d.data;
 		int insize[AV_NUM_DATA_POINTERS] = { 0 };
-		//Ò»ĞĞ£¨¿í£©Êı¾İµÄ×Ö½ÚÊı
+		//ä¸€è¡Œï¼ˆå®½ï¼‰æ•°æ®çš„å­—èŠ‚æ•°
 		insize[0] = inWidth * inPixSize;
 
-		int h = sws_scale(vsc, indata, insize, 0, inHeight,//Ô´Êı¾İ
+		int h = sws_scale(vsc, indata, insize, 0, inHeight,//æºæ•°æ®
 			yuv->data, yuv->linesize);
 		if (h <= 0)
 		{
@@ -92,16 +92,16 @@ public:
 		return r;
 	}
 
-	//³õÊ¼»¯ÏñËØ¸ñÊ½×ª»»µÄÉÏÏÂÎÄ³õÊ¼»¯
+	//åˆå§‹åŒ–åƒç´ æ ¼å¼è½¬æ¢çš„ä¸Šä¸‹æ–‡åˆå§‹åŒ–
 	bool InitScale()
 	{
-		//2 ³õÊ¼»¯¸ñÊ½×ª»»ÉÏÏÂÎÄ
+		//2 åˆå§‹åŒ–æ ¼å¼è½¬æ¢ä¸Šä¸‹æ–‡
 		vsc = sws_getCachedContext(vsc,
-			inWidth, inHeight,//Ô´¿í¸ß
+			inWidth, inHeight,//æºå®½é«˜
 			AV_PIX_FMT_BGR24,
 			outWidth, outHeight,
 			AV_PIX_FMT_YUV420P,
-			SWS_BICUBIC,//³ß´ç±ä»¯Ê¹ÓÃËã·¨
+			SWS_BICUBIC,//å°ºå¯¸å˜åŒ–ä½¿ç”¨ç®—æ³•
 			0, 0, 0
 		);
 
@@ -110,15 +110,15 @@ public:
 			Print2File("sws_getCachedContext failed!");
 			return false;
 		}
-		//3 ³õÊ¼»¯Êä³öµÄÊı¾İ½á¹¹
+		//3 åˆå§‹åŒ–è¾“å‡ºçš„æ•°æ®ç»“æ„
 		yuv = av_frame_alloc();
 		yuv->format = AV_PIX_FMT_YUV420P;
 		yuv->width = inWidth;
 		yuv->height = inHeight;
 		yuv->pts = 0;
-		//·ÖÅäyuv¿Õ¼ä usb²»¿ÉÓÃ
+		//åˆ†é…yuvç©ºé—´ usbä¸å¯ç”¨
 		av_frame_get_buffer(yuv, 32);
-		//ÓĞbugÔİÊ±×¢ÊÍ
+		//æœ‰bugæš‚æ—¶æ³¨é‡Š
 		//int ret = av_frame_get_buffer(yuv, 32);
 		//if (ret != 0);
 		//{
@@ -129,14 +129,14 @@ public:
 		return true;
 	}
 
-	//ÒôÆµÖØ²ÉÑùÉÏÏÂÎÄ³õÊ¼»¯(ÔİÊ±×¢ÊÍµô)
+	//éŸ³é¢‘é‡é‡‡æ ·ä¸Šä¸‹æ–‡åˆå§‹åŒ–(æš‚æ—¶æ³¨é‡Šæ‰)
 	bool InitResample()
 	{
-		// //2 ÒôÆµÖØ²ÉÑù ÉÏÏÂÎÄ³õÊ¼»¯
+		// //2 éŸ³é¢‘é‡é‡‡æ · ä¸Šä¸‹æ–‡åˆå§‹åŒ–
 		// asc = NULL;
 		// asc = swr_alloc_set_opts(asc,
-		// 	av_get_default_channel_layout(channels), (AVSampleFormat)outSampleFmt, sampleRate,//Êä³ö¸ñÊ½
-		// 	av_get_default_channel_layout(channels), (AVSampleFormat)inSampleFmt, sampleRate, 0, 0//ÊäÈë¸ñÊ½
+		// 	av_get_default_channel_layout(channels), (AVSampleFormat)outSampleFmt, sampleRate,//è¾“å‡ºæ ¼å¼
+		// 	av_get_default_channel_layout(channels), (AVSampleFormat)inSampleFmt, sampleRate, 0, 0//è¾“å…¥æ ¼å¼
 		// );
 		// if (!asc) {
 		// 	Print2File("swr_alloc_set_opts failed!");
@@ -150,15 +150,15 @@ public:
 		// 	return false;
 		// }
 
-		// // cout << "ÒôÆµÖØ²ÉÑù ÉÏÏÂÎÄ³õÊ¼»¯ success" << endl;
+		// // cout << "éŸ³é¢‘é‡é‡‡æ · ä¸Šä¸‹æ–‡åˆå§‹åŒ– success" << endl;
 
-		// ///3 ÒôÆµÖØ²ÉÑùÊä³ö¿Õ¼ä·ÖÅä
+		// ///3 éŸ³é¢‘é‡é‡‡æ ·è¾“å‡ºç©ºé—´åˆ†é…
 		// pcm = av_frame_alloc();
 		// pcm->format = outSampleFmt;
 		// pcm->channels = channels;
 		// pcm->channel_layout = av_get_default_channel_layout(channels);
-		// pcm->nb_samples = nbSample;//Ò»Ö¡ÒôÆµÒ»Í¨µÀµÄ²ÉÑùÊıÁ¿
-		// ret = av_frame_get_buffer(pcm, 0);//¸øpcm·ÖÅäÄÚ´æ¿Õ¼ä
+		// pcm->nb_samples = nbSample;//ä¸€å¸§éŸ³é¢‘ä¸€é€šé“çš„é‡‡æ ·æ•°é‡
+		// ret = av_frame_get_buffer(pcm, 0);//ç»™pcmåˆ†é…å†…å­˜ç©ºé—´
 		// if (ret != 0) {
 		// 	char err[1024] = { 0 };
 		// 	av_strerror(ret, err, sizeof(err) - 1);
@@ -168,15 +168,15 @@ public:
 		return true;
 	}
 
-	//·µ»ØÖµÎŞĞèµ÷ÓÃÕßÇåÀí
+	//è¿”å›å€¼æ— éœ€è°ƒç”¨è€…æ¸…ç†
 	XData Resample(XData d)
 	{
 		XData r;
-		//ÒÑ¾­¶ÁÒ»Ö¡Ô´Êı¾İ
-		//ÖØ²ÉÑùÔ´Êı¾İ
+		//å·²ç»è¯»ä¸€å¸§æºæ•°æ®
+		//é‡é‡‡æ ·æºæ•°æ®
 		const uint8_t *indata[AV_NUM_DATA_POINTERS] = { 0 };
 		indata[0] = (uint8_t *)d.data;
-		int len = swr_convert(asc, pcm->data, pcm->nb_samples,//Êä³ö²ÎÊı£¬Êä³ö´æ´¢µØÖ·ºÍÑù±¾ÊıÁ¿
+		int len = swr_convert(asc, pcm->data, pcm->nb_samples,//è¾“å‡ºå‚æ•°ï¼Œè¾“å‡ºå­˜å‚¨åœ°å€å’Œæ ·æœ¬æ•°é‡
 			indata, pcm->nb_samples
 		);
 		if (len <= 0)
@@ -192,32 +192,32 @@ public:
 
 
 
-	//ÊÓÆµ±àÂëÆ÷³õÊ¼»¯
+	//è§†é¢‘ç¼–ç å™¨åˆå§‹åŒ–
 	bool InitVideoCodec() {
-		//4 ³õÊ¼»¯±àÂëÉÏÏÂÎÄ
-		//a ÕÒµ½±àÂëÆ÷
+		//4 åˆå§‹åŒ–ç¼–ç ä¸Šä¸‹æ–‡
+		//a æ‰¾åˆ°ç¼–ç å™¨
 		if (!(vc = CreateCodec(AV_CODEC_ID_H264)))
 		{
 			return false;
 		}
-		vc->bit_rate = 50 * 1024 * 8;//Ñ¹ËõºóÃ¿Ò»ÃëÊÓÆµµÄbitÎ»´óĞ¡50KB
+		vc->bit_rate = 50 * 1024 * 8;//å‹ç¼©åæ¯ä¸€ç§’è§†é¢‘çš„bitä½å¤§å°50KB
 		vc->width = outWidth;
 		vc->height = outHeight;
 		//vc->time_base = { 1,fps };
 		vc->framerate = { fps,1 };
 
-		//»­Ãæ×éµÄ´óĞ¡¡£¶àÉÙÖ¡Ò»¸ö¹Ø¼üÖ¡
-		vc->gop_size = 25;//¸Ä¹ı
+		//ç”»é¢ç»„çš„å¤§å°ã€‚å¤šå°‘å¸§ä¸€ä¸ªå…³é”®å¸§
+		vc->gop_size = 25;//æ”¹è¿‡
 		vc->max_b_frames = 0;
 		vc->pix_fmt = AV_PIX_FMT_YUV420P;
-		// ÏÂÃæÉèÖÃ·´¶øÑÓ³ÙÉÏÉı
-		// vc->thread_count = 8;//ÉèÖÃ±àÂëÆ÷ºËĞÄÊı
+		// ä¸‹é¢è®¾ç½®åè€Œå»¶è¿Ÿä¸Šå‡
+		// vc->thread_count = 8;//è®¾ç½®ç¼–ç å™¨æ ¸å¿ƒæ•°
 		// vc->thread_count = av_cpu_count();
 		// av_opt_set((&vc)->priv_data, "x264opts","no-mbtree:sliced-threads:sync-lookahead=0", 0);
 		return OpenCodec(&vc);
 	}
 
-	//ÒôÆµ±àÂë³õÊ¼»¯
+	//éŸ³é¢‘ç¼–ç åˆå§‹åŒ–
 	bool InitAudioCodec() {
 		if (!(ac = CreateCodec(AV_CODEC_ID_AAC)))
 		{
@@ -231,7 +231,7 @@ public:
 		return OpenCodec(&ac);
 	}
 
-	//ÊÓÆµ±àÂë ·µ»ØÖµÎŞĞèÓÃ»§ÇåÀí
+	//è§†é¢‘ç¼–ç  è¿”å›å€¼æ— éœ€ç”¨æˆ·æ¸…ç†
 	XData EncodeVideo(XData frame)
 	{
 		// Print2File("Before EncodeVideo : !! av_packet_unref(&vpack);");
@@ -243,7 +243,7 @@ public:
 			r;
 		}
 		AVFrame *p = (AVFrame *)frame.data;
-		//h264±àÂë
+		//h264ç¼–ç 
 		//frame->pts = vpts;
 		//vpts++;
 		int ret = avcodec_send_frame(vc, p);
@@ -265,7 +265,7 @@ public:
 		return r;
 	}
 
-	//ÒôÆµ±àÂë ·µ»ØÖµÎŞĞèÓÃ»§ÇåÀí
+	//éŸ³é¢‘ç¼–ç  è¿”å›å€¼æ— éœ€ç”¨æˆ·æ¸…ç†
 	XData EncodeAudio(XData frame)
 	{
 		Print2File("EncodeAudio");
@@ -277,12 +277,12 @@ public:
 		AVFrame *p = (AVFrame *)frame.data;
 		if (lasta == p->pts)
 		{
-			//Ğ¡ÓÚ1000¿ÉÄÜ»á¶ªµô£¬ÕâÀïÎ¢Ãî¼ÆËã£¬ÄÇÀïºÁÃë¼ÆËã£¬ÖÁÉÙ´óÓÚ1000
+			//å°äº1000å¯èƒ½ä¼šä¸¢æ‰ï¼Œè¿™é‡Œå¾®å¦™è®¡ç®—ï¼Œé‚£é‡Œæ¯«ç§’è®¡ç®—ï¼Œè‡³å°‘å¤§äº1000
 			p->pts += 1200;
 		}
 		lasta = p->pts;
-		//pts ÔËËã
-		//nb_sample/sample_rate = Ò»Ö¡ÒôÆµµÄÃëÊısec
+		//pts è¿ç®—
+		//nb_sample/sample_rate = ä¸€å¸§éŸ³é¢‘çš„ç§’æ•°sec
 		//timebase pts = sec*timebase.den
 
 		int ret = avcodec_send_frame(ac, p);
@@ -296,8 +296,8 @@ public:
 		r.pts = frame.pts;
 		return r;
 	}
-	AVCodecContext *vc = 0;//±àÂëÆ÷ÉÏÏÂÎÄ
-	AVCodecContext *ac = 0;//ÒôÆµ±àÂëÆ÷ÉÏÏÂÎÄ
+	AVCodecContext *vc = 0;//ç¼–ç å™¨ä¸Šä¸‹æ–‡
+	AVCodecContext *ac = 0;//éŸ³é¢‘ç¼–ç å™¨ä¸Šä¸‹æ–‡
 
 protected:
 	
@@ -305,14 +305,14 @@ protected:
 private:
 	bool OpenCodec(AVCodecContext **c)
 	{
-		//ÊÓÆµ±àÂëÆ÷ÁÙÊ±¼ÓÈë
+		//è§†é¢‘ç¼–ç å™¨ä¸´æ—¶åŠ å…¥
 		AVDictionary *param = 0;
-		//´ËÉèÖÃ´Ó2000ms½µµ½500ms½âÂëÑÓ³Ù
+		//æ­¤è®¾ç½®ä»2000msé™åˆ°500msè§£ç å»¶è¿Ÿ
 		//superfast
-    	av_dict_set(&param, "preset", "superfast", 0);  //±àÂëĞÎÊ½ĞŞ¸Ä
-		// av_dict_set(&param, "tune", "zerolatency", 0);  //±àÂëĞÎÊ½ĞŞ¸Ä
-    	// av_dict_set(&param, "tune", "zerolatency", 0);  //ÊµÊ±±àÂë
-		//´ò¿ªÒôÆµ±àÂëÆ÷
+    	av_dict_set(&param, "preset", "superfast", 0);  //ç¼–ç å½¢å¼ä¿®æ”¹
+		// av_dict_set(&param, "tune", "zerolatency", 0);  //ç¼–ç å½¢å¼ä¿®æ”¹
+    	// av_dict_set(&param, "tune", "zerolatency", 0);  //å®æ—¶ç¼–ç 
+		//æ‰“å¼€éŸ³é¢‘ç¼–ç å™¨
 		int ret = avcodec_open2(*c, 0, &param);
 		if (ret != 0) {
 			char err[1024] = { 0 };
@@ -331,7 +331,7 @@ private:
 			Print2File("avcodec_find_encoder failed");
 			return NULL;
 		}
-		//ÒôÆµ±àÂëÆ÷ÉÏÏÂÎÄ
+		//éŸ³é¢‘ç¼–ç å™¨ä¸Šä¸‹æ–‡
 		AVCodecContext* c = avcodec_alloc_context3(codec);
 		if (!c)
 		{
@@ -341,22 +341,23 @@ private:
 
 		c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 		// c->thread_count = XGetCpuNum();
-		// TODO ÕâÀï¸Ä¹ı£¬ÎªÁË¼ò»¯ÉèÎª4£¬ÊµÑémacµÄCPUºËĞÄÊı£¬¿ÉÒÔ¿çÆ½Ì¨¿´CPU¿´ÓĞ¶àÉÙ
-		// ÕâÀïºÜÆæ¹Ö,thread_count = 1 is the best
+		// TODO è¿™é‡Œæ”¹è¿‡ï¼Œä¸ºäº†ç®€åŒ–è®¾ä¸º4ï¼Œå®éªŒmacçš„CPUæ ¸å¿ƒæ•°ï¼Œå¯ä»¥è·¨å¹³å°çœ‹CPUçœ‹æœ‰å¤šå°‘
+		// è¿™é‡Œå¾ˆå¥‡æ€ª,thread_count = 1 is the best
 		c->thread_count = 1;
 		c->time_base = { 1,1000000 };
-		// ´ËÉèÖÃÑÓ³Ù±ä¸ß
+		// æ­¤è®¾ç½®å»¶è¿Ÿå˜é«˜
 		c->delay = 0;
 		return c;
 	}
-	SwsContext *vsc = NULL;//ÏñËØ¸ñÊ½×ª»»ÉÏÏÂÎÄ
-	SwrContext *asc = NULL;//ÒôÆµÖØ²ÉÑùÉÏÏÂÎÄ
-	AVFrame *yuv = NULL;//Êä³öµÄYUV
-	AVFrame *pcm = NULL;//ÖØ²ÉÑùÊä³öµÄPCM
-	AVPacket vpack = {0};//ÊÓÆµÖ¡
-	AVPacket apack = {0};//ÒôÆµÖ¡
+	SwsContext *vsc = NULL;//åƒç´ æ ¼å¼è½¬æ¢ä¸Šä¸‹æ–‡
+	SwrContext *asc = NULL;//éŸ³é¢‘é‡é‡‡æ ·ä¸Šä¸‹æ–‡
+	AVFrame *yuv = NULL;//è¾“å‡ºçš„YUV
+	AVFrame *pcm = NULL;//é‡é‡‡æ ·è¾“å‡ºçš„PCM
+	AVPacket vpack = {0};//è§†é¢‘å¸§
+	AVPacket apack = {0};//éŸ³é¢‘å¸§
 	int vpts = 0;
 	int apts = 0;
 };
 
 #endif  // UTIL_MEDIAENCODER_H
+

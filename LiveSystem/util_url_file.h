@@ -19,10 +19,10 @@ public:
     uint32_t flag_meta;
 
     AVInputFormat * ifmt;
-    AVOutputFormat * ofmt; 
+    AVOutputFormat * ofmt;
 
     AVStream *out_stream;
-    
+
     StreamContext(AVFormatContext *ptr, int id) {
         pFmtCtx = ptr;
         stream_id = id;

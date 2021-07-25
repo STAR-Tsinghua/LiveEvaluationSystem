@@ -34,7 +34,7 @@ class SodtpJitter {
 public:
     // enum STATE {
     //     INIT,       // for state only.
-        
+  
     //     NORMAL,     // for state and ret value.
     //     EMPTY,      // for state and ret value.
 

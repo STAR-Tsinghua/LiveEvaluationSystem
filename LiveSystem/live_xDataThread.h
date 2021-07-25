@@ -6,80 +6,79 @@
 class XDataThread
 {
 public:
-	//£¨»º³åÁĞ±í´óĞ¡£©ÁĞ±í×î´óÖµ£¬³¬³öÉ¾³ı×î¾ÉµÄÊı¾İ
+	//ï¼ˆç¼“å†²åˆ—è¡¨å¤§å°ï¼‰åˆ—è¡¨æœ€å¤§å€¼ï¼Œè¶…å‡ºåˆ é™¤æœ€æ—§çš„æ•°æ®
 	int maxList = 6;
 	XDataThread(){};
 	~XDataThread(){};
-	//ÔÚÁĞ±í½áÎ²²åÈë
+	//åœ¨åˆ—è¡¨ç»“å°¾æ’å…¥
 	void Push(XData d)
 	{
 		// Print2File("XDataThread:void Push(XData d)");
 		mutex.lock();
-		//size´ó¿ÉÄÜÊÇ¿Ó
+		//sizeå¤§å¯èƒ½æ˜¯å‘
 		if (datas.size() > maxList)
-		{
-			datas.front().Drop(); // µÚÒ»¸öÔªËØÉ¾³ıdataºÍsizeÊı¾İ 
-			datas.pop_front(); // É¾³ılistµÚÒ»¸öÔªËØ,STLµÄapi
-		}
+      {
+        datas.front().Drop(); // ç¬¬ä¸€ä¸ªå…ƒç´ åˆ é™¤dataå’Œsizeæ•°æ®
+        datas.pop_front(); // åˆ é™¤listç¬¬ä¸€ä¸ªå…ƒç´ ,STLçš„api
+      }
 		datas.push_back(d);
 		mutex.unlock();
 		// Print2File("XDataThread:void Push(XData d) Finished");
 	}
-	//¶ÁÈ¡ÁĞ±íÖĞ×îÔçµÄÊı¾İ£¬·µ»ØÊı¾İĞèÒªµ÷ÓÃXData.DropÇåÀí
+	//è¯»å–åˆ—è¡¨ä¸­æœ€æ—©çš„æ•°æ®ï¼Œè¿”å›æ•°æ®éœ€è¦è°ƒç”¨XData.Dropæ¸…ç†
 	XData Pop()
 	{
 		mutex.lock();
 		if (datas.empty())
-		{
-			mutex.unlock();
-			return XData();
-		}
+      {
+        mutex.unlock();
+        return XData();
+      }
 		XData d = datas.front();
 		datas.pop_front();
 		mutex.unlock();
 		return d;
 	}
-
+  
 	void Clear()
 	{
 		mutex.lock();
 		while (!datas.empty())
-		{
-			datas.front().Drop();
-			datas.pop_front();
-		}
+      {
+        datas.front().Drop();
+        datas.pop_front();
+      }
 		mutex.unlock();
 	}
-
-	//Æô¶¯Ïß³Ì£¬Èç¹ûÒªÒÆÖ³QtÓÃ
+  
+	//å¯åŠ¨çº¿ç¨‹ï¼Œå¦‚æœè¦ç§»æ®–Qtç”¨
 	bool Start()
 	{
 		isExit = false;
-		// ÕâÀïÃ»Ïëµ½ºÃ·½·¨Æô¶¯Ò»¸öÏß³ÌÌæ´ú
-		// QThread::start(); Èç¹ûÒªÒÆÖ³QtÓÃ
+		// è¿™é‡Œæ²¡æƒ³åˆ°å¥½æ–¹æ³•å¯åŠ¨ä¸€ä¸ªçº¿ç¨‹æ›¿ä»£
+		// QThread::start(); å¦‚æœè¦ç§»æ®–Qtç”¨
 		return true;
 	}
-
-	//ÍË³öÏß³Ì²¢ÇÒµÈ´ıÏß³ÌÍË³ö£¨×èÈû£©£¬Èç¹ûÒªÒÆÖ³QtÓÃ
+  
+	//é€€å‡ºçº¿ç¨‹å¹¶ä¸”ç­‰å¾…çº¿ç¨‹é€€å‡ºï¼ˆé˜»å¡ï¼‰ï¼Œå¦‚æœè¦ç§»æ®–Qtç”¨
 	void Stop()
 	{
-		//ÏÈ°ÑÏß³ÌÍË³ö
+		//å…ˆæŠŠçº¿ç¨‹é€€å‡º
 		isExit = true;
 		// wait();
 	}
-
+  
 
 protected:
-	//´æ·Å½»»¥Êı¾İ
+	//å­˜æ”¾äº¤äº’æ•°æ®
 	std::list<XData> datas;
-	//½»»¥Êı¾İÁĞ±í´óĞ¡
+	//äº¤äº’æ•°æ®åˆ—è¡¨å¤§å°
 	int dataCout = 0;
-	//»¥³â·ÃÎÊ datas
+	//äº’æ–¥è®¿é—® datas
 	std::mutex mutex;
-	//´¦ÀíÏß³ÌÍË³ö
+	//å¤„ç†çº¿ç¨‹é€€å‡º
 	bool isExit = false;
-	
+  
 private:
-
+  
 };
-
