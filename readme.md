@@ -78,6 +78,10 @@ You may have to configure link libraries for opencv (and/or ffmpeg). You can ref
 
 Install this library by `sudo apt install libsdl2-dev`
 
+### uthash.h
+
+Install this lib by `sudo apt install uthash-dev`
+
 ## Compilation process and toolchains
 
 ### DTP

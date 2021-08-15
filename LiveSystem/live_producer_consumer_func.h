@@ -2,7 +2,6 @@
 #define LIVE_PRODUCER_CONSUMER_FUNC_H
 #include <bounded_buffer.h>
 #include <live_liveCapture.h>
-#include <
 
 bool liveConsumeThread(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, std::vector<StreamCtxPtr> *vStmCtx, BoundedBuffer<StreamPktVecPtr> *pBuffer){
     // camera 直播输入源

@@ -13,18 +13,18 @@ FFMPEG_INC = $(FFMPEG_ROOT)/include
 FFMPEG_SHARED = $(FFMPEG_ROOT)/shared
 FFMPEG_BIN = $(FFMPEG_ROOT)/bin
 
-CXFLAGS = -std=c++11 -g
+CXFLAGS = -std=c++11 # -g
 OPENCVFLAGS = `pkg-config --cflags --libs opencv`
 
-INCS = -I$(CURDIR) -I$(DTP_INC) -I$(FFMPEG_INC)
+INCS = -I$(CURDIR) -I$(CURDIR)/sodtp -I$(CURDIR)/util -I$(DTP_INC) -I$(FFMPEG_INC)
 
-LIBS = -L$(FFMPEG_LIB) -L$(FFMPEG_SHARED) -lswscale -lswresample -lavformat \
+LIBS = -L$(CURDIR) -L$(FFMPEG_LIB) -L$(FFMPEG_SHARED) -lswscale -lswresample -lavformat \
 		-lavdevice -lavcodec -lavutil -lavfilter \
 		-lSDL2 \
 		-L$(DTP_LIB) -lquiche \
 		-lm -lz -lev -ldl -pthread \
 
-TARGETS = r_dtp_server r_dtp_play r_udp_server r_udp_play 
+TARGETS = r_dtp_server r_dtp_play r_udp_server r_udp_play
 # r_quiche_server r_quiche_play
 # 先放着只为实验图的"实验"
 
@@ -40,15 +40,15 @@ all: $(TARGETS)
 r_dtp_server : s_dtp_server.cxx
 	$(CX) $(CXFLAGS)  -o $@ $^ $(INCS) $(LIBS) $(OPENCVFLAGS)
 
-r_dtp_play : p_dtp_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
-	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
+r_dtp_play : p_dtp_play.cxx libsodtp.so
+	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS) -lsodtp
 
 # ================= udp =================
 r_udp_server : s_udp_server.cxx
 	$(CX) $(CXFLAGS)  -o $@ $^ $(INCS) $(LIBS) $(OPENCVFLAGS)
 
-r_udp_play : p_udp_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
-	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
+r_udp_play : p_udp_play.cxx libsodtp.so
+	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS) -lsodtp
 
 # ================= quiche =================
 # r_quiche_server : s_quiche_server.cxx
@@ -57,7 +57,11 @@ r_udp_play : p_udp_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
 # r_quiche_play : p_quiche_play.cxx p_sodtp_jitter.cxx sodtp_block.cxx
 # 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS)
 
+libsodtp.so: sodtp/sodtp_block.cxx sodtp/p_sodtp_jitter.cxx
+	$(CX) $(CXFLAGS) -fPIC -shared -o $@ $^ $(INCS) $(LIBS)
 
+libquiche.so:
+	cp ../submodule/DTP/target/release/libquiche.so .
 
 clean:
 	rm -rf $(TARGETS)
@@ -80,18 +84,18 @@ rb:
 	make all
 
 # dtp
-rd:
+rd: r_dtp_server r_dtp_play libquiche.so libsodtp.so
 	make cl_dtp
 	LD_LIBRARY_PATH=. ./r_dtp_server 127.0.0.1 9093 1>dtp_server.log 2>&1 &
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_dtp_play 127.0.0.1 9093 1>dtp_play.log 2>&1 &
 
 # udp
-ru:
+ru: r_udp_server r_udp_play libsodtp.so
 	make cl_udp
-	./r_udp_server 127.0.0.1 9093 1> udp_server.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_udp_server 127.0.0.1 9093 1> udp_server.log 2>&1 &
 	sleep 2s
-	./r_udp_play 127.0.0.1 9093 1> udp_player.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_udp_play 127.0.0.1 9093 1> udp_player.log 2>&1 &
 
 # quiche
 # rq:
