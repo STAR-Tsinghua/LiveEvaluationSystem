@@ -24,7 +24,8 @@ extern "C"
 
 void SaveFrame(AVFrame *pFrame, int width, int height, int iStream, int iFrame) {
     FILE *pFile;
-    char path[128];
+    char path[256];
+    char root_path[128];
 
     // // Open file
     // sprintf(dir, "/Users/yuming/Movies/decode/%d", iStream);
@@ -35,12 +36,12 @@ void SaveFrame(AVFrame *pFrame, int width, int height, int iStream, int iFrame) 
     //     mkdir(dir, 0775);
     // }
 
-    sprintf(path, "/Users/yuming/Movies/decode/%d", iStream);
+    sprintf(root_path, "/Users/yuming/Movies/decode/%d", iStream);
     if (access(path, 0) == -1)
     {
         mkdir(path, 0775);
     }
-    sprintf(path, "%s/frame%d.ppm", path, iFrame);
+    sprintf(path, "%s/frame%d.ppm", root_path, iFrame);
 
     pFile=fopen(path, "wb");
     if(pFile==NULL)
@@ -61,7 +62,8 @@ void SaveFrame(Decoder *decoder) {
     FILE            *pFile;
     AVCodecContext  *ctx    = decoder->pVCodecCtx;
     AVFrame         *pFrame = decoder->pFrameRGB;
-    char path[128];
+    char path[256];
+    char root_path[128];
 
     if (access(decoder->path, 0) == -1)
     {
@@ -71,16 +73,16 @@ void SaveFrame(Decoder *decoder) {
         }
     }
 
-    sprintf(path, "%s/%d", decoder->path, decoder->iStream);
-    if (access(path, 0) == -1)
+    sprintf(root_path, "%s/%d", decoder->path, decoder->iStream);
+    if (access(root_path, 0) == -1)
     {
-        if (mkdir(path, 0775) < 0) {
-            fprintf(stderr, "mkdir: fail to create %s\n", path);
+        if (mkdir(root_path, 0775) < 0) {
+            fprintf(stderr, "mkdir: fail to create %s\n", root_path);
             return;
         }
     }
 
-    sprintf(path, "%s/frame%d.ppm", path, decoder->iFrame);
+    sprintf(path, "%s/frame%d.ppm", root_path, decoder->iFrame);
     pFile = fopen(path, "wb");
     if(pFile == NULL) {
         return;
@@ -269,64 +271,9 @@ void DecodePacketPlay(Decoder *decoder)
     }
 }
 
-// Warning!!!
-// Buffer size should be added AV_INPUT_BUFFER_PADDING_SIZE.
-// Warning!!!
-int SodtpReadPacket(
-    SodtpJitterPtr          pJitter,
-    // AVCodecParserContext    *pVCodecParserCtx,
-    // AVCodecContext          *pVCodecCtx,
-    AVPacket                *pPacket) {
-
-
-    int ret;
-    SodtpBlockPtr pBlock;
-    ret = pJitter->pop(pBlock);
-
-    // Warning!!!
-    // Block buffer size should be size + AV_INPUT_BUFFER_PADDING_SIZE
-    // Warning!!!
-    //
-    //
-    // if (pBlock) {
-    if (ret == SodtpJitter::STATE_NORMAL) {
-        av_packet_from_data(pPacket, pBlock->data, pBlock->size);
-    }
-    //
-    //
-    //
-    return ret;
-}
-
-int SodtpReadPacket(
-    SodtpJitterPtr          pJitter,
-    AVPacket                *pPacket,
-    SodtpBlockPtr           &pBlock) {
-
-
-    int ret;
-    ret = pJitter->pop(pBlock);
-    if (!pBlock) {
-        pPacket->data = NULL;
-        pPacket->size = 0;
-        return ret;
-    }
-
-    // Warning!!!
-    // Block buffer size should be size + AV_INPUT_BUFFER_PADDING_SIZE
-    // Warning!!!
-    //
-    //
-    // if (pBlock) {
-    if (ret == SodtpJitter::STATE_NORMAL) {
-        av_packet_from_data(pPacket, pBlock->data, pBlock->size);
-    } else {
-        fprintf(stderr, "jitter is buffering now.\n");
-    }
-
-    return ret;
-}
-
+/**
+   Get packet data and block data from jitter buffer
+ */
 int SodtpReadPacket(
     SodtpJitter             *pJitter,
     AVPacket                *pPacket,
@@ -345,9 +292,6 @@ int SodtpReadPacket(
     // Warning!!!
     // Block buffer size should be size + AV_INPUT_BUFFER_PADDING_SIZE
     // Warning!!!
-    //
-    //
-    // if (pBlock) {
     if (ret == SodtpJitter::STATE_NORMAL) {
         av_packet_from_data(pPacket, pBlock->data, pBlock->size);
     }
@@ -920,6 +864,7 @@ void worker_cb4(EV_P_ ev_timer *w, int revents) {
     // buffering: 200ms;
     // printf("debug: %s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
 }
+
 // decode and display the pictures.
 int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
     // printf("viewer: viewing stream %u!\n", pJitter->stream_id);
@@ -1142,6 +1087,236 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
 }
 
 
+// decode and display the pictures and audio.
+// Pictures and audio are not synchronized
+int video_viewer_5(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
+    // printf("viewer: viewing stream %u!\n", pJitter->stream_id);
+    // Initalizing these to NULL prevents segfaults!
+    /* AVFormatContext         *pVFormatCtx = NULL; */
+    AVCodecContext          *pVCodecCtx = NULL;
+    AVCodecContext          *pACodecCtx = NULL;
+    AVCodec                 *pVCodec = NULL;
+    AVCodec                 *pACodec = NULL;
+    AVFrame                 *pFrame = NULL;
+    AVFrame                 *pFrameYUV = NULL;
+    AVFrame                 *pFrameShow = NULL;
+    AVPacket                packet;
+    int                     iFrame;
+    int                     ret;
+    int                     numBytes;
+    uint8_t                 *buffer = NULL;
+    struct SwsContext       *pSwsCtx = NULL;
+
+    SodtpBlockPtr           pBlock = NULL;
+    SDL_Texture             *pTexture = NULL;
+
+    CodecParWithoutExtraData* myCodecPar = NULL;
+    // Register all formats and codecs
+    // av_register_all(); // 原本就是注释掉的
+    //初始化网络库 （可以打开rtsp rtmp http 协议的流媒体视频）
+    // avformat_network_init();// 原本就是注释掉的
+
+    av_init_packet(&packet);
+
+    pVCodecCtx = avcodec_alloc_context3(NULL);
+    if (!pVCodecCtx) {
+        fprintf(stderr, "Could not allocate video codec context\n");
+        return -1;
+    }
+    pVCodecCtx->thread_count = 1;
+
+    int i = 0;
+    int WAITING_UTIME = 20000;
+    int WAITING_ROUND = 500;
+    int SKIPPING_ROUND = 70;
+
+    // Get codecptr from the first block
+    // codecptr is in myCodecPar
+    while (true) {
+        ret = pJitter->front(pBlock);
+
+        if ((ret == SodtpJitter::STATE_NORMAL) && pBlock->key_block) {
+            fprintf(stdout, "sniffing: stream %d,\t block %d,\t size %d\n",
+                    pBlock->stream_id, pBlock->block_id, pBlock->size);
+
+            // Print2File("==========================改的接口==========================");
+            // pVFormatCtx = sniff_format2(pBlock->data, pBlock->size); //原本！！！！
+            if(pBlock->haveFormatContext){
+                // Print2File("myCodecPar = pBlock->codecParPtr;");
+                // myCodecPar 除了extraData的数据
+                myCodecPar = pBlock->codecParPtr;
+                // Print2File("*myCodecPar->extradata = *pBlock->codecParExtradata");
+                myCodecPar->extradata = pBlock->codecParExtradata;
+                // Print2File("*myCodecPar->extradata = *pBlock->codecParExtradata break");
+                break;
+            }else{
+                Print2File("pBlock->haveFormatContext false : continue");
+                continue;
+            }
+            break;
+        }
+        // 弱网发生
+        // Print2File("decoding: waiting for the key block of stream %u. sleep round");
+        fprintf(stderr, "decoding: waiting for the key block of stream %u. sleep round %d!\n", pJitter->stream_id, i);
+
+        if (++i > WAITING_ROUND) {
+            // 弱网发生
+            // Print2File("decoding: fail to read the key block of stream");
+            fprintf(stderr, "decoding: fail to read the key block of stream %u.\n", pJitter->stream_id);
+            break;
+        }
+        usleep(WAITING_UTIME);
+    }
+    timeMainPlayer.evalTime("p","video_viewer5_while_pass");
+    
+    // Print2File("if (!pVFormatCtx)");
+    // if (!pVFormatCtx) {
+    //     Print2File("viewer: quit stream");
+    //     fprintf(stderr, "viewer: quit stream %u.\n", pJitter->stream_id);
+    //     return -1;
+    // }
+    // Print2File("beafore if (!myCodecPar)");
+    if (!myCodecPar) {
+        //弱网发生
+        // Print2File("viewer: quit stream");
+        fprintf(stderr, "viewer: quit stream %u.\n", pJitter->stream_id);
+        return -1;
+    }
+    // Print2File("after if (!myCodecPar)");
+    // 源码修改成功，待改第二个变量
+    // CodecParWithoutExtraData codecpar;
+    // myCodecPar = &codecpar;
+    // int ret3 = lhs_copy_parameters_to_myParameters(myCodecPar, pVFormatCtx->streams[0]->codecpar);
+    // Print2File("int ret2 = lhs_copy_parameters_to_context ==========================改的接口==========================");
+    if(pBlock->stream_id == 0) {
+      // This is a video block
+    } else if(pBlock->stream_id == 1) {
+      // This is an audio block
+    }
+    int ret2 = lhs_copy_parameters_to_context(pVCodecCtx, myCodecPar);
+    // int ret2 = avcodec_parameters_to_context(pVCodecCtx, pVFormatCtx->streams[0]->codecpar);
+    if(ret2<0){
+        Print2File("avcodec_parameters_to_context():"+std::to_string(ret2));
+    }
+    
+    // Print2File("pVCodec = avcodec_find_decoder(pVCodecCtx->codec_id);");
+    pVCodec = avcodec_find_decoder(pVCodecCtx->codec_id);
+    if (!pVCodec) {
+        Print2File("Codec not found");
+        fprintf(stderr, "Codec not found\n");
+        return -1;
+    }
+    // Print2File("if (avcodec_open2(pVCodecCtx, pVCodec, NULL) < 0) {");
+    // Open Codec
+    if (avcodec_open2(pVCodecCtx, pVCodec, NULL) < 0) {
+        Print2File("Fail to open codec!");
+        fprintf(stderr, "Fail to open codec!\n");
+        return -1;
+    }
+    // Print2File("pFrame = av_frame_alloc();");
+    // Allocate video frame
+    pFrame = av_frame_alloc();
+    // Allocate an AVFrame structure
+    // Print2File("pFrameYUV = av_frame_alloc();");
+    pFrameYUV = av_frame_alloc();
+    // Print2File("pFrameShow = av_frame_alloc();");
+    pFrameShow = av_frame_alloc();
+    if (pFrame == NULL || pFrameYUV == NULL || pFrameShow == NULL) {
+        Print2File("fail to allocate frame!");
+        printf("fail to allocate frame!\n");
+        return -1;
+    }
+    // Determine required buffer size and allocate buffer
+    timeMainPlayer.evalTime("p","av_image_get_buffer_size");
+    numBytes = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, pVCodecCtx->width, pVCodecCtx->height, 1);
+    buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
+    // Print2File("av_image_fill_arrays");
+    // Assign appropriate parts of buffer to image planes in pFrameYUV
+    av_image_fill_arrays(pFrameYUV->data, pFrameYUV->linesize, buffer,
+        AV_PIX_FMT_YUV420P, pVCodecCtx->width, pVCodecCtx->height, 1);
+    av_image_fill_arrays(pFrameShow->data, pFrameShow->linesize, buffer,
+        AV_PIX_FMT_YUV420P, pVCodecCtx->width, pVCodecCtx->height, 1);
+    // Print2File("sws_getContext");
+    // initialize SWS context for software scaling
+    pSwsCtx = sws_getContext(pVCodecCtx->width,
+                            pVCodecCtx->height,
+                            pVCodecCtx->pix_fmt,
+                            pVCodecCtx->width,
+                            pVCodecCtx->height,
+                            AV_PIX_FMT_YUV420P,
+                            SWS_BILINEAR,
+                            NULL,
+                            NULL,
+                            NULL
+                            );
+    // Print2File("SDL_CreateTexture");
+    pTexture = SDL_CreateTexture(splay->renderer,
+                            SDL_PIXELFORMAT_IYUV,
+                            SDL_TEXTUREACCESS_STREAMING,
+                            pVCodecCtx->width,
+                            pVCodecCtx->height
+                            );
+    // SaveConfig scon;
+    // if (!path) {
+    //     scon.parse("./config/save.conf");
+    //     path = scon.path.c_str();
+    // }
+
+    Decoder &decoder    = pJitter->decoder;
+    decoder.pVCodecCtx  = pVCodecCtx;
+    decoder.pSwsCtx     = pSwsCtx;
+    decoder.pFrame      = pFrame;
+    decoder.pFrameYUV   = pFrameYUV;
+    decoder.pFrameRGB   = NULL;
+    decoder.pFrameShow  = pFrameShow;
+    decoder.pPacket     = &packet;
+    decoder.pJitter     = pJitter.get();
+    decoder.pBlock      = NULL;
+    decoder.iStream     = pJitter->stream_id;
+    decoder.iFrame      = 0;
+    decoder.iBlock      = 0;
+    decoder.iStart      = 0;
+    // Set the path to be NULL, which means we do not
+    // save picture in SDL display mode.
+    decoder.path        = NULL;
+    decoder.pTexture    = pTexture;
+
+
+    ev_timer worker;
+    struct ev_loop *loop = ev_loop_new(EVFLAG_AUTO);
+
+    double nominal = (double)pJitter->get_nominal_depth() / 1000.0;
+    double frameRate = 0.010;
+    double interval = 0.040;    // 40ms, i.e. 25fps
+
+    ev_timer_init(&worker, worker_cb4, nominal, frameRate);
+    ev_timer_start(loop, &worker);
+    worker.data = &decoder;
+
+    ev_loop(loop, 0);
+
+
+    // Free the YUV image
+    av_free(buffer);
+    av_frame_free(&pFrameYUV);
+    av_frame_free(&pFrameShow);
+
+    // Free the original frame
+    av_frame_free(&pFrame);
+
+    // Close the codecs
+    avcodec_close(pVCodecCtx);
+
+    // Close the video file
+    /* avformat_close_input(&pVFormatCtx); */
+
+    // Notification for clearing the jitter.
+    sem_post(pJitter->_sem);
+    timeMainPlayer.evalTime("p","ev_feed_signal(SIGUSR1);");
+    ev_feed_signal(SIGUSR1);
+    
+    return 0;
+}
 // =======================lhs改的=======================
 // int lhs_avformat_open_input(AVFormatContext **ps, const char *filename,
 //                         AVInputFormat *fmt, AVDictionary **options)

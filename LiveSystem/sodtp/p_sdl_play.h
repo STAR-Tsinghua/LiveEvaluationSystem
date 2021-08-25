@@ -43,8 +43,13 @@ int SDLPlay::init(int w, int h) {
     // SDL 2.0 supports multiple windows.
     screen_w = w;
     screen_h = h;
-    screen = SDL_CreateWindow("SoDTP player", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                screen_w, screen_h, SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
+    screen = SDL_CreateWindow("SoDTP player",
+                              SDL_WINDOWPOS_UNDEFINED,
+                              SDL_WINDOWPOS_UNDEFINED,
+                              screen_w,
+                              screen_h,
+                              SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE
+                              );
     if(!screen) {
         printf("SDL: could not create window - exiting:%s\n", SDL_GetError());  
         return -1;
@@ -72,7 +77,7 @@ void SDLPlay::update(AVFrame *frame, SDL_Texture *texture, SDL_Rect *rect) {
     SDL_UpdateTexture(texture, NULL, frame->data[0], frame->linesize[0]);
     // SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, NULL, rect);
-    
+
     // SDL_RenderPresent(renderer);
 }
 

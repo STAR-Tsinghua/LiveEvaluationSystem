@@ -246,7 +246,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                 // Print2File("SodtpBlockPtr BlockDataBuffer::read(uint32_t id, SodtpStreamHeader *head) {");
                 SodtpBlockPtr bk_ptr = bk_buf.read(s, &header);
                 if (bk_ptr) {
-                    fprintf(stderr, "block ts %lld\n", header.block_ts);
+                    fprintf(stderr, "block ts %ld\n", header.block_ts);
                     fprintf(stderr, "recv round %d,\t stream %d,\t block %d,\t size %d,\t delay %d\n",
                         conn_io->recv_round, header.stream_id,
                         bk_ptr->block_id, bk_ptr->size,
@@ -256,7 +256,10 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                     if(bk_ptr->stream_id == 1) {
                       // if it is an audio stream
                       // drop it now
-                      break;
+                      timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(bk_ptr->block_id));
+                      conn_io->jitter->push_back(&header, bk_ptr);
+                      conn_io->recv_round++;
+                      continue;
                     } else {
                       // deal with video stream block
                       timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(bk_ptr->block_id));

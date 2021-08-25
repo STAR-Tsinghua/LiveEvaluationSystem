@@ -32,7 +32,7 @@ public:
 		static bool isFirst = true;
 		if (isFirst)
 		{
-			av_register_all();
+			// av_register_all(); // deprecated
 			avformat_network_init();
 			isFirst = false;
 		}
