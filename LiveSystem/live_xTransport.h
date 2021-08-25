@@ -85,7 +85,7 @@ public:
 		int ret = 0;
 		struct buffer_data_write bd = { 0 };
 		char err_buf[512];
-		char err_buf_size = 512;
+		int err_buf_size = 512;
 		/* fill opaque structure used by the AVIOContext write callback */
  		bd.ptr  = bd.buf = (uint8_t *)av_malloc(bd_buf_size);
 		if (!bd.buf) {

@@ -273,16 +273,16 @@ int addStream(AVFormatContext *fc, const AVCodecContext *vc, AVStream *&vs, cons
     return vs->index;
 }
 
-bool set_StmCtxPtrsAndId(std::vector<StreamCtxPtr> *pStmCtxPtrs, AVFormatContext *fc){
-    int id = 0;
+int set_StmCtxPtrsAndId(std::vector<StreamCtxPtr> *pStmCtxPtrs, AVFormatContext *fc){
+    static int id = 0;
     StreamCtxPtr cptr = std::make_shared<StreamContext>(fc, id);
     if(cptr==NULL){
         Print2File("ptr==NULL return false");
-        return false;
+        return -1;
     }
     pStmCtxPtrs->push_back(cptr);
     id++;
-    return true;
+    return id;
 }
 // lhs修改后的版本1
 bool init_live_resource1(std::vector<StreamCtxPtr> *pStmCtxPtrs, AVCodecContext *vc, AVStream *&vs){
