@@ -12,13 +12,10 @@ extern "C"
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 }
-#include <util_url_file.h>
+#include "util_url_file.h"
 #include <sodtp_block.h>
 #include <unistd.h>
-#include <util_log.h>
-#include <live_liveCapture.h>
-#include <live_xTransport.h>
-#include <util_mediaEncoder.h>
+#include "../util/util_log.h"
 #define MAX_BOUNDED_BUFFER_SIZE  1
 
 // class BoundedBuffer {

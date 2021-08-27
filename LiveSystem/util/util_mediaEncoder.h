@@ -1,7 +1,6 @@
 #ifndef UTIL_MEDIAENCODER_H
 #define UTIL_MEDIAENCODER_H
 #pragma once
-#include <live_xData.h>
 
 extern "C"
 {
@@ -10,6 +9,8 @@ extern "C"
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 }
+
+#include "../live_xData.h"
 
 class  AVCodecContext;
 enum XSampleFMT
@@ -60,7 +61,7 @@ public:
 	//工厂的生产方法
 	// static XMediaEncode *Get(unsigned char index = 0);
 	//返回值无需调用者清理
-	XData RGBToYUV(XData d)
+	XData RGBToYUV(XData d) const
 	{
 		XData r;
 		r.pts = d.pts;
@@ -169,7 +170,7 @@ public:
 	}
 
 	//返回值无需调用者清理
-	XData Resample(XData d)
+	XData Resample(XData d) const
 	{
 		XData r;
 		//已经读一帧源数据
@@ -232,7 +233,7 @@ public:
 	}
 
 	//视频编码 返回值无需用户清理
-	XData EncodeVideo(XData frame)
+	XData EncodeVideo(XData frame) const
 	{
 		// Print2File("Before EncodeVideo : !! av_packet_unref(&vpack);");
 		av_packet_unref(&vpack);
@@ -266,7 +267,7 @@ public:
 	}
 
 	//音频编码 返回值无需用户清理
-	XData EncodeAudio(XData frame)
+	XData EncodeAudio(XData frame) const
 	{
 		// Print2File("EncodeAudio");
 		XData r;

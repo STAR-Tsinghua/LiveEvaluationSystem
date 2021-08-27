@@ -63,7 +63,7 @@ public:
     //   printf("Failed to initialize output file.\n");
     //   return false;
     // }
-
+    
     deviceConfig = ma_device_config_init(ma_device_type_capture);
     deviceConfig.capture.format   = DEVICE_FORMAT;
     deviceConfig.capture.channels = DEVICE_CHANNELS;

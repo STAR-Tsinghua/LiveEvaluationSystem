@@ -14,16 +14,16 @@ public:
     StreamWorker() {}
     ~StreamWorker() {}
 public:
-    JitterBuffer        jbuffer;
+  JitterBuffer        jbuffer; // 用于缓存所有的数据块
 
-    SDLPlay             splay;
-    SDL_Rect            rect;
+  SDLPlay             splay; // 处理视频帧的更新与播放
+  SDL_Rect            rect;
 
-    vector<thread*>     thds;
-    thread              *thd_conn;
-    const char          *host;
-    const char          *port;
-    const char          *path;
+  vector<thread*>     thds;
+  thread              *thd_conn;
+  const char          *host;
+  const char          *port;
+  const char          *path;
 };
 
 
@@ -46,6 +46,7 @@ void stream_working(struct ev_loop *loop, ev_signal *w, int revents) {
             (*it)->get_work_thread() == NULL) {
             Print2FileInfo("(p)启动video_viewer4线程处");
             timeMainPlayer.evalTime("p","video_viewer4Start");
+            printf("[WARNING] new thread!!!!!\n");
             thread *pthd = new thread(video_viewer4, *it, &worker->splay, worker->path);
             (*it)->set_work_thread(pthd);
             worker->thds.push_back(pthd);

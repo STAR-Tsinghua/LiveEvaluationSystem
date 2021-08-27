@@ -304,116 +304,116 @@ int SodtpReadPacket(
 
 
 // int video_peer(int argc, char *argv[]) {
-int video_viewer1(SodtpJitterPtr pJitter) {
+/* int video_viewer1(SodtpJitterPtr pJitter) { */
 
-    printf("video viewer once!\n");
+/*     printf("video viewer once!\n"); */
 
-    // Initalizing these to NULL prevents segfaults!
-    AVCodecContext          *pVCodecCtx = NULL;
-    AVCodec                 *pVCodec = NULL;
-    AVFrame                 *pFrame = NULL;
-    AVFrame                 *pFrameRGB = NULL;
-    AVPacket                packet;
-    int                     i, ret;
-    int                     numBytes;
-    uint8_t                 *buffer = NULL;
-    struct SwsContext       *pSwsCtx = NULL;
+/*     // Initalizing these to NULL prevents segfaults! */
+/*     AVCodecContext          *pVCodecCtx = NULL; */
+/*     AVCodec                 *pVCodec = NULL; */
+/*     AVFrame                 *pFrame = NULL; */
+/*     AVFrame                 *pFrameRGB = NULL; */
+/*     AVPacket                packet; */
+/*     int                     i, ret; */
+/*     int                     numBytes; */
+/*     uint8_t                 *buffer = NULL; */
+/*     struct SwsContext       *pSwsCtx = NULL; */
 
-    // Register all formats and codecs
-    // av_register_all();
+/*     // Register all formats and codecs */
+/*     // av_register_all(); */
 
-    pVCodec = avcodec_find_decoder(AV_CODEC_ID_H265);
-    if (!pVCodec) {
-        fprintf(stderr, "Codec not found\n");
-        return -1;
-    }
+/*     pVCodec = avcodec_find_decoder(AV_CODEC_ID_H265); */
+/*     if (!pVCodec) { */
+/*         fprintf(stderr, "Codec not found\n"); */
+/*         return -1; */
+/*     } */
 
-    pVCodecCtx = avcodec_alloc_context3(pVCodec);
-    if (!pVCodecCtx) {
-        fprintf(stderr, "Could not allocate video codec context\n");
-        return -1;
-    }
-    pVCodecCtx->thread_count = 1;
+/*     pVCodecCtx = avcodec_alloc_context3(pVCodec); */
+/*     if (!pVCodecCtx) { */
+/*         fprintf(stderr, "Could not allocate video codec context\n"); */
+/*         return -1; */
+/*     } */
+/*     pVCodecCtx->thread_count = 1; */
 
-    // Open Codec
-    if (avcodec_open2(pVCodecCtx, pVCodec, NULL) < 0) {
-        fprintf(stderr, "Fail to open codec!\n");
-        return -1;
-    }
+/*     // Open Codec */
+/*     if (avcodec_open2(pVCodecCtx, pVCodec, NULL) < 0) { */
+/*         fprintf(stderr, "Fail to open codec!\n"); */
+/*         return -1; */
+/*     } */
 
-    // Allocate video frame
-    pFrame = av_frame_alloc();
-    // Allocate an AVFrame structure
-    pFrameRGB = av_frame_alloc();
-    if (pFrame == NULL || pFrameRGB == NULL)
-        return -1;
+/*     // Allocate video frame */
+/*     pFrame = av_frame_alloc(); */
+/*     // Allocate an AVFrame structure */
+/*     pFrameRGB = av_frame_alloc(); */
+/*     if (pFrame == NULL || pFrameRGB == NULL) */
+/*         return -1; */
 
-    // Determine required buffer size and allocate buffer
-    printf("hahaha1\n");
-    numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, pVCodecCtx->width, pVCodecCtx->height, 1);
-    buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
-    printf("hahaha2\n");
+/*     // Determine required buffer size and allocate buffer */
+/*     printf("hahaha1\n"); */
+/*     numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, pVCodecCtx->width, pVCodecCtx->height, 1); */
+/*     buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t)); */
+/*     printf("hahaha2\n"); */
 
-    // Assign appropriate parts of buffer to image planes in pFrameRGB
-    av_image_fill_arrays(pFrameRGB->data, pFrameRGB->linesize, buffer,
-        AV_PIX_FMT_RGB24, pVCodecCtx->width, pVCodecCtx->height, 1);
-    printf("hahaha3\n");
+/*     // Assign appropriate parts of buffer to image planes in pFrameRGB */
+/*     av_image_fill_arrays(pFrameRGB->data, pFrameRGB->linesize, buffer, */
+/*         AV_PIX_FMT_RGB24, pVCodecCtx->width, pVCodecCtx->height, 1); */
+/*     printf("hahaha3\n"); */
 
-    // initialize SWS context for software scaling
-    pSwsCtx = sws_getContext(pVCodecCtx->width,
-                            pVCodecCtx->height,
-                            pVCodecCtx->pix_fmt,
-                            pVCodecCtx->width,
-                            pVCodecCtx->height,
-                            AV_PIX_FMT_RGB24,
-                            SWS_BILINEAR,
-                            NULL,
-                            NULL,
-                            NULL
-                            );
-    printf("hahaha4\n");
-    av_init_packet(&packet);
+/*     // initialize SWS context for software scaling */
+/*     pSwsCtx = sws_getContext(pVCodecCtx->width, */
+/*                             pVCodecCtx->height, */
+/*                             pVCodecCtx->pix_fmt, */
+/*                             pVCodecCtx->width, */
+/*                             pVCodecCtx->height, */
+/*                             AV_PIX_FMT_RGB24, */
+/*                             SWS_BILINEAR, */
+/*                             NULL, */
+/*                             NULL, */
+/*                             NULL */
+/*                             ); */
+/*     printf("hahaha4\n"); */
+/*     av_init_packet(&packet); */
 
-    // Warning!!!
-    // SodtpReadPacket() might be wrongly implemented.
-    // Need to double check.
-    // Warning!!!
-    // This should also be blocked!
-    i = 0;
-    while (true) {
-        ret = SodtpReadPacket(pJitter, &packet);
-        printf("hahaha\n");
-        if (ret == SodtpJitter::STATE_NORMAL) {
-            printf("packet size %d\n", packet.size);
-            DecodePacket(pVCodecCtx, pSwsCtx, pFrame, pFrameRGB, &packet, 0, ++i);
-        }
-        if (pJitter->state == SodtpJitter::STATE_CLOSE) {
-            // Stream is closed.
-            // Thread will be closed by breaking this loop.
-            fprintf(stderr, "Stream is closed!\n");
-            break;
-        }
-    }
-    ///
-    ///
+/*     // Warning!!! */
+/*     // SodtpReadPacket() might be wrongly implemented. */
+/*     // Need to double check. */
+/*     // Warning!!! */
+/*     // This should also be blocked! */
+/*     i = 0; */
+/*     while (true) { */
+/*         ret = SodtpReadPacket(pJitter, &packet); */
+/*         printf("hahaha\n"); */
+/*         if (ret == SodtpJitter::STATE_NORMAL) { */
+/*             printf("packet size %d\n", packet.size); */
+/*             DecodePacket(pVCodecCtx, pSwsCtx, pFrame, pFrameRGB, &packet, 0, ++i); */
+/*         } */
+/*         if (pJitter->state == SodtpJitter::STATE_CLOSE) { */
+/*             // Stream is closed. */
+/*             // Thread will be closed by breaking this loop. */
+/*             fprintf(stderr, "Stream is closed!\n"); */
+/*             break; */
+/*         } */
+/*     } */
+/*     /// */
+/*     /// */
 
 
-    // Free the RGB image
-    av_free(buffer);
-    av_frame_free(&pFrameRGB);
+/*     // Free the RGB image */
+/*     av_free(buffer); */
+/*     av_frame_free(&pFrameRGB); */
 
-    // Free the YUV frame
-    av_frame_free(&pFrame);
+/*     // Free the YUV frame */
+/*     av_frame_free(&pFrame); */
 
-    // Close the codecs
-    avcodec_close(pVCodecCtx);
+/*     // Close the codecs */
+/*     avcodec_close(pVCodecCtx); */
 
-    // Notification for the jitter clearing.
-    sem_post(pJitter->_sem);
-    ev_feed_signal(SIGUSR1);
+/*     // Notification for the jitter clearing. */
+/*     sem_post(pJitter->_sem); */
+/*     ev_feed_signal(SIGUSR1); */
 
-    return 0;
-}
+/*     return 0; */
+/* } */
 
 struct buffer_data {
     uint8_t *ptr;
@@ -891,6 +891,7 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
 	//初始化网络库 （可以打开rtsp rtmp http 协议的流媒体视频）
 	// avformat_network_init();// 原本就是注释掉的
 
+    // 0. Initialization
     av_init_packet(&packet);
 
     pVCodecCtx = avcodec_alloc_context3(NULL);
@@ -905,6 +906,7 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
     int WAITING_ROUND = 500;
     int SKIPPING_ROUND = 70;
 
+    // 1. Read a block from jitter or wait until getting a block
     while (true) {
         ret = pJitter->front(pBlock);
 
@@ -961,6 +963,9 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
     // myCodecPar = &codecpar;
     // int ret3 = lhs_copy_parameters_to_myParameters(myCodecPar, pVFormatCtx->streams[0]->codecpar);
     // Print2File("int ret2 = lhs_copy_parameters_to_context ==========================改的接口==========================");
+
+    // 2. Prepare the decoder
+    // 2.1 Read codec params from the block
     int ret2 = lhs_copy_parameters_to_context(pVCodecCtx, myCodecPar);
     // int ret2 = avcodec_parameters_to_context(pVCodecCtx, pVFormatCtx->streams[0]->codecpar);
     if(ret2<0){
@@ -968,6 +973,7 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
     }
     
     // Print2File("pVCodec = avcodec_find_decoder(pVCodecCtx->codec_id);");
+    // 2.2 Find the decoder
     pVCodec = avcodec_find_decoder(pVCodecCtx->codec_id);
     if (!pVCodec) {
         Print2File("Codec not found");

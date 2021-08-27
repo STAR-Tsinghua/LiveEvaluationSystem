@@ -3,9 +3,9 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <stdio.h>
-#include <live_xData.h>
-#include <util_log.h>
-#include <live_xDataThread.h>
+#include "live_xData.h"
+#include "util/util_log.h"
+#include "live_xDataThread.h"
 using namespace cv;
 
 class LiveCapture: public XDataThread

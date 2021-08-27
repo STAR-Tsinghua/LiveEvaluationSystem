@@ -24,7 +24,7 @@ extern "C"
 
 #include <stdarg.h>
 #include <sys/stat.h>
-#include <sodtp_config.h>
+#include "../sodtp/sodtp_config.h"
 
 #define msleep(n) usleep(n*1000)
 #define LOG_TPYE_TXT ".txt"

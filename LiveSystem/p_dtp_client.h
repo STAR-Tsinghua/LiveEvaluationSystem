@@ -191,7 +191,8 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
 
         fprintf(stderr, "sent HTTP request\n");
 
-        req_sent = true;
+        req_sent = true
+;
     }
 
 
@@ -257,7 +258,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                       // if it is an audio stream
                       // drop it now
                       timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(bk_ptr->block_id));
-                      conn_io->jitter->push_back(&header, bk_ptr);
+                      // conn_io->jitter->push_back(&header, bk_ptr);
                       conn_io->recv_round++;
                       continue;
                     } else {

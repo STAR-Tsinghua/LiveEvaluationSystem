@@ -9,8 +9,8 @@ extern "C"
 }
 
 #include <memory>
-#include <sodtp_config.h>
-#include <util_mediaEncoder.h>
+#include "sodtp_config.h"
+#include "../util/util_mediaEncoder.h"
 
 class StreamContext {
 public:
@@ -273,6 +273,8 @@ int addStream(AVFormatContext *fc, const AVCodecContext *vc, AVStream *&vs, cons
     return vs->index;
 }
 
+// Create a StreamCtxPtr and push it into the given vector with given AVFormatContext
+// It returns the stream_id, and -1 for error
 int set_StmCtxPtrsAndId(std::vector<StreamCtxPtr> *pStmCtxPtrs, AVFormatContext *fc){
     static int id = 0;
     StreamCtxPtr cptr = std::make_shared<StreamContext>(fc, id);

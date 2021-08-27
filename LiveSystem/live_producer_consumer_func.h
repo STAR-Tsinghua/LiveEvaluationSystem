@@ -1,10 +1,140 @@
 #ifndef LIVE_PRODUCER_CONSUMER_FUNC_H
 #define LIVE_PRODUCER_CONSUMER_FUNC_H
-#include <bounded_buffer.h>
+#include "sodtp/bounded_buffer.h"
 #include <live_liveCapture.h>
 #include <live_AudioCapture.h>
 #include <cassert>
 
+bool liveConsumeThreadFull(
+                           LiveCapture *lc,
+                           const MediaEncoder *xe,
+                           XTransport *xt,
+                           std::vector<StreamCtxPtr> *vStmCtx,
+                           BoundedBuffer<StreamPktVecPtr> *pBuffer){
+  // camera 直播输入源
+  int i = 0;      // packet index
+  int ret = 0;
+  int stream_num = 0; // 先暂时设定死
+  int block_id = 0;
+  StreamPktVecPtr pStmPktVec = NULL;
+  // (*ptr) already exists, then we can just resize it.
+  // 摄像头消费xData线程
+  long long beginTime = GetCurTime();
+  for (;;){
+    XData vd = lc->Pop();
+    if (vd.size <= 0){
+            msleep(1);
+            continue;
+        }
+        //处理视频
+        if (vd.size > 0){
+            vd.pts = vd.pts - beginTime;
+            XData yuv = xe->RGBToYUV(vd);
+            vd.Drop();
+            --lc->buffered_RGB;
+            timeFrameServer.evalTimeStamp("RGB_Pop","s","FrameTime");
+            timeFrameServer.evalTimeStamp("RGB_Buffer_Count","s",std::to_string(lc->buffered_RGB));
+            XData dpkt = xe->EncodeVideo(yuv);
+            if (dpkt.size > 0){
+                timeFrameServer.evalTimeStamp("FrameToYUV","s","FrameTime");
+                // timeMain.evalTime("dpkt.size > 0");
+                if (!dpkt.data || dpkt.size <= 0){
+                    Print2File("!pkt.data || pkt.size <= 0");
+                    continue;
+                }
+                // create next stream
+                stream_num = vStmCtx->size();
+                // if ptr doesn't exist, then create a vector to store packets in streams
+                if (!pStmPktVec) {
+                    pStmPktVec = std::make_shared<std::vector<StreamPktPtr>>(stream_num);
+                    for (auto &item : *pStmPktVec) {
+                        item = std::make_shared<StreamPacket>();
+                    }
+                }
+                // (*ptr) already exists, then we can just resize it.
+                else {
+                    if (pStmPktVec->size() != stream_num) {
+                        pStmPktVec->resize(stream_num);
+                    }
+                }
+                i = 0;
+                // Begin pushing the stream
+                for (auto it = vStmCtx->begin(); it != vStmCtx->end(); i++) {
+                    // 这里注意 ret=1 设置为直播1
+                    ret = 1;
+                    // bool SendFrame(XData d, int streamIndex)
+                    AVPacket *pack = (AVPacket *)dpkt.data;
+                    //这句十分重要
+                    av_packet_ref(&(*pStmPktVec)[i]->packet,pack);
+                    int streamIndex = 0;//强制设置为视频流为0
+                    pack->stream_index = streamIndex;
+                    AVRational stime;
+                    AVRational dtime;
+                    //判断是音频还是视频
+                    if (xt->vs && xt->vc && pack->stream_index == xt->vs->index)
+                    {
+                        stime = xt->vc->time_base;
+                        dtime = xt->vs->time_base;
+                    }
+                    else if(xt->as && xt->ac &&pack->stream_index == xt->as->index)
+                    {
+                        stime = xt->ac->time_base;
+                        dtime = xt->as->time_base;
+                        assert(false);
+                    }
+                    //推流
+                    pack->pts = av_rescale_q(pack->pts, stime, dtime);
+                    pack->dts = av_rescale_q(pack->dts, stime, dtime);
+                    pack->duration = av_rescale_q(pack->duration, stime, dtime);//duration计算错误，改成拉流端控制
+                    (*pStmPktVec)[i]->header.duration = (*pStmPktVec)[i]->packet.duration * 1000;
+                    (*pStmPktVec)[i]->header.duration *= (*it)->pFmtCtx->streams[0]->time_base.num;
+
+                    //原设置相关代码段
+                    if (ret < 0) {
+                        (*pStmPktVec)[i]->header.flag = HEADER_FLAG_FIN;  // end of stream
+                    } else {
+                        (*pStmPktVec)[i]->header.flag = HEADER_FLAG_NULL; // normal state
+                    }
+                    
+                    if ((*pStmPktVec)[i]->packet.flags & AV_PKT_FLAG_KEY) {
+                        timeFrameServer.evalTimeStamp("Net_Produce","I_frame",std::to_string(block_id));
+                        (*pStmPktVec)[i]->header.flag |= HEADER_FLAG_KEY;
+                        (*pStmPktVec)[i]->header.haveFormatContext = true;
+                        // 拷贝 xt->ic->streams[0]->codecpar 信息
+                        CodecParWithoutExtraData* codeparPtr = &((*pStmPktVec)[i]->header.codecPar);
+                        // 拷贝codecpar其他变量
+                        int ret3 = lhs_copy_parameters_to_myParameters(codeparPtr,xt->ic->streams[0]->codecpar);
+                        (*pStmPktVec)[i]->codecParExtradata = xt->ic->streams[0]->codecpar->extradata;
+                    }else{
+                        timeFrameServer.evalTimeStamp("Net_Produce","P_frame",std::to_string(block_id));
+                    }
+
+                    (*pStmPktVec)[i]->header.stream_id = (*it)->stream_id;
+                    timeFrameServer.evalTimeStamp("Net_Produce_redsult", "stream", std::to_string((*it)->stream_id));
+                    (*pStmPktVec)[i]->header.block_id = block_id;
+                    
+                    if (ret < 0) {
+                        it = vStmCtx->erase(it);
+                    }
+                    else {
+                        it++;
+                    }
+                }
+                
+                // write a vec pointer of packet ptrs into the buffer, and get a stale vec pointer.
+                // 特别注意 block_id 多流改位置！
+                block_id += 2;
+                pStmPktVec = pBuffer->produce(pStmPktVec);
+                pStmPktVec = NULL;
+                if (vStmCtx->empty()) {
+                    pBuffer->produce(NULL);
+                    break;
+                }
+            }
+        }
+    }
+    return true;
+}
 bool liveConsumeThread(LiveCapture *lc,
                        MediaEncoder *xe,
                        XTransport *xt,
@@ -79,6 +209,7 @@ bool liveConsumeThread(LiveCapture *lc,
                     {
                         stime = xt->ac->time_base;
                         dtime = xt->as->time_base;
+                        assert(false);
                     }
                     //推流
                     pack->pts = av_rescale_q(pack->pts, stime, dtime);
@@ -142,7 +273,8 @@ bool audioConsumeThread(AudioCapture *ac,
   int ret = 0;
   int stream_num = 0;
   int block_id = 1;
-  StreamPktVecPtr pStmPktVec = NULL; long long beginTime = GetCurTime();
+  StreamPktVecPtr pStmPktVec = NULL;
+  long long beginTime = GetCurTime();
   while(true) {
     XData audio_frame = ac->Pop();
     if(audio_frame.size <= 0){
@@ -271,11 +403,11 @@ bool prepareAudio(AudioCapture *ac, MediaEncoder *xe, XTransport *xt) {
   timeMainServer.evalTime("s","InitAudioCodec");
   
   // time.start();
-  if(!xt->MemoryOutByFIFO()){
-    Print2File("4. MemoryOutByFIFO : 失败！！");
-		return false;
-  }
-  timeMainServer.evalTime("s","MemoryOutByFIFO");
+  /* if(!xt->MemoryOutByFIFO()){ */
+    /* Print2File("4. MemoryOutByFIFO : 失败！！"); */
+		/* return false; */
+  /* } */
+  /* timeMainServer.evalTime("s","MemoryOutByFIFO"); */
   
   // time.start();
 	int aindex = 0;
@@ -381,33 +513,33 @@ bool prepareLiveMedia(LiveCapture *lc, MediaEncoder *xe, XTransport *xt) {
 void live_produce_full(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf){
     int i = 0;      // packet index
     int ret = 0;
-    int stream_id = -1;
-    // 准备摄像头的一对生产者消费者流RGB与YUV
+    int stream_id_video = -1;
+    int stream_id_audio = -1;
+
+    // Prepare capture, encoder and transporter
     LiveCapture *lc = new LiveCapture();
     AudioCapture *ac = new AudioCapture();
     MediaEncoder *mc = new MediaEncoder();
     XTransport *xt = new XTransport();
-    XTransport *axt = new XTransport();
     timeMainServer.evalTime("s","BeforePrepareLiveMedia");
     if(prepareLiveMedia(&(*lc),&(*mc),&(*xt))){
-        std::vector<StreamCtxPtr> vStmCtx;
-        stream_id = set_StmCtxPtrsAndId(&vStmCtx,xt->ic);
+      std::vector<StreamCtxPtr> vStmCtx; // Store contexts of all the streams in a 'file' such as video and audio
+      stream_id_video = set_StmCtxPtrsAndId(&vStmCtx,xt->ic); // add a stream context into the vector (video stream_id = 0)
+      if(stream_id < 0){
+        Print2File("init_live_resource()==false");
+        return;
+      }
+      if(prepareAudio(&(*ac), &(*mc), &(*xt))) {
+        stream_id = set_StmCtxPtrsAndId(&vStmCtx,axt->ic); // add audio context into the vector (audio stream_id = 1)
         if(stream_id < 0){
-            Print2File("init_live_resource()==false");
-            return;
+          Print2File("init_live_resource()==false");
+          return;
         }
-        if(prepareAudio(&(*ac), &(*mc), &(*axt))) {
-          std::vector<StreamCtxPtr> vStmCtxAudio;
-          stream_id = set_StmCtxPtrsAndId(&vStmCtxAudio,axt->ic);
-          if(stream_id < 0){
-            Print2File("init_live_resource()==false");
-            return;
-          }
-          timeMainServer.evalTime("s","Before2Thread");
-          std::thread cameraCaptureConsumeThread(liveConsumeThread,&(*lc),&(*mc),&(*xt),&vStmCtx,&(*pBuffer));
-          std::thread cameraCaptureProduceThread(&LiveCapture::run,lc);
-          ac->start();
-          std::thread audioCaptureConsumeThread(audioConsumeThread,
+        timeMainServer.evalTime("s","Before2Thread");
+        std::thread cameraCaptureProduceThread(&LiveCapture::run,lc); // start capturing video
+        ac->start(); // start capturing audio
+        std::thread cameraCaptureConsumeThread(liveConsumeThread,&(*lc),&(*mc),&(*xt),&vStmCtx,&(*pBuffer)); 
+        std::thread audioCaptureConsumeThread(audioConsumeThread,
                                                 &(*ac),
                                                 &(*mc),
                                                 &(*axt),
