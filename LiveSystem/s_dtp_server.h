@@ -45,14 +45,14 @@
 #include <ev.h>
 #include <uthash.h>
 
-#include <quiche.h>
+#include "../submodule/DTP/include/quiche.h"
 
 #include <vector>
-#include <util_url_file.h>
-#include <sodtp_block.h>
-#include <bounded_buffer.h>
-#include <util_log.h>
-#include <live_producer_consumer_func.h>
+#include "./sodtp/util_url_file.h"
+#include "./sodtp/sodtp_block.h"
+#include "./sodtp/bounded_buffer.h"
+#include "./util/util_log.h"
+#include "live_producer_consumer_func.h"
 
 #define LOCAL_CONN_ID_LEN 16
 

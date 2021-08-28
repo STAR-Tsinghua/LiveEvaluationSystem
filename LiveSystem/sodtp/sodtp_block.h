@@ -4,8 +4,8 @@
 #include <list>
 #include <memory>
 
-#include <sodtp_util.h>
-#include <util_log.h>
+#include "sodtp_util.h"
+#include "../util/util_log.h"
 extern "C"
 {
 #include <libavcodec/avcodec.h>

@@ -1,12 +1,12 @@
 #ifndef LIVE_AUDIOCAPTURE_H
 #define LIVE_AUDIOCAPTURE_H
 #define MINIAUDIO_IMPLEMENTATION
-#include <miniaudio.h>
+#include "miniaudio.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <util_log.h>
-#include <live_xData.h>
-#include <live_xDataThread.h>
+#include "util/util_log.h"
+#include "live_xData.h"
+#include "live_xDataThread.h"
 
 #define DEVICE_FORMAT           ma_format_f32
 #define DEVICE_CHANNELS         2

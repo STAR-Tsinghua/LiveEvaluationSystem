@@ -1,4 +1,6 @@
-﻿#include <iostream>
+﻿#ifndef LIVE_XTRANSPORT_H
+#define LIVE_XTRANSPORT_H
+#include <iostream>
 #include <string>
 extern "C"
 {
@@ -8,8 +10,43 @@ extern "C"
 #include <libavformat/avio.h>
 #include <libavutil/file.h>
 }
+#include "util/util_log.h"
+#include "live_xData.h"
 #pragma comment(lib, "avformat.lib")
 
+// Write all the data from buf to opaque
+//
+// The type of opaque should be a struct buffer_data_write
+//
+// The data written in uint8 FIFO
+static int lhs_write_packet(void *opaque, uint8_t *buf, int buf_size) {
+  struct buffer_data_write *bd = (struct buffer_data_write *)opaque;
+  while (buf_size > bd->room) {
+    int64_t offset = bd->ptr - bd->buf;
+    // uint8_t *bufferPtr = static_cast<uint8_t *>(malloc( sizeof(uint8_t)))
+    void *tmpPtr = av_realloc_f(bd->buf, 2, bd->size);
+    bd->buf = static_cast<uint8_t *>(malloc(sizeof(tmpPtr)));
+    if (!bd->buf)
+      return AVERROR(ENOMEM);
+    bd->size *= 2;
+    bd->ptr = bd->buf + offset;
+    bd->room = bd->size - offset;
+  }
+  /* copy buffer data to buffer_data buffer */
+  memcpy(bd->ptr, buf, buf_size);
+  bd->ptr += buf_size;
+  bd->room -= buf_size;
+  return buf_size;
+}
+
+//! A encapsulized Format Context of a media file.
+//!
+//! Each object has a compulsory video stream and an optional audio stream.
+//!
+//! Member functions help to create the FormatContext of both video and audio
+//! stream
+//!
+//! Warning!: Potential memory leak
 class XTransport
 {
 public:
@@ -39,7 +76,7 @@ public:
 	};
 	XTransport(const XTransport&){};
 	XTransport& operator=(const XTransport&);
-	void Close()
+	void close()
 	{
 		if (ic)
 		{
@@ -49,11 +86,22 @@ public:
 		vc = NULL;
 	}
 
+  /**
+   Add Stream to this file, described in *ic
 
-	int AddStream(const AVCodecContext *c) //2
+   This function creates a new stream according to the given
+   AVCodecContext and then it stores the new stream into the coresponding pointer that is either video or audio stream
+
+   @return: the stream number of the added stream. -1 for error
+
+    TODO: check the number of video and audio streams
+   */
+  int addStream(const AVCodecContext *c)
 	{
-		if (!c)return -1;
-		//b 添加视频流
+		if (!c) return -1;
+
+		// Add a media stream
+    // p.s.: the stream doesn't actually hold data in the Live System
 		AVStream *st = avformat_new_stream(ic, NULL);
 		if (!st)
 		{
@@ -130,7 +178,11 @@ public:
 		return true;
 	}
 
-	bool SendFrame(XData d, int streamIndex)
+  /**
+     Write the data into the media file
+     @useless in LiveSystem
+   */
+  bool SendFrame(XData d, int streamIndex)
 	{
 		if (!d.data || d.size <= 0)return false;
 		AVPacket *pack = (AVPacket *)d.data;
@@ -168,3 +220,4 @@ public:
 private:
 
 };
+#endif // LIVE_XTRANSPORT_H

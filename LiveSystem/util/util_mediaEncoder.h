@@ -233,7 +233,7 @@ public:
 	}
 
 	//视频编码 返回值无需用户清理
-	XData EncodeVideo(XData frame) const
+	XData EncodeVideo(XData frame)
 	{
 		// Print2File("Before EncodeVideo : !! av_packet_unref(&vpack);");
 		av_packet_unref(&vpack);
@@ -267,7 +267,7 @@ public:
 	}
 
 	//音频编码 返回值无需用户清理
-	XData EncodeAudio(XData frame) const
+	XData EncodeAudio(XData frame)
 	{
 		// Print2File("EncodeAudio");
 		XData r;
