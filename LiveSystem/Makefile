@@ -80,6 +80,7 @@ cl_udp:
 
 rb:
 	rm -rf $(TARGETS)
+	rm -rf *.so
 	make cl_all
 	make all
 

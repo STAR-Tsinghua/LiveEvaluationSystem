@@ -254,19 +254,19 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                         (int)(current_mtime() - header.block_ts));
                     // Print2File("conn_io->jitter->push_back(&header, bk_ptr)");
                     // Print2File("conn_io->jitter->push_back(&header, bk_ptr); 真正");
-                    if(bk_ptr->stream_id == 1) {
-                      // if it is an audio stream
-                      // drop it now
-                      timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(bk_ptr->block_id));
-                      // conn_io->jitter->push_back(&header, bk_ptr);
-                      conn_io->recv_round++;
-                      continue;
-                    } else {
+                    // if(bk_ptr->stream_id == 1) {
+                    //   // if it is an audio stream
+                    //   // drop it now
+                    //   timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(bk_ptr->block_id));
+                    //   // conn_io->jitter->push_back(&header, bk_ptr);
+                    //   conn_io->recv_round++;
+                    //   continue;
+                    // } else {
                       // deal with video stream block
-                      timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(bk_ptr->block_id));
-                      conn_io->jitter->push_back(&header, bk_ptr);
-                      conn_io->recv_round++;
-                    }
+                    timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(bk_ptr->block_id));
+                    conn_io->jitter->push_back(&header, bk_ptr);
+                    conn_io->recv_round++;
+                    // }
                 }
             }
 

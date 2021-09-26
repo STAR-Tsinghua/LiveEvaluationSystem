@@ -394,7 +394,7 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
     Print2FileInfo("(s)启动live_produce线程处");
     timeMainServer.evalTime("s","before_live_produce");
     // conn_io->thd_produce = new std::thread(live_produce, &conn_io->buffer, conns->conf);
-    conn_io->thd_produce = new std::thread(live_produce_full, &conn_io->buffer, conns->conf);
+    conn_io->thd_produce = new std::thread(live_produce, &conn_io->buffer, conns->conf);
 
     // Print2FileInfo("(s)启动audio_produce线程处");
     // timeMainServer.evalTime("s", "before_audio_produce");
