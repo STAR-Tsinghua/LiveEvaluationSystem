@@ -1,3 +1,6 @@
 [submodule "submodule/DTP"]
 	path = submodule/DTP
 	url = https://github.com/STAR-Tsinghua/DTP.git
+[submodule "submodule/quiche"]
+	path = submodule/quiche
+	url = https://github.com/cloudflare/quiche.git

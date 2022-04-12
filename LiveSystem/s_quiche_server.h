@@ -51,7 +51,6 @@
 #include <util_url_file.h>
 #include <sodtp_block.h>
 #include <bounded_buffer.h>
-
 #include <live_producer_consumer_func.h>
 
 #define LOCAL_CONN_ID_LEN 16
@@ -178,8 +177,8 @@ static void send_meta_data(CONN_IO *conn_io, StreamCtxPtr sctx, uint64_t quiche_
 
     // deadline = 99999ms
     // priority = 0
-    if (quiche_conn_stream_send_full(conn_io->conn, quiche_sid, buf,
-                sizeof(*header) + sizeof(*meta), true, 99999, 0) < 0) {
+    if (quiche_conn_stream_send(conn_io->conn, quiche_sid, buf,
+                sizeof(*header) + sizeof(*meta), true) < 0) {
         fprintf(stdout, "failed round %d,\t stream %d,\t meta data\n",
                 conn_io->send_round, header->stream_id);
     } else {
@@ -192,6 +191,7 @@ static void send_meta_data(CONN_IO *conn_io, StreamCtxPtr sctx, uint64_t quiche_
 
 // To simplify this process.
 // We can send frames each 1/25 second.
+// @deprecated
 static void sender_cb1(EV_P_ ev_timer *w, int revents) {
     CONN_IO *conn_io = (CONN_IO *)w->data;
     static AVPacket packet;
@@ -251,13 +251,13 @@ static void sender_cb1(EV_P_ ev_timer *w, int revents) {
 
             //深拷贝修改
             // memcpy(buf, &item->header, sizeof(item->header));
-            memcpy(buf, &header, sizeof(header));
-            int extradataSize = header.codecPar.extradata_size;
-            memcpy(buf + sizeof(item->header), item->codecParExtradata, extradataSize);
-            memcpy(buf + sizeof(item->header) + extradataSize, item->packet.data, item->packet.size);
+            //memcpy(buf, &header, sizeof(header));
+            //int extradataSize = header.codecPar.extradata_size;
+            //memcpy(buf + sizeof((*it)->header), (*it)->codecParExtradata, extradataSize);
+            //memcpy(buf + sizeof((*it)->header) + extradataSize, (*it)->packet.data, (*it)->packet.size);
             // Print2File("if (quiche_conn_stream_send_full(conn_io->conn, quiche_sid, buf");
-            if (quiche_conn_stream_send_full(conn_io->conn, quiche_sid, buf,
-                        sizeof(header) + packet.size, true, 99999, 0) < 0) {
+            if (quiche_conn_stream_send(conn_io->conn, quiche_sid, buf,
+                        sizeof(header) + packet.size, true) < 0) {
                 fprintf(stdout, "failed round %d,\t stream %d,\t block %d,\t size %d\n",
                         conn_io->send_round, header.stream_id,
                         conn_io->send_round, packet.size);
@@ -362,10 +362,15 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
                 item->header.block_ts = current_mtime();
 
                 memcpy(buf, &item->header, sizeof(item->header));
-                memcpy(buf + sizeof(item->header), item->packet.data, item->packet.size);
 
-                if (quiche_conn_stream_send_full(conn_io->conn, quiche_sid, buf,
-                            sizeof(item->header) + item->packet.size, true, deadline, priority) < 0) {
+                int extradataSize = item->header.codecPar.extradata_size;
+                // Print2File("extradataSize ====== : "+std::to_string(extradataSize));
+                // codecParExtradataPtr = (uint8_t*)av_mallocz(extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
+                memcpy(buf + sizeof(item->header), item->codecParExtradata, extradataSize);
+                memcpy(buf + sizeof(item->header) + extradataSize, item->packet.data, item->packet.size);
+
+                if (quiche_conn_stream_send(conn_io->conn, quiche_sid, buf,
+                            sizeof(item->header) + item->packet.size, true) < 0) {
                     fprintf(stdout, "failed round %d,\t stream %d,\t block %d,\t size %d\n",
                             conn_io->send_round, item->header.stream_id,
                             item->header.block_id, item->packet.size);
@@ -424,8 +429,8 @@ static void sender_cb3(EV_P_ ev_timer *w, int revents) {
 
                 to_send = sizeof(SodtpStreamHeader) + 36000;
 
-                if (quiche_conn_stream_send_full(conn_io->conn, quiche_sid, buf,
-                            to_send, true, 99999, 0) < 0) {
+                if (quiche_conn_stream_send(conn_io->conn, quiche_sid, buf,
+                            to_send, true) < 0) {
                     fprintf(stdout, "failed round %d,\t stream %d,\t block %d,\t size %d\n",
                             conn_io->send_round, i,
                             conn_io->send_round, to_send);
@@ -535,7 +540,7 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
 
 
     // The magic number 1/25 = 0.4. should be updated according to the frame
-    // rate of each stream. 
+    // rate of each stream.
     ev_timer_init(&conn_io->sender, sender_cb, 0., 1.0/(double)FRAME_RATE);
     ev_timer_start(loop, &conn_io->sender);
     conn_io->sender.data = conn_io;
@@ -702,7 +707,8 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
 
                 if (fin) {
                     fprintf(stderr, "stream %" PRIu64 " has been received\n", s);
-                    fprintf(stderr, "bct of stream is %" PRIu64 "ms.\n", quiche_conn_get_bct(conn_io->conn, s));
+                    // fprintf(stderr, "bct of stream is %" PRIu64 "ms.\n", quiche_conn_get_bct(conn_io->conn, s));
+                    fprintf(stderr, "bct of stream is unknown. (quiche doesn't have bct)\n");
                 }
             }
 
@@ -793,13 +799,14 @@ int quiche_server(const char *host, const char *port, const char *conf) {
     quiche_config_set_application_protos(config,
         (uint8_t *) "\x05hq-27\x05hq-25\x05hq-24\x05hq-23\x08http/0.9", 21);
 
-    quiche_config_set_max_idle_timeout(config, 5000);
+    // quiche_config_set_max_idle_timeout(config, 5000);
+    quiche_config_set_idle_timeout(config, 5000);
     quiche_config_set_max_packet_size(config, MAX_DATAGRAM_SIZE);
     quiche_config_set_initial_max_data(config, 10000000000);
     quiche_config_set_initial_max_stream_data_bidi_local(config, 1000000000);
     quiche_config_set_initial_max_stream_data_bidi_remote(config, 1000000000);
     quiche_config_set_initial_max_streams_bidi(config, 1000000);
-    quiche_config_set_cc_algorithm(config, QUICHE_CC_RENO);
+    //quiche_config_set_cc_algorithm(config, QUICHE_CC_RENO);
 
     struct connections c;
     c.sock = sock;
