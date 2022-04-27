@@ -77,7 +77,7 @@ clean:
 	rm -rf $(TARGETS)
 
 cl_all:
-	rm -rf $(LOGS)
+	sudo rm -rf $(LOGS)
 	mkdir $(LOGS)
 
 cl_dtp:

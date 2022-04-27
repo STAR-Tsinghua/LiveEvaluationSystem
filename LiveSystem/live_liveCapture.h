@@ -62,18 +62,28 @@ public:
 		}
 	}
 
-	bool Init(int camIndex = 0)
+	bool Init(int camIndex = 0, int resolution = 480)
 	{
 		cam.open(camIndex);
-		if (!cam.isOpened())
-		{
+		if (!cam.isOpened()) {
 			return false;
+		}
+		bool resolSet = false;
+		switch (resolution) {
+			case 720:
+				resolSet = cam.set(CAP_PROP_FRAME_WIDTH, 1280) && cam.set(CAP_PROP_FRAME_HEIGHT, 720);
+				break;
+			case 1080:
+				resolSet = cam.set(CAP_PROP_FRAME_WIDTH, 1920) && cam.set(CAP_PROP_FRAME_HEIGHT, 1080);
+				break;
+			default:
+				break;
 		}
 		width = cam.get(CAP_PROP_FRAME_WIDTH);
 		height = cam.get(CAP_PROP_FRAME_HEIGHT);
 		fps = cam.get(CAP_PROP_FPS);
-		// Print2FileInfo("Init cam.get(CAP_PROP_FRAME_WIDTH): "+std::to_string(width));
-		// Print2FileInfo("Init cam.get(CAP_PROP_FRAME_HEIGHT): "+std::to_string(height));
+		Print2FileInfo("Init cam.get(CAP_PROP_FRAME_WIDTH): "+std::to_string(width));
+		Print2FileInfo("Init cam.get(CAP_PROP_FRAME_HEIGHT): "+std::to_string(height));
 		Print2FileInfo("Init cam.get(CAP_PROP_FPS): "+std::to_string(fps)); //log显示mac电脑为30帧
 		timeMainServer.evalTime("s","cam.get(CAP_PROP_FPS) Before : "+std::to_string(fps));
 		if (fps == 0) fps = 25;

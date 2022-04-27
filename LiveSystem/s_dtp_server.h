@@ -374,6 +374,7 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
         return NULL;
     }
 
+    quiche_conn_set_tail(conn, 5);
     conn_io->sock = conns->sock;
     conn_io->conn = conn;
     conn_io->send_round = 0;
@@ -668,6 +669,7 @@ int dtp_server(const char *host, const char *port, const char *conf) {
     quiche_config_set_initial_max_stream_data_bidi_remote(config, 1000000000);
     quiche_config_set_initial_max_streams_bidi(config, 1000000);
     quiche_config_set_cc_algorithm(config, QUICHE_CC_RENO);
+    quiche_config_set_redundancy_rate(config, 1.0f);
 
     struct connections c;
     c.sock = sock;

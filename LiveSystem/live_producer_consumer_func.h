@@ -465,7 +465,7 @@ void audio_produce(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf) {
 bool prepareLiveMedia(LiveCapture *lc, MediaEncoder *xe, XTransport *xt) {
   timeMainServer.evalTime("s","prepareLiveMedia");
   //  1.打开摄像机
-  if (!lc->Init(0)) {
+  if (!lc->Init(0, 720)) {
     Print2File("1. 打开摄像机 : 失败！！");
     return false;
   }
