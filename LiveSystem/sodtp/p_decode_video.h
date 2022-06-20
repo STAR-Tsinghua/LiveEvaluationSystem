@@ -911,7 +911,7 @@ int video_viewer4(SodtpJitterPtr pJitter, SDLPlay *splay, const char *path) {
         ret = pJitter->front(pBlock);
 
         if ((ret == SodtpJitter::STATE_NORMAL) && pBlock->key_block) {
-            fprintf(stdout, "sniffing: stream %d,\t block %d,\t size %d\n",
+            fprintf(stdout, "sniffing: stream %u,\t block %u,\t size %d\n",
                     pBlock->stream_id, pBlock->block_id, pBlock->size);
 
             // Print2File("==========================改的接口==========================");

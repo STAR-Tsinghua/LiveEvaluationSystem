@@ -59,10 +59,10 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
         if (i == 0) {
             rect.x = 0;
             rect.y = 0;
-            // rect.w = 1280;
-            rect.w = 720;
-            // rect.h = 720;
-            rect.h = 400;
+            rect.w = 1280;
+            //rect.w = 720;
+            rect.h = 720;
+            //rect.h = 400;
         }
         else {
             rect.x = 720;
@@ -92,10 +92,10 @@ int main(int argc, char *argv[]) {
     // alarm(20); //这行代码无用！ 警惕自己
     StreamWorker sworker;
 
-    // int screen_w = 1280+540;
-    // int screen_h = 720;
-    int screen_w = 720+300;
+    int screen_w = 720;
     int screen_h = 400;
+    //int screen_w = 720+300;
+    //int screen_h = 400;
     sworker.splay.init(screen_w, screen_h);
 
     const char *host = argv[1];

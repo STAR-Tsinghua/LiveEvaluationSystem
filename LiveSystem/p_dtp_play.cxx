@@ -107,10 +107,10 @@ int main(int argc, char *argv[]) {
     // alarm(20); //这行代码无用！ 警惕自己
     StreamWorker sworker;
 
-    int screen_w = 1280;
-    int screen_h = 720;
-    // int screen_w = 720;
-    // int screen_h = 400;
+    // int screen_w = 1280;
+    // int screen_h = 720;
+    int screen_w = 720;
+    int screen_h = 400;
     sworker.splay.init(screen_w, screen_h);
 
     const char *host = argv[1];

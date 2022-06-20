@@ -218,12 +218,21 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
             if (fin) {
                 SodtpBlockPtr bk_ptr = bk_buf.read(s, &header);
                 if (bk_ptr) {
+                    long delay = ((long)current_mtime() - header.block_ts);
+                    delay = delay < 0 ? 0 : delay;
                     fprintf(stderr, "block ts %lld\n", header.block_ts);
-                    fprintf(stderr, "recv round %d,\t stream %d,\t block %d,\t size %d,\t delay %d\n",
+                    fprintf(stderr, "recv round %d,\t stream %u,\t block %u,\t size %d,\t delay %ld\n",
                         conn_io->recv_round, header.stream_id,
                         bk_ptr->block_id, bk_ptr->size,
-                        (int)(current_mtime() - header.block_ts));
-                    conn_io->jitter->push_back(&header, bk_ptr);
+                        delay);
+                    if (header.stream_id < 0) {
+                        fprintf(stderr, "Error block, drop it.\n");
+                    } else if(delay > 300) {
+                        fprintf(stderr, "Block %u miss ddl %ld, drop it.\n", bk_ptr->block_id, delay);
+                    } 
+                    else {
+                        conn_io->jitter->push_back(&header, bk_ptr);
+                    }
 
                     conn_io->recv_round++;
                 }

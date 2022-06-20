@@ -105,6 +105,9 @@ rd: r_dtp_server r_dtp_play libdtp.so libsodtp.so
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_dtp_play 127.0.0.1 9093 1>dtp_play.log 2>&1 &
 
+rdc: r_dtp_server r_dtp_play libquiche.so libsodtp.so
+	LD_LIBRARY_PATH=. ./r_dtp_play fd02::2 9093 1>dtp_play.log 2>&1 &
+
 # udp
 ru: r_udp_server r_udp_play libsodtp.so
 	make cl_udp
@@ -112,12 +115,17 @@ ru: r_udp_server r_udp_play libsodtp.so
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_udp_play 127.0.0.1 9093 1> udp_player.log 2>&1 &
 
+ruc: r_udp_server r_udp_play libsodtp.so
+	LD_LIBRARY_PATH=. ./r_udp_play fd02::2 9093 1> udp_player.log 2>&1 &
 # quiche
 rq: r_quiche_server r_quiche_play libquiche.so libsodtp.so
 	make cl_quiche
 	LD_LIBRARY_PATH=. ./r_quiche_server 127.0.0.1 9093 1>quiche_server.log 2>&1 &
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_quiche_play 127.0.0.1 9093 1>quiche_play.log 2>&1 &
+
+rqc: r_quiche_play libquiche.so libsodtp.so
+	LD_LIBRARY_PATH=. ./r_quiche_play fd02::2 9094 1> quiche_player.log 2>&1 &
 
 k:
 	../command/lhs_killBoth.sh
