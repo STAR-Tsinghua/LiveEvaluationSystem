@@ -60,9 +60,9 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
             rect.x = 0;
             rect.y = 0;
             rect.w = 1280;
-            //rect.w = 720;
+            // rect.w = 720;
             rect.h = 720;
-            //rect.h = 400;
+            // rect.h = 400;
         }
         else {
             rect.x = 720;
@@ -94,8 +94,9 @@ int main(int argc, char *argv[]) {
 
     int screen_w = 720;
     int screen_h = 400;
-    //int screen_w = 720+300;
-    //int screen_h = 400;
+
+    // int screen_w = 1280;
+    // int screen_h = 720;
     sworker.splay.init(screen_w, screen_h);
 
     const char *host = argv[1];

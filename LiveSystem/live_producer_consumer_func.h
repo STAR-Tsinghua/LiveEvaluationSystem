@@ -465,7 +465,7 @@ void audio_produce(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf) {
 bool prepareLiveMedia(LiveCapture *lc, MediaEncoder *xe, XTransport *xt) {
   timeMainServer.evalTime("s","prepareLiveMedia");
   //  1.打开摄像机
-  if (!lc->Init(0, 720)) {
+  if (!lc->Init(0, 360)) { // 在同一台机器上运行两个视频程序的话，建议使用 360p，更加流畅
     Print2File("1. 打开摄像机 : 失败！！");
     return false;
   }
