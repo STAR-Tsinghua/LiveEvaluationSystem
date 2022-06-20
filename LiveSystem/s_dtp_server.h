@@ -231,9 +231,11 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
                 if (item->header.flag & HEADER_FLAG_KEY) {
                     // Print2File("item->header.flag & HEADER_FLAG_KEY");
                     priority = (item->header.stream_id << 10) + 10;
+                    // priority = 10;
                 }
                 else {
                     priority = (item->header.stream_id << 10) + 20;
+                    // priority = 20;
                 }
 
                 // for the first block, we set it with the highest priority and enough deadline.
@@ -244,7 +246,11 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
                     deadline = 300000;//lhs改过的
                 }
                 else {
-                    deadline = 300;
+                    if (item->packet.flags & AV_PKT_FLAG_KEY) {
+                        deadline = 300;
+                    } else {
+                        deadline = 300;
+                    }
                 }
 
                 // tag the time stamp.
@@ -669,7 +675,7 @@ int dtp_server(const char *host, const char *port, const char *conf) {
     quiche_config_set_initial_max_stream_data_bidi_remote(config, 1000000000);
     quiche_config_set_initial_max_streams_bidi(config, 1000000);
     quiche_config_set_cc_algorithm(config, QUICHE_CC_RENO);
-    quiche_config_set_redundancy_rate(config, 1.0f);
+    quiche_config_set_redundancy_rate(config, 0.0f); //
 
     struct connections c;
     c.sock = sock;

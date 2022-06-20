@@ -62,17 +62,6 @@ r_quiche_server : s_quiche_server.cxx
 r_quiche_play : p_quiche_play.cxx libsodtp.so
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(QUICHE_INC) -L$(QUICHE_LIB) -lquiche $(LIBS) -lsodtp
 
-libsodtp.so: sodtp/sodtp_block.cxx sodtp/p_sodtp_jitter.cxx
-	$(CX) $(CXFLAGS) -fPIC -shared -o $@ $^ $(INCS) $(LIBS)
-
-libdtp.so:
-	cd ../submodule/DTP && cargo build --release
-	cp -f ../submodule/DTP/target/release/libquiche.so ./libdtp.so
-
-libquiche.so:
-	cd ../submodule/quiche && cargo build --release
-	cp -f ../submodule/quiche/target/release/libquiche.so ./libquiche.so
-
 clean:
 	rm -rf $(TARGETS)
 
@@ -105,12 +94,20 @@ rd: r_dtp_server r_dtp_play libdtp.so libsodtp.so
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_dtp_play 127.0.0.1 9093 1>dtp_play.log 2>&1 &
 
+rds: r_dtp_server r_dtp_play libsodtp.so
+	make cl_dtp
+	LD_LIBRARY_PATH=. ./r_dtp_server fd02::2 9093 1>dtp_server.log 2>&1 &
+
 # udp
 ru: r_udp_server r_udp_play libsodtp.so
 	make cl_udp
 	LD_LIBRARY_PATH=. ./r_udp_server 127.0.0.1 9093 1> udp_server.log 2>&1 &
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_udp_play 127.0.0.1 9093 1> udp_player.log 2>&1 &
+
+rus: r_udp_server r_udp_play libsodtp.so
+	make cl_udp
+	LD_LIBRARY_PATH=. ./r_udp_server fd02::2 9093 1> udp_server.log 2>&1 &
 
 # quiche
 rq: r_quiche_server r_quiche_play libquiche.so libsodtp.so
@@ -119,6 +116,20 @@ rq: r_quiche_server r_quiche_play libquiche.so libsodtp.so
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_quiche_play 127.0.0.1 9093 1>quiche_play.log 2>&1 &
 
+rqs: r_quiche_server r_quiche_play libsodtp.so
+	make cl_quiche
+	LD_LIBRARY_PATH=. ./r_quiche_server fd02::2 9094 1> quiche_server.log 2>&1 &
+
 k:
 	../command/lhs_killBoth.sh
 
+libsodtp.so: sodtp/sodtp_block.cxx sodtp/p_sodtp_jitter.cxx
+	$(CX) $(CXFLAGS) -fPIC -shared -o $@ $^ $(INCS) $(LIBS)
+
+libdtp.so:
+	cd ../submodule/DTP && cargo build --release
+	cp -f ../submodule/DTP/target/release/libquiche.so ./libdtp.so
+
+libquiche.so:
+	cd ../submodule/quiche && cargo build --release
+	cp -f ../submodule/quiche/target/release/libquiche.so ./libquiche.so

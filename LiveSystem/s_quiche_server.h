@@ -84,7 +84,7 @@ public:
     UT_hash_handle hh;
 
     uint32_t send_round;
-    std::vector<StreamCtxPtr> vStmCtxPtrs;
+    // std::vector<StreamCtxPtr> vStmCtxPtrs;
     BoundedBuffer<StreamPktVecPtr> buffer;
 
     std::thread *thd_produce;
@@ -175,7 +175,7 @@ static void send_meta_data(CONN_IO *conn_io, StreamCtxPtr sctx, uint64_t quiche_
     meta->width = sctx->pFmtCtx->streams[0]->codecpar->width;
     meta->height = sctx->pFmtCtx->streams[0]->codecpar->height;
 
-    // deadline = 99999ms
+    // deadline = 1000ms
     // priority = 0
     if (quiche_conn_stream_send(conn_io->conn, quiche_sid, buf,
                 sizeof(*header) + sizeof(*meta), true) < 0) {
@@ -189,143 +189,9 @@ static void send_meta_data(CONN_IO *conn_io, StreamCtxPtr sctx, uint64_t quiche_
     delete[] buf;
 }
 
+// 真正发送的地方
 // To simplify this process.
 // We can send frames each 1/25 second.
-// @deprecated
-static void sender_cb1(EV_P_ ev_timer *w, int revents) {
-    CONN_IO *conn_io = (CONN_IO *)w->data;
-    static AVPacket packet;
-    static SodtpStreamHeader header;
-    static uint8_t buf[2000000];    // 2Mbytes
-    static uint64_t quiche_sid = 1; // stream id of quiche
-
-    int ret = 0;
-
-
-    if (quiche_conn_is_established(conn_io->conn)) {
-
-        int size = conn_io->vStmCtxPtrs.size();
-        fprintf(stderr, "send frame once. fmt num %d\n", size);
-
-
-        for (auto it = conn_io->vStmCtxPtrs.begin(); it != conn_io->vStmCtxPtrs.end(); ) {
-            // printf("debug: %s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-
-            // if ((*it)->flag_meta == false) {
-            //     send_meta_data(conn_io, *it, quiche_sid);
-            //     (*it)->flag_meta = true;
-            //     quiche_sid += 4;
-            // }
-
-            ret = file_read_packet2((*it)->pFmtCtx, &packet);
-
-            // printf("send round %d,\t size = %d\n", send_round, packet.size);
-
-            if (ret < 0) {
-                header.flag = HEADER_FLAG_FIN;  // end of stream
-            } else {
-                header.flag = HEADER_FLAG_NULL; // normal state
-            }
-
-            header.stream_id = (*it)->stream_id;
-            // header.block_ts = packet.dts;
-            header.block_ts = current_mtime();
-            header.block_id = conn_io->send_round;
-            // duration in milli-seconds
-            header.duration = packet.duration * 1000;
-            header.duration *= (*it)->pFmtCtx->streams[0]->time_base.num;
-            header.duration /= (*it)->pFmtCtx->streams[0]->time_base.den;
-            fprintf(stderr, "duration %dms\n", header.duration);
-
-            // printf("frame duration %lld, time base: num %d den %d\n", packet.duration,
-            //         conn_io->vFmtCtxPtrs[i]->streams[0]->time_base.num,
-            //         conn_io->vFmtCtxPtrs[i]->streams[0]->time_base.den);
-
-            if (packet.flags & AV_PKT_FLAG_KEY) {
-                header.flag |= HEADER_FLAG_KEY;
-            }
-
-            // 原来代码
-            // memcpy(buf, &header, sizeof(header));
-            // memcpy(buf + sizeof(header), packet.data, packet.size);
-
-            //深拷贝修改
-            // memcpy(buf, &item->header, sizeof(item->header));
-            //memcpy(buf, &header, sizeof(header));
-            //int extradataSize = header.codecPar.extradata_size;
-            //memcpy(buf + sizeof((*it)->header), (*it)->codecParExtradata, extradataSize);
-            //memcpy(buf + sizeof((*it)->header) + extradataSize, (*it)->packet.data, (*it)->packet.size);
-            // Print2File("if (quiche_conn_stream_send_full(conn_io->conn, quiche_sid, buf");
-            if (quiche_conn_stream_send(conn_io->conn, quiche_sid, buf,
-                        sizeof(header) + packet.size, true) < 0) {
-                fprintf(stdout, "failed round %d,\t stream %d,\t block %d,\t size %d\n",
-                        conn_io->send_round, header.stream_id,
-                        conn_io->send_round, packet.size);
-            } else {
-                fprintf(stdout, "send round %d,\t stream %d,\t block %d,\t size %d\n",
-                        conn_io->send_round, header.stream_id,
-                        conn_io->send_round, packet.size);
-            }
-            quiche_sid += 4;
-
-
-            if (ret < 0) {
-                fprintf(stderr, "remove a format context\n");
-                it = conn_io->vStmCtxPtrs.erase(it);
-                // continue;
-
-                ///
-                // Here, we clear all the context when one file meets EOF.
-                // Because we use vector index, which is i, as the stream id.
-                // for (auto &cptr : conn_io->vStmCtxPtrs) {
-                //     avformat_close_input(&cptr->pFmtCtx);
-                // }
-                // conn_io->vStmCtxPtrs.clear();
-                // break;
-            }
-            else {
-                it++;
-            }
-
-            ///
-            av_packet_unref(&packet);
-            // printf("debug: %s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-            ///
-        }
-        fflush(stdout);
-        conn_io->send_round ++;
-
-        // send this packet.data with packet.len
-        ///
-        ///
-        // however, we need to know the block frame rate.
-        // to determine the interval between blocks.
-
-        // if (quiche_conn_stream_send(conn_io->conn, 4, packet.data, packet.len, true) < 0) {
-        //     fprintf(stderr, "failed to send data round %d\n", send_round);
-        // } else {
-        //     fprintf(stderr, "send round %d\n", send_round);
-        // }
-
-        // printf("debug: %s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-        if (conn_io->vStmCtxPtrs.empty()) {
-            fprintf(stderr, "stop sending\n");
-            ev_timer_stop(loop, &conn_io->sender);
-        }
-        ///
-        ///
-        // 临时设定，用于debug，需要修改。
-        // if (conn_io->send_round > 500) {
-        //     ev_timer_stop(loop, &conn_io->sender);
-        // }
-        ///
-        ///
-
-        flush_egress(loop, conn_io);
-        // printf("debug: %s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-    }
-}
-
 static void sender_cb(EV_P_ ev_timer *w, int revents) {
     CONN_IO *conn_io = (CONN_IO *)w->data;
     static uint8_t buf[2000000];    // 2Mbytes
@@ -334,22 +200,23 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
     int ret = 0;
     int size = 0;
     int priority = 0;
-    int deadline = 99999;
+    int deadline = 0;
     StreamPktVecPtr pStmPktVec = NULL;
 
     if (quiche_conn_is_established(conn_io->conn)) {
-
         pStmPktVec = conn_io->buffer.consume();
-
         if (!pStmPktVec) {
+            Print2File("stop sending");
             fprintf(stderr, "stop sending\n");
             ev_timer_stop(loop, &conn_io->sender);
         }
         else {
+            // Print2File("else stop sending else else");
             size = pStmPktVec->size();
             fprintf(stderr, "send frame once. stream num %d\n", size);
-
+            // Print2File("befor for (auto &item : *pStmPktVec)");
             for (auto &item : *pStmPktVec) {
+                // Print2File("for (auto &item : *pStmPktVec)");
                 // printf("debug: %s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
 
                 // if ((*it)->flag_meta == false) {
@@ -358,11 +225,40 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
                 //     quiche_sid += 4;
                 // }
 
+                // set the value of priority and deadline.
+                // key frame, priority = sid * 1024 + 10
+                if (item->header.flag & HEADER_FLAG_KEY) {
+                    // Print2File("item->header.flag & HEADER_FLAG_KEY");
+                    priority = (item->header.stream_id << 10) + 10;
+                    // priority = 10;
+                }
+                else {
+                    priority = (item->header.stream_id << 10) + 20;
+                    // priority = 20;
+                }
+
+                // for the first block, we set it with the highest priority and enough deadline.
+                // 如果拉流端I帧丢失 decoding: waiting for the key block of stream
+                if (item->header.block_id == 0) {
+                    priority = 2;
+                    deadline = 3000;//原来的值
+                    deadline = 300000;//lhs改过的
+                }
+                else {
+                    if (item->packet.flags & AV_PKT_FLAG_KEY) {
+                        deadline = 300;
+                    } else {
+                        deadline = 300;
+                    }
+                }
+
                 // tag the time stamp.
                 item->header.block_ts = current_mtime();
-
+                // Print2File("item->header.block_ts = current_mtime();");
+                //深拷贝修改
                 memcpy(buf, &item->header, sizeof(item->header));
-
+                // uint8_t     *codecParExtradata;
+                // Print2File("*(item->codecParExtradata) : "+std::to_string(sizeof(*(item->codecParExtradata))));
                 int extradataSize = item->header.codecPar.extradata_size;
                 // Print2File("extradataSize ====== : "+std::to_string(extradataSize));
                 // codecParExtradataPtr = (uint8_t*)av_mallocz(extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
@@ -374,15 +270,26 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
                     fprintf(stdout, "failed round %d,\t stream %d,\t block %d,\t size %d\n",
                             conn_io->send_round, item->header.stream_id,
                             item->header.block_id, item->packet.size);
+                    timeFrameServer.evalTimeStamp("Net_Consume_failed","s",std::to_string(item->header.block_id));
                 } else {
                     fprintf(stdout, "send round %d,\t stream %d,\t block %d,\t size %d\n",
                             conn_io->send_round, item->header.stream_id,
                             item->header.block_id, item->packet.size);
+
+                    if (item->packet.flags & AV_PKT_FLAG_KEY) {
+                        timeFrameServer.evalTimeStamp("Net_Consume","I_frame",std::to_string(item->header.block_id),std::to_string(item->packet.size));
+                    }else{
+                        timeFrameServer.evalTimeStamp("Net_Consume","P_frame",std::to_string(item->header.block_id),std::to_string(item->packet.size));
+                    }
                 }
                 quiche_sid += 4;
 
                 ///
+                // Print2File("static void sender_cb(EV_P_ ev_timer *w, int revents):  !! av_packet_unref(&item->packet);");
+                // 此处对应于的 av_packet_ref() 指向同一内存释放
                 av_packet_unref(&item->packet);
+                // packet内存释放代替上一句也可以？
+                // av_free_packet(&item->packet);
                 // printf("debug: %s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);
                 ///
             }
@@ -401,61 +308,6 @@ static void sender_cb(EV_P_ ev_timer *w, int revents) {
         flush_egress(loop, conn_io);
     }
 }
-
-static void sender_cb3(EV_P_ ev_timer *w, int revents) {
-    CONN_IO *conn_io = (CONN_IO *)w->data;
-    static uint8_t buf[2000000];    // 2Mbytes
-    static uint64_t quiche_sid = 1; // stream id of quiche
-
-    int ret = 0;
-    int size = 0;
-    int to_send = 0;
-    StreamPktVecPtr pStmPktVec = NULL;
-
-    if (quiche_conn_is_established(conn_io->conn)) {
-        pStmPktVec = NULL;
-        if (false) {
-            fprintf(stderr, "stop sending\n");
-            ev_timer_stop(loop, &conn_io->sender);
-        }
-        else {
-            size = 9;
-            fprintf(stderr, "send frame once. stream num %d\n", size);
-
-            for (int i = 0; i < size; i++) {
-
-                memcpy(buf, buf+1, sizeof(SodtpStreamHeader));
-                memcpy(buf + sizeof(SodtpStreamHeader), buf+21, 80000);
-
-                to_send = sizeof(SodtpStreamHeader) + 36000;
-
-                if (quiche_conn_stream_send(conn_io->conn, quiche_sid, buf,
-                            to_send, true) < 0) {
-                    fprintf(stdout, "failed round %d,\t stream %d,\t block %d,\t size %d\n",
-                            conn_io->send_round, i,
-                            conn_io->send_round, to_send);
-                } else {
-                    fprintf(stdout, "send round %d,\t stream %d,\t block %d,\t size %d\n",
-                            conn_io->send_round, i,
-                            conn_io->send_round, to_send);
-                }
-                quiche_sid += 4;
-            }
-        }
-        fflush(stdout);
-        conn_io->send_round ++;
-        ///
-        ///
-        // 临时设定，用于debug，需要修改。
-        if (conn_io->send_round > 500) {
-            ev_timer_stop(loop, &conn_io->sender);
-        }
-        ///
-        ///
-        flush_egress(loop, conn_io);
-    }
-}
-
 static void mint_token(const uint8_t *dcid, size_t dcid_len,
                        struct sockaddr_storage *addr, socklen_t addr_len,
                        uint8_t *token, size_t *token_len) {
@@ -497,7 +349,10 @@ static bool validate_token(const uint8_t *token, size_t token_len,
 static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
     // The frame rate should be updated as you need.
     // To be more accurate, there should be a dynamic variable.
-    static const int FRAME_RATE = 25;
+    static const int FRAME_RATE = 30;
+    static const double interval = 0.040;
+    static const double frameRate = 0.033;
+
 
     CONN_IO *conn_io = new CONN_IO();
     if (conn_io == NULL) {
@@ -533,15 +388,27 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
     conn_io->buffer.reset(MAX_BOUNDED_BUFFER_SIZE);
     // Init the stream format context.
     // init_resource(&conn_io->vStmCtxPtrs, conns->conf);
+
+    // 原接口！！！
+    // Print2File("-----------------------------原接口-----------------------------");
     // conn_io->thd_produce = new std::thread(produce, &conn_io->buffer, conns->conf);
 
-    // 改的接口
+    // 三种协议处
+    // 改的接口！！！
+    // Print2File("-----------------------------改的接口-----------------------------");
+    // Print2FileInfo("(s)启动live_produce线程处");
+    // timeMainServer.evalTime("s","before_live_produce");
+    // conn_io->thd_produce = new std::thread(live_produce, &conn_io->buffer, conns->conf);
     conn_io->thd_produce = new std::thread(live_produce, &conn_io->buffer, conns->conf);
 
+    // Print2FileInfo("(s)启动audio_produce线程处");
+    // timeMainServer.evalTime("s", "before_audio_produce");
+    // conn
 
     // The magic number 1/25 = 0.4. should be updated according to the frame
     // rate of each stream.
-    ev_timer_init(&conn_io->sender, sender_cb, 0., 1.0/(double)FRAME_RATE);
+    Print2FileInfo("(s)启动sender_cb线程处");
+    ev_timer_init(&conn_io->sender, sender_cb, 0., frameRate);
     ev_timer_start(loop, &conn_io->sender);
     conn_io->sender.data = conn_io;
 
@@ -554,10 +421,9 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
 
 static void recv_cb(EV_P_ ev_io *w, int revents) {
     CONN_IO *tmp, *conn_io = NULL;
-
     static uint8_t buf[MAX_BLOCK_SIZE];
     static uint8_t out[MAX_DATAGRAM_SIZE];
-
+    
     while (1) {
         struct sockaddr_storage peer_addr;
         socklen_t peer_addr_len = sizeof(peer_addr);
@@ -664,7 +530,9 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                 fprintf(stderr, "invalid address validation token\n");
                 return;
             }
-
+            Print2FileInfo("(s)create_conn函数");
+            timeMainServer.evalTime("s","before_create_conn");
+            // 之前准备
             conn_io = create_conn(loop, odcid, odcid_len);
             if (conn_io == NULL) {
                 return;
@@ -819,6 +687,8 @@ int quiche_server(const char *host, const char *port, const char *conf) {
 
     struct ev_loop *loop = ev_default_loop(0);
 
+    timeMainServer.evalTime("s","Before_recv_cb");
+    Print2FileInfo("(s)启动recv_cb函数处");
     ev_io_init(&watcher, recv_cb, sock, EV_READ);
     ev_io_start(loop, &watcher);
     watcher.data = &c;

@@ -84,6 +84,7 @@ public:
 		fps = cam.get(CAP_PROP_FPS);
 		Print2FileInfo("Init cam.get(CAP_PROP_FRAME_WIDTH): "+std::to_string(width));
 		Print2FileInfo("Init cam.get(CAP_PROP_FRAME_HEIGHT): "+std::to_string(height));
+		//fprintf("Init cam.get(CAP_PROP_FRAME_WIDTH): %d")
 		Print2FileInfo("Init cam.get(CAP_PROP_FPS): "+std::to_string(fps)); //log显示mac电脑为30帧
 		timeMainServer.evalTime("s","cam.get(CAP_PROP_FPS) Before : "+std::to_string(fps));
 		if (fps == 0) fps = 25;
