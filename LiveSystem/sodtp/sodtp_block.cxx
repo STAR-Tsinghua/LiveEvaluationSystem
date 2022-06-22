@@ -3,27 +3,41 @@
 
 int BlockDataBuffer::write(uint32_t id, uint8_t *src, int size) {
     int ret = 0;
+    if(buffer.size() > 0 && id < buffer.back()->id) {
+        // already expired data
+        return size;
+    }
     timeFramePlayer.evalTimeStamp("buffer_write","p",std::to_string(id));
     // Find existing block, and push back the data.
     for (const auto &it : buffer) {
         if (it->id == id) {
-            // timeFramePlayer.evalTimeStamp("buffer_write","p",std::to_string(id));
+            timeFramePlayer.evalTimeStamp("buffer_write","p",std::to_string(id) + std::string("write"));
             return it->write(src, size);
         }
     }
-
+    timeFramePlayer.evalTimeStamp("buffer_write","p",std::to_string(id) + " new");
     // Else, this is a new block.
     // Create new BlockData.
     BlockDataPtr ptr(new BlockData(id));
-    buffer.push_front(ptr);
 
     // If too many blocks, pop the stale block.
     if (buffer.size() > MAX_BLOCK_NUM) {
-        buffer.pop_back();
+        timeFramePlayer.evalTimeStamp("buffer_write","p", std::string(" pop"));
+        for (auto it = buffer.begin(); it != buffer.end();) {
+            if((*it)->expired) {
+                // remove finished block
+                timeFramePlayer.evalTimeStamp("buffer_write","p", std::string("pop") + std::to_string((*it)->id));
+                it = buffer.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 
+    buffer.push_front(ptr);
     ret = ptr->write(src, size);
 
+    timeFramePlayer.evalTimeStamp("buffer_write","p",std::to_string(id) + "after write");
     return ret;
 }
 
@@ -98,6 +112,12 @@ SodtpBlockPtr BlockDataBuffer::read(uint32_t id, SodtpStreamHeader *head) {
     return ptr;
 }
 
-
-
-
+void BlockDataBuffer::mark_finish(uint32_t id) {
+    timeFramePlayer.evalTimeStamp("buffer_finish","p",std::to_string(id));
+    for (const auto &it : buffer) {
+        if (it->id == id) {
+            it->expired = true;
+            break;
+        }
+    }
+}

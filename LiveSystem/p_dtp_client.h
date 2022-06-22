@@ -247,26 +247,23 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                 // Print2File("SodtpBlockPtr BlockDataBuffer::read(uint32_t id, SodtpStreamHeader *head) {");
                 SodtpBlockPtr bk_ptr = bk_buf.read(s, &header);
                 if (bk_ptr) {
-                    fprintf(stderr, "block ts %ld\n", header.block_ts);
-                    fprintf(stderr, "recv round %d,\t stream %d,\t block %d,\t size %d,\t delay %d\n",
+                    long delay = ((long)current_mtime() - header.block_ts);
+                    delay = delay < 0 ? 0 : delay;
+                    fprintf(stderr, "block ts %lld\n", header.block_ts);
+                    fprintf(stderr, "recv round %d,\t stream %u,\t block %u,\t size %d,\t delay %ld\n",
                         conn_io->recv_round, header.stream_id,
                         bk_ptr->block_id, bk_ptr->size,
-                        (int)(current_mtime() - header.block_ts));
-                    // Print2File("conn_io->jitter->push_back(&header, bk_ptr)");
-                    // Print2File("conn_io->jitter->push_back(&header, bk_ptr); 真正");
-                    // if(bk_ptr->stream_id == 1) {
-                    //   // if it is an audio stream
-                    //   // drop it now
-                    //   timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(bk_ptr->block_id));
-                    //   // conn_io->jitter->push_back(&header, bk_ptr);
-                    //   conn_io->recv_round++;
-                    //   continue;
-                    // } else {
-                      // deal with video stream block
-                    timeFramePlayer.evalTimeStamp("pJitter_Push","p",std::to_string(bk_ptr->block_id));
-                    conn_io->jitter->push_back(&header, bk_ptr);
+                        delay);
+                    if (header.stream_id > 10) {
+                        fprintf(stderr, "Error block, drop it.\n");
+                    } else if(delay > 400 && s != 1) {
+                        fprintf(stderr, "Block %u miss ddl %ld, drop it.\n", bk_ptr->block_id, delay);
+                    }
+                    else {
+                        conn_io->jitter->push_back(&header, bk_ptr);
+                    }
+
                     conn_io->recv_round++;
-                    // }
                 }
             }
 

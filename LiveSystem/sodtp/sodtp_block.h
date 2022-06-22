@@ -21,7 +21,8 @@ extern "C"
 #define HEADER_FLAG_FIN     0x0010
 
 typedef struct CodecParWithoutExtraData {
-    enum AVMediaType codec_type;
+    enum
+AVMediaType codec_type;
     enum AVCodecID   codec_id;
     uint32_t         codec_tag;
     uint8_t *extradata;
@@ -117,9 +118,10 @@ public:
 
     uint32_t    id;             // a temp id for collecting complete data.
     uint64_t    expire_ts;
+    bool expired = false;
 
     BlockData(uint32_t id) {
-        // expire_ts = current_time() + 200; // deadline 
+        // expire_ts = current_mtime() + 300; // deadline
         offset = data;
         this->id = id;
     }
@@ -142,9 +144,10 @@ public:
 typedef std::shared_ptr<BlockData> BlockDataPtr;
 
 
+// TODO: Error in removing cached blocks
 class BlockDataBuffer {
 public:
-    static const int32_t MAX_BLOCK_NUM = 40;
+    static const int32_t MAX_BLOCK_NUM = 100;
 
     std::list<BlockDataPtr> buffer;
 
@@ -156,6 +159,9 @@ public:
 
     // Read after the block is completed.
     SodtpBlockPtr read(uint32_t id, SodtpStreamHeader *head);
+
+    // Mark the id of block that can be released.
+    void mark_finish(uint32_t id);
 };
 
 // AVCodecParameters 要改成 CodecParWithoutExtraData
