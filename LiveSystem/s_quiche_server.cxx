@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
         conf = argv[3];
     }
     else {
-        conf = "./config/stream.conf";
+        conf = "./config/quiche.conf";
     }
 
     quiche_server(host, port, conf);

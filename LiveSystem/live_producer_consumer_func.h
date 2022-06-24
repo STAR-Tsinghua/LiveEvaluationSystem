@@ -462,10 +462,10 @@ void audio_produce(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf) {
   return;
 }
 
-bool prepareLiveMedia(LiveCapture *lc, MediaEncoder *xe, XTransport *xt) {
+bool prepareLiveMedia(LiveCapture *lc, MediaEncoder *xe, XTransport *xt, int camera = 0, int resolution = 360) {
   timeMainServer.evalTime("s","prepareLiveMedia");
   //  1.打开摄像机
-  if (!lc->Init(0, 360)) { // 在同一台机器上运行两个视频程序的话，建议使用 360p，更加流畅
+  if (!lc->Init(camera, resolution)) { // 在同一台机器上运行两个视频程序的话，建议使用 360p，更加流畅
     Print2File("1. 打开摄像机 : 失败！！");
     return false;
   }
@@ -575,8 +575,25 @@ void live_produce(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf){
     LiveCapture *lc = new LiveCapture();
     MediaEncoder *mc = new MediaEncoder();
     XTransport *xt = new XTransport();
+    fprintf(stderr, "live_produce, config name: %s\n", conf);
+    int camera = 0, resolution = 360;
+    FILE* fconf = fopen(conf, "r");
+    if(!fconf) {
+      fprintf(stderr, "cannot open conf file\n");
+    } else {
+      fscanf(fconf, "%d %d", &camera, &resolution);
+      fprintf(stderr, "load conf: %d %d\n", camera, resolution);
+      if(camera < 0 || camera > 4 || resolution <= 0) {
+        fprintf(stderr, "error conf parameter\n");
+        camera = 0;
+        resolution = 360;
+      }
+      fclose(fconf);
+    }
+    
+    
     timeMainServer.evalTime("s","BeforePrepareLiveMedia");
-    if(prepareLiveMedia(&(*lc),&(*mc),&(*xt))){
+    if(prepareLiveMedia(&(*lc),&(*mc),&(*xt), camera, resolution)){
         std::vector<StreamCtxPtr> vStmCtx;
         stream_id = set_StmCtxPtrsAndId(&vStmCtx,xt->ic);
         if(stream_id < 0){
