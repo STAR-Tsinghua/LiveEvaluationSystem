@@ -58,7 +58,7 @@ public:
     // will be ignored.
     static const int32_t REBUFFER_DISORDER_LIMIT    = 10;
 
-    static const int32_t REAL_TIME_LIMIT    = 300;      // default limit for real-time delay (ms).
+    static const int32_t REAL_TIME_LIMIT    = 350;      // default limit for real-time delay (ms).
 
     uint32_t            state;
 

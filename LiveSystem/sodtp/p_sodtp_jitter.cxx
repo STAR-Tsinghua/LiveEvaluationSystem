@@ -261,7 +261,7 @@ int SodtpJitter::push(SodtpBlockPtr block) {
         scoped_lock lock(_mutex);
 
         // drop stale blocks in real-time mode.
-        if (real_time && (block->block_ts + _real_time_limit < current_mtime())) {
+        if (real_time && (block->block_ts + _real_time_limit < current_mtime()) && block->block_id != 0 && block->block_id != 1) {
             fprintf(stderr, "ignore non real-time block, stream %d,\t block %d\n",
                 block->stream_id, block->block_id);
             return ret;
