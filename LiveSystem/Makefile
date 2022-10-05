@@ -22,7 +22,9 @@ OPENCVFLAGS = `pkg-config --cflags --libs opencv`
 
 INCS = -I$(CURDIR) -I$(CURDIR)/sodtp -I$(CURDIR)/util -I$(FFMPEG_INC)
 
-LIBS = -L$(CURDIR) -L$(FFMPEG_LIB) -L$(FFMPEG_SHARED) -lswscale -lswresample -lavformat \
+LIBS_DIR = -L$(CURDIR) -L$(FFMPEG_LIB) -L$(FFMPEG_SHARED) -L$(LIBCRYPTO_DIR) -L$(LIBSSL_DIR)
+
+LIBS =  -lswscale -lswresample -lavformat \
 		-lavdevice -lavcodec -lavutil -lavfilter \
 		-lSDL2 \
 		-lm -lz -lev -ldl -pthread \
@@ -43,10 +45,10 @@ all: $(TARGETS)
 
 # ================= dtp =================
 r_dtp_server : s_dtp_server.cxx
-	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(DTP_INC) -L$(DTP_LIB) -ldtp $(LIBS) $(OPENCVFLAGS)
+	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(DTP_INC) -L$(DTP_LIB) $(LIBS_DIR) -ldtp $(LIBS) $(OPENCVFLAGS)
 
 r_dtp_play : p_dtp_play.cxx libsodtp.so
-	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(DTP_INC) -L$(DTP_LIB) -ldtp $(LIBS) -lsodtp
+	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(DTP_INC) -L$(DTP_LIB) $(LIBS_DIR) -ldtp $(LIBS) -lsodtp
 
 # ================= udp =================
 r_udp_server : s_udp_server.cxx
@@ -57,10 +59,10 @@ r_udp_play : p_udp_play.cxx libsodtp.so
 
 # ================= quiche =================
 r_quiche_server : s_quiche_server.cxx
-	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(QUICHE_INC) -L$(QUICHE_LIB) -lquiche $(LIBS) $(OPENCVFLAGS)
+	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(QUICHE_INC) -L$(QUICHE_LIB) $(LIBS_DIR) $(LIBS) $(OPENCVFLAGS) -lssl -lquiche 
 
 r_quiche_play : p_quiche_play.cxx libsodtp.so
-	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(QUICHE_INC) -L$(QUICHE_LIB) -lquiche $(LIBS) -lsodtp
+	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(QUICHE_INC) -L$(QUICHE_LIB) $(LIBS_DIR) -lquiche $(LIBS) -lsodtp
 
 main:
 	g++ main.cpp loopbuf.cpp -o a.out
@@ -92,13 +94,13 @@ rb:
 	make all
 
 # dtp
-rd: r_dtp_server r_dtp_play libdtp.so libsodtp.so
+rd: r_dtp_server r_dtp_play libsodtp.so
 	make cl_dtp
 	LD_LIBRARY_PATH=. ./r_dtp_server 127.0.0.1 9093 1>dtp_server.log 2>&1 &
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_dtp_play 127.0.0.1 9093 1>dtp_play.log 2>&1 &
 
-rdc: r_dtp_server r_dtp_play libquiche.so libsodtp.so
+rdc: r_dtp_server r_dtp_play libsodtp.so
 	LD_LIBRARY_PATH=. ./r_dtp_play fd02::2 9093 1>dtp_play.log 2>&1 &
 
 rds: r_dtp_server r_dtp_play libsodtp.so
@@ -120,21 +122,26 @@ rus: r_udp_server r_udp_play libsodtp.so
 	LD_LIBRARY_PATH=. ./r_udp_server fd02::2 9093 1> udp_server.log 2>&1 &
 
 # quiche
-rq: r_quiche_server r_quiche_play libquiche.so libsodtp.so
+rq: r_quiche_server r_quiche_play libsodtp.so
 	make cl_quiche
 	LD_LIBRARY_PATH=. ./r_quiche_server 127.0.0.1 9094 1>quiche_server.log 2>&1 &
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_quiche_play 127.0.0.1 9094 1>quiche_play.log 2>&1 &
 
-rqc: r_quiche_play libquiche.so libsodtp.so
+rqc: r_quiche_play libsodtp.so
 	LD_LIBRARY_PATH=. ./r_quiche_play fd02::2 9094 1> quiche_player.log 2>&1 &
 
-rqs: r_quiche_server r_quiche_play libsodtp.so
+rqs: r_quiche_server libsodtp.so
 	make cl_quiche
 	LD_LIBRARY_PATH=. ./r_quiche_server fd02::2 9094 1> quiche_server.log 2>&1 &
 
 k:
 	../command/lhs_killBoth.sh
+kq:
+	../command/lhs_killq.sh
+
+test: test.cpp
+	$(CX) $(CXFLAGS) test.cpp $(INCS) -I$(QUICHE_INC) -L$(QUICHE_LIB) $(LIBS_DIR) -lquiche -o ./a.out
 
 libsodtp.so: sodtp/sodtp_block.cxx sodtp/p_sodtp_jitter.cxx
 	$(CX) $(CXFLAGS) -fPIC -shared -o $@ $^ $(INCS) $(LIBS)
@@ -146,3 +153,13 @@ libdtp.so:
 libquiche.so:
 	cd ../submodule/quiche && cargo build --release
 	cp -f ../submodule/quiche/target/release/libquiche.so ./libquiche.so
+
+libdtp.a:
+	cd ../submodule/DTP && cargo build --release
+	mv -f ../submodule/DTP/target/release/libquiche.a ./libdtp.a
+	rm -f ../submodule/DTP/target/release/libquiche.so
+
+libquiche.a:
+	cd ../submodule/quiche && cargo build --release
+	mv -f ../submodule/quiche/target/release/libquiche.a ./libquiche.a
+	rm -f ../submodule/quiche/target/release/libquiche.so
