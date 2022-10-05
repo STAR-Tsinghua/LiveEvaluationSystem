@@ -23,15 +23,21 @@ int BlockDataBuffer::write(uint32_t id, uint8_t *src, int size) {
     // If too many blocks, pop the stale block.
     if (buffer.size() > MAX_BLOCK_NUM) {
         timeFramePlayer.evalTimeStamp("buffer_write","p", std::string(" pop"));
+	bool find = false;
+	uint64_t current = current_mtime();
         for (auto it = buffer.begin(); it != buffer.end();) {
             if((*it)->expired) {
                 // remove finished block
                 timeFramePlayer.evalTimeStamp("buffer_write","p", std::string("pop") + std::to_string((*it)->id));
                 it = buffer.erase(it);
+		find = true;
             } else {
                 ++it;
             }
         }
+	if(!find) {
+		buffer.pop_back();
+	}
     }
 
     buffer.push_front(ptr);

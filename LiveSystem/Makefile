@@ -92,16 +92,16 @@ rb:
 	make all
 
 # dtp
-rd: r_dtp_server r_dtp_play libdtp.so libsodtp.so
+rd: libsodtp.so r_dtp_server r_dtp_play 
 	make cl_dtp
 	LD_LIBRARY_PATH=. ./r_dtp_server 127.0.0.1 9093 1>dtp_server.log 2>&1 &
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_dtp_play 127.0.0.1 9093 1>dtp_play.log 2>&1 &
 
-rdc: r_dtp_server r_dtp_play libquiche.so libsodtp.so
+rdc: libsodtp.so r_dtp_play 
 	LD_LIBRARY_PATH=. ./r_dtp_play fd02::2 9093 1>dtp_play.log 2>&1 &
 
-rds: r_dtp_server r_dtp_play libsodtp.so
+rds: libsodtp.so r_dtp_server 
 	make cl_dtp
 	LD_LIBRARY_PATH=. ./r_dtp_server fd02::2 9093 1>dtp_server.log 2>&1 &
 
@@ -120,16 +120,16 @@ rus: r_udp_server r_udp_play libsodtp.so
 	LD_LIBRARY_PATH=. ./r_udp_server fd02::2 9093 1> udp_server.log 2>&1 &
 
 # quiche
-rq: r_quiche_server r_quiche_play libquiche.so libsodtp.so
+rq: libsodtp.so r_quiche_server r_quiche_play 
 	make cl_quiche
 	LD_LIBRARY_PATH=. ./r_quiche_server 127.0.0.1 9094 1>quiche_server.log 2>&1 &
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_quiche_play 127.0.0.1 9094 1>quiche_play.log 2>&1 &
 
-rqc: r_quiche_play libquiche.so libsodtp.so
+rqc: libsodtp.so r_quiche_play 
 	LD_LIBRARY_PATH=. ./r_quiche_play fd02::2 9094 1> quiche_player.log 2>&1 &
 
-rqs: r_quiche_server r_quiche_play libsodtp.so
+rqs: r_quiche_server r_quiche_play 
 	make cl_quiche
 	LD_LIBRARY_PATH=. ./r_quiche_server fd02::2 9094 1> quiche_server.log 2>&1 &
 
@@ -146,3 +146,13 @@ libdtp.so:
 libquiche.so:
 	cd ../submodule/quiche && cargo build --release
 	cp -f ../submodule/quiche/target/release/libquiche.so ./libquiche.so
+
+libdtp.a:
+	cd ../submodule/DTP && cargo build --release
+	mv -f ../submodule/DTP/target/release/libquiche.a ./libdtp.a
+	rm ../submodule/DTP/target/release/libquiche.so
+
+libquiche.a:
+	cd ../submodule/quiche && cargo build --release
+	mv -f ../submodule/DTP/target/release/libquiche.a ./libquiche.a
+	rm ../submodule/quiche/target/release/libquiche.so

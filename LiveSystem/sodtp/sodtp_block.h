@@ -121,7 +121,7 @@ public:
     bool expired = false;
 
     BlockData(uint32_t id) {
-        // expire_ts = current_mtime() + 300; // deadline
+        expire_ts = current_mtime() + 300; // deadline
         offset = data;
         this->id = id;
     }
