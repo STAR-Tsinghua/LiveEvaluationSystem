@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 
     // int screen_w = 1280;
     // int screen_h = 720;
-    sworker.splay.init(screen_w, screen_h);
+    sworker.splay.init(screen_w, screen_h, "QUIC player");
 
     const char *host = argv[1];
     const char *port = argv[2];

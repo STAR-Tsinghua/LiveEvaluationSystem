@@ -227,8 +227,8 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                         delay);
                     if (header.stream_id > 10) {
                         fprintf(stderr, "Error block, drop it.\n");
-                    } else if(delay > 300) {
-                        fprintf(stderr, "Block %u miss ddl %ld, drop it.\n", bk_ptr->block_id, delay);
+                    // } else if(delay > 300) {
+                    //     fprintf(stderr, "Block %u miss ddl %ld, drop it.\n", bk_ptr->block_id, delay);
                     }
                     else {
                         conn_io->jitter->push_back(&header, bk_ptr);

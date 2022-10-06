@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     // int screen_h = 720;
     int screen_w = 720;
     int screen_h = 400;
-    sworker.splay.init(screen_w, screen_h);
+    sworker.splay.init(screen_w, screen_h, "DTP player");
 
     const char *host = argv[1];
     const char *port = argv[2];

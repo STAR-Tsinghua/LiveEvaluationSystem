@@ -17,7 +17,7 @@ public:
     SDLPlay() {};
     ~SDLPlay() {};
 
-    int init(int w, int h);
+    int init(int w, int h, const char* window_name = "SoDTP player");
     void update(AVFrame *frame, SDL_Texture *texture, SDL_Rect *rect);
     void show();
 
@@ -35,7 +35,7 @@ public:
     SDL_Event       event;
 };
 
-int SDLPlay::init(int w, int h) {
+int SDLPlay::init(int w, int h, const char* window_name) {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER)) {
         printf( "Could not initialize SDL - %s\n", SDL_GetError()); 
         return -1;
@@ -43,7 +43,7 @@ int SDLPlay::init(int w, int h) {
     // SDL 2.0 supports multiple windows.
     screen_w = w;
     screen_h = h;
-    screen = SDL_CreateWindow("SoDTP player",
+    screen = SDL_CreateWindow(window_name,
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
                               screen_w,
