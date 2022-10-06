@@ -113,24 +113,30 @@ int main(int argc, char *argv[]) {
     int screen_h = 400;
     sworker.splay.init(screen_w, screen_h, "DTP player");
 
-    const char *host = argv[1];
-    const char *port = argv[2];
-
-    const char *path = NULL;
-    if (argc >= 4) {
-        path = argv[3];
+    argp_parse(&argp, argc, argv, 0, 0, &args);
+    printf("SERVER_IP %s SERVER_PORT %s CONFIG_FILE %s\n", args.args[0],
+             args.args[1], args.args[2]);
+    const char *host = args.args[0];
+    const char *port = args.args[1];
+    const char *conf = args.args[2];
+    
+    if (conf) {
+        conf = argv[3];
     }else {
-        path = "./config/ev_dtp.conf";
+        conf = "./config/dtp.conf";
     }
-    logSysPrepare(path);
+
+    logSysPrepare(conf);
+
+    const char* path = NULL;
 
     SaveConfig scon;
     scon.parse("./config/save.conf");    
-    if (!path) {
-        path = scon.path.c_str();
+    if (!conf) {
+        conf = scon.path.c_str();
     }
     if (!scon.save) {
-        path = NULL;
+        conf = NULL;
     }
 
     sworker.host = host;

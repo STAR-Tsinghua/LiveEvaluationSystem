@@ -148,7 +148,7 @@ libsodtp.so: sodtp/sodtp_block.cxx sodtp/p_sodtp_jitter.cxx
 	$(CX) $(CXFLAGS) -fPIC -shared -o $@ $^ $(INCS) $(LIBS_DIR) $(LIBS)
 
 libdtp.so:
-	cd ../submodule/DTP && cargo build --release
+	cd ../submodule/DTP && cargo build --release --features "boringssl-vendored fec"
 	cp -f ../submodule/DTP/target/release/libquiche.so ./libdtp.so
 
 libquiche.so:
@@ -156,7 +156,7 @@ libquiche.so:
 	cp -f ../submodule/quiche/target/release/libquiche.so ./libquiche.so
 
 libdtp.a:
-	cd ../submodule/DTP && cargo build --release
+	cd ../submodule/DTP && cargo build --release --features "boringssl-vendored fec"
 	mv -f ../submodule/DTP/target/release/libquiche.a ./libdtp.a
 	rm -f ../submodule/DTP/target/release/libquiche.so
 
