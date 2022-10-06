@@ -674,7 +674,7 @@ int dtp_server(const char *host, const char *port, const char *conf) {
     quiche_config_set_initial_max_stream_data_bidi_local(config, 1000000000);
     quiche_config_set_initial_max_stream_data_bidi_remote(config, 1000000000);
     quiche_config_set_initial_max_streams_bidi(config, 1000000);
-    quiche_config_set_cc_algorithm(config, QUICHE_CC_BBR);
+    quiche_config_set_cc_algorithm(config, QUICHE_CC_CUBIC);
     quiche_config_set_redundancy_rate(config, 1.0f); //
 
     struct connections c;
