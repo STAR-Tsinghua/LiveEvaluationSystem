@@ -14,8 +14,10 @@ The main workspace of the project. It includes source code of the LiveStream sys
 
 ## Compile and Run
 
-1. Go to `../submodule/DTP` and run `cargo build --release` to get `libquiche.so`. Then copy the library to this directory.
+1. Run `make libdtp.so` or `make libquiche.so` to get the required library.
 2. Compile with `sudo make rb`
-3. Run with `sudo make rd` or `sudo make ru` to test different protocols.
-4. Kill the processes with `sudo make k`
+3. Run with `sudo make rd`, `sudo make ru` or `sudo make rq` to test different protocols.
+4. Kill the processes with `sudo make k` after each test.
+
+Check Makefile to know more commands.
 

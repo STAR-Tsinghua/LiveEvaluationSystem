@@ -121,13 +121,19 @@ $ cargo build --release
 Go to `LiveSystem` and then use the commands
 
 ```sh 
-$ cp ../submodule/DTP/target/release/libquiche.so ./ # need to copy this file manually
+$ make libdtp.so # get the dtp library for rd
+$ make libquiche.so # get the quiche library for rq
 $ sudo make rb # r(run)b(binary(maybe)) Compile the executable, and create log directory.
 $ sudo make rd # r(run)d(dtp). Run dtp server and client locally
 $ sudo make k # k(kill) . Kill both server and client
 $ sudo make ru # (run udp). Run udp server and client locally
 $ sudo make k
+$ sudo make rq # run quiche server and client
+$ sudo make kq # you can kill dtp or quiche c/s by command like this
 ```
+
+You need to set up configuration in `LiveSystem/config/[dtp|quiche].conf` to choose the camera and resolution before running the code. The format like `0 360` meaning using device 0 and resolution 360p.
+
 After running `make rd`, the system should be running with a pop-up window displaying live stream video from the camera.
 
 Please remember to kill both sides after test, or it would block the next test.
