@@ -100,6 +100,10 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
 
 
 int main(int argc, char *argv[]) {
+    argp_parse(&argp, argc, argv, 0, 0, &args);
+    printf("SERVER_IP %s SERVER_PORT %s CONFIG_FILE %s\n", args.args[0],
+             args.args[1], args.args[2]);
+
     timeMainPlayer.startAndWrite("player");
     // timeMainPlayer.evalTime("p","mainStartPlayer");
     Print2FileInfo("(p)player程序入口");
@@ -113,9 +117,6 @@ int main(int argc, char *argv[]) {
     int screen_h = 400;
     sworker.splay.init(screen_w, screen_h, "DTP player");
 
-    argp_parse(&argp, argc, argv, 0, 0, &args);
-    printf("SERVER_IP %s SERVER_PORT %s CONFIG_FILE %s\n", args.args[0],
-             args.args[1], args.args[2]);
     const char *host = args.args[0];
     const char *port = args.args[1];
     const char *conf = args.args[2];
