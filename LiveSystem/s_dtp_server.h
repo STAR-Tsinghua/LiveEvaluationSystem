@@ -216,7 +216,10 @@ public:
     ev_timer timer;
     ev_timer sender;
 
-    int sock;
+    // int sock;
+    int *socks;
+    int ai_family;
+    ev_io *watchers;
 
     uint8_t cid[LOCAL_CONN_ID_LEN];
 
@@ -235,9 +238,14 @@ public:
 };
 
 struct connections {
-    int sock;
+    // int sock;
 
-    ev_io *watcher;
+    int *socks;
+    int ai_family;
+
+    ev_io *watchers;
+
+    // ev_io *watcher;
 
     const char *conf; // file name of stream resource configuration.
 
@@ -249,6 +257,14 @@ static quiche_config *config = NULL;
 static struct connections *conns = NULL;
 
 static void timeout_cb(EV_P_ ev_timer *w, int revents);
+static void on_recv_0(EV_P_ ev_io *w, int revents);
+static void on_recv_1(EV_P_ ev_io *w, int revents);
+static void on_recv_2(EV_P_ ev_io *w, int revents);
+static void on_recv_3(EV_P_ ev_io *w, int revents);
+static void on_recv_4(EV_P_ ev_io *w, int revents);
+static void on_recv_5(EV_P_ ev_io *w, int revents);
+static void on_recv_6(EV_P_ ev_io *w, int revents);
+static void on_recv_7(EV_P_ ev_io *w, int revents);
 
 static void debug_log(const char *line, void *argp) {
     fprintf(stderr, "%s\n", line);
@@ -271,7 +287,10 @@ static void flush_egress(struct ev_loop *loop, CONN_IO *conn_io) {
             return;
         }
 
-        ssize_t sent = sendto(conn_io->sock, out, written, 0,
+        int t = 0;
+        int sid = 0;
+        
+        ssize_t sent = sendto(conn_io->socks[sid], out, written, 0,
                               (struct sockaddr *) &conn_io->peer_addr,
                               conn_io->peer_addr_len);
         if (sent != written) {
@@ -283,8 +302,14 @@ static void flush_egress(struct ev_loop *loop, CONN_IO *conn_io) {
 
         if (++send_times > MAX_SEND_TIMES) {
             // feed the 'READ' state to watcher.
-            ev_feed_event(loop, conns->watcher, EV_READ);
-
+            // ev_feed_event(loop, conns->watcher, EV_READ);
+            if(MULIP_ENABLE) {
+                for(int i = 0;i < 8; ++i) {
+                    ev_feed_event(loop, &conn_io->watchers[i], EV_READ);
+                }
+            } else {
+                ev_feed_event(loop, &conn_io->watchers[0], EV_READ);
+            }
             // if (ev_is_pending(conns->watcher)) {
             if (true) {
                 fprintf(stderr, "break the sending.\n");
@@ -526,9 +551,11 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
     if(FEC_ENABLE) {
         quiche_conn_set_tail(conn, TAILSIZE);
     }
-    conn_io->sock = conns->sock;
+    // conn_io->sock = conns->sock;
+    conn_io->socks = conns->socks;
     conn_io->conn = conn;
     conn_io->send_round = 0;
+    conn_io->watchers = conns->watchers;
 
     ev_init(&conn_io->timer, timeout_cb);
     conn_io->timer.data = conn_io;
@@ -566,7 +593,7 @@ static CONN_IO *create_conn(EV_P_ uint8_t *odcid, size_t odcid_len) {
     return conn_io;
 }
 
-static void recv_cb(EV_P_ ev_io *w, int revents) {
+static void recv_cb(EV_P_ ev_io *w, int revents, int path) {
     CONN_IO *tmp, *conn_io = NULL;
     static uint8_t buf[MAX_BLOCK_SIZE];
     static uint8_t out[MAX_DATAGRAM_SIZE];
@@ -576,7 +603,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
         socklen_t peer_addr_len = sizeof(peer_addr);
         memset(&peer_addr, 0, peer_addr_len);
 
-        ssize_t read = recvfrom(conns->sock, buf, sizeof(buf), 0,
+        ssize_t read = recvfrom(conns->socks[path], buf, sizeof(buf), 0,
                                 (struct sockaddr *) &peer_addr,
                                 &peer_addr_len);
 
@@ -629,7 +656,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                     return;
                 }
 
-                ssize_t sent = sendto(conns->sock, out, written, 0,
+                ssize_t sent = sendto(conns->socks[path], out, written, 0,
                                       (struct sockaddr *) &peer_addr,
                                       peer_addr_len);
                 if (sent != written) {
@@ -659,7 +686,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
                     return;
                 }
 
-                ssize_t sent = sendto(conns->sock, out, written, 0,
+                ssize_t sent = sendto(conns->socks[path], out, written, 0,
                                       (struct sockaddr *) &peer_addr,
                                       peer_addr_len);
                 if (sent != written) {
@@ -785,21 +812,51 @@ int dtp_server(const char *host, const char *port, const char *conf) {
         return -1;
     }
 
-    int sock = socket(local->ai_family, SOCK_DGRAM, 0);
-    if (sock < 0) {
-        perror("failed to create socket");
-        return -1;
+    int socks[8];
+
+    if (MULIP_ENABLE) {
+        for (int i = 0; i < 8; i++) {
+            socks[i] = socket(local->ai_family, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+            if (socks[i] < 0) {
+                log_error("failed to create socket");
+                return -1;
+            }
+            struct sockaddr_in6 *local_addr =
+                (struct sockaddr_in6 *)local->ai_addr;
+            in6_addr_set_byte(&local_addr->sin6_addr, 8, ip_cfg[i]);
+            if (bind(socks[i], (struct sockaddr *)local_addr,
+                     local->ai_addrlen) != 0) {
+                log_error("failed to bind socket");
+                return -1;
+            }
+        }
+    } else {
+        socks[0] = socket(local->ai_family, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+        if (socks[0] < 0) {
+            log_error("failed to create socket");
+            return -1;
+        }
+        if (bind(socks[0], local->ai_addr, local->ai_addrlen) != 0) {
+            log_error("failed to bind socket");
+            return -1;
+        }
     }
 
-    if (fcntl(sock, F_SETFL, O_NONBLOCK) != 0) {
-        perror("failed to make socket non-blocking");
-        return -1;
-    }
+    // int sock = socket(local->ai_family, SOCK_DGRAM, 0);
+    // if (sock < 0) {
+    //     perror("failed to create socket");
+    //     return -1;
+    // }
 
-    if (bind(sock, local->ai_addr, local->ai_addrlen) < 0) {
-        perror("failed to connect socket");
-        return -1;
-    }
+    // if (fcntl(sock, F_SETFL, O_NONBLOCK) != 0) {
+    //     perror("failed to make socket non-blocking");
+    //     return -1;
+    // }
+
+    // if (bind(sock, local->ai_addr, local->ai_addrlen) < 0) {
+    //     perror("failed to connect socket");
+    //     return -1;
+    // }
 
     config = quiche_config_new(QUICHE_PROTOCOL_VERSION);
     if (config == NULL) {
@@ -829,22 +886,66 @@ int dtp_server(const char *host, const char *port, const char *conf) {
     quiche_set_debug_logging_level(DEBUG_LEVEL);
 
     struct connections c;
-    c.sock = sock;
+    // c.sock = sock;
+    c.socks = socks;
+    c.ai_family = local->ai_family;
     c.conf = conf;
     c.h = NULL;
 
     conns = &c;
 
-    ev_io watcher;
+    // ev_io watcher;
 
     struct ev_loop *loop = ev_default_loop(0);
 
     timeMainServer.evalTime("s","Before_recv_cb");
     Print2FileInfo("(s)启动recv_cb函数处");
-    ev_io_init(&watcher, recv_cb, sock, EV_READ);
-    ev_io_start(loop, &watcher);
-    watcher.data = &c;
-    conns->watcher = &watcher;
+
+    ev_io watcher[8] = {0};
+    if (MULIP_ENABLE) {
+        ev_io_init(&watcher[0], on_recv_0, c.socks[0], EV_READ);
+        ev_io_start(loop, &watcher[0]);
+        watcher[0].data = &c;
+
+        ev_io_init(&watcher[1], on_recv_1, c.socks[1], EV_READ);
+        ev_io_start(loop, &watcher[1]);
+        watcher[1].data = &c;
+
+        ev_io_init(&watcher[2], on_recv_2, c.socks[2], EV_READ);
+        ev_io_start(loop, &watcher[2]);
+        watcher[2].data = &c;
+
+        ev_io_init(&watcher[3], on_recv_3, c.socks[3], EV_READ);
+        ev_io_start(loop, &watcher[3]);
+        watcher[3].data = &c;
+
+        ev_io_init(&watcher[4], on_recv_4, c.socks[4], EV_READ);
+        ev_io_start(loop, &watcher[4]);
+        watcher[4].data = &c;
+
+        ev_io_init(&watcher[5], on_recv_5, c.socks[5], EV_READ);
+        ev_io_start(loop, &watcher[5]);
+        watcher[5].data = &c;
+
+        ev_io_init(&watcher[6], on_recv_6, c.socks[6], EV_READ);
+        ev_io_start(loop, &watcher[6]);
+        watcher[6].data = &c;
+
+        ev_io_init(&watcher[7], on_recv_7, c.socks[7], EV_READ);
+        ev_io_start(loop, &watcher[7]);
+        watcher[7].data = &c;
+    } else {
+        // ev_io watcher;
+        ev_io_init(&watcher[0], on_recv_0, socks[0], EV_READ);
+        ev_io_start(loop, &watcher[0]);
+        watcher[0].data = &c;
+        // conns->watcher = &watcher[0];
+    }
+    conns->watchers = watcher;    
+    // ev_io_init(&watcher, recv_cb, sock[0], EV_READ);
+    // ev_io_start(loop, &watcher);
+    // watcher.data = &c;
+    // conns->watcher = &watcher;
 
     ev_loop(loop, 0);
 
@@ -852,7 +953,43 @@ int dtp_server(const char *host, const char *port, const char *conf) {
 
     quiche_config_free(config);
 
+    for(int i = 0; i < 8; ++i) {
+        close(socks[i]);
+    }
+
     return 0;
+}
+
+static void on_recv_0(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 0);
+}
+
+static void on_recv_1(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 1);
+}
+
+static void on_recv_2(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 2);
+}
+
+static void on_recv_3(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 3);
+}
+
+static void on_recv_4(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 4);
+}
+
+static void on_recv_5(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 5);
+}
+
+static void on_recv_6(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 6);
+}
+
+static void on_recv_7(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 7);
 }
 
 

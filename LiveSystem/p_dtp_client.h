@@ -44,8 +44,8 @@
 
 #include <ev.h>
 
-#include <quiche.h>
-#include <p_sodtp_jitter.h>
+#include "../submodule/DTP/include/quiche.h"
+#include <sodtp/p_sodtp_jitter.h>
 #include <util_log.h>
 
 #include <argp.h>
@@ -59,8 +59,8 @@ static int ip_cfg[8] = {0, 0x20, 0x40, 0x60, 0x80, 0xa0, 0xc0, 0xe0};
 
 const char *argp_program_version = "dtp-client 0.0.1";
 static char doc[] = "live dtp client for test";
-static char args_doc[] = "SERVER_IP SERVER_PORT [CONFIG_FILE]";
-#define ARGS_NUM 3
+static char args_doc[] = "SERVER_IP SERVER_PORT CLIENT_IP CLIENT_PORT [CONFIG_FILE]";
+#define ARGS_NUM 5
 
 static bool FEC_ENABLE = false;
 static uint32_t TAILSIZE = 5;
@@ -204,9 +204,12 @@ static struct argp argp = {options, parse_opt, args_doc, doc};
 class CONN_IO {
 public:
     ev_timer timer;
-    ev_io *watcher;
+    // ev_io *watcher;
 
-    int sock;
+    // int sock;
+    int *socks;
+    int ai_family;
+    ev_io *watchers;
 
     quiche_conn *conn;
 
@@ -217,7 +220,14 @@ public:
 static void debug_log(const char *line, void *argp) {
     fprintf(stderr, "%s\n", line);
 }
-
+static void on_recv_0(EV_P_ ev_io *w, int revents);
+static void on_recv_1(EV_P_ ev_io *w, int revents);
+static void on_recv_2(EV_P_ ev_io *w, int revents);
+static void on_recv_3(EV_P_ ev_io *w, int revents);
+static void on_recv_4(EV_P_ ev_io *w, int revents);
+static void on_recv_5(EV_P_ ev_io *w, int revents);
+static void on_recv_6(EV_P_ ev_io *w, int revents);
+static void on_recv_7(EV_P_ ev_io *w, int revents);
 //这个函数用意还需要理解
 static void flush_egress(struct ev_loop *loop, CONN_IO *conn_io) {
     static uint8_t out[MAX_DATAGRAM_SIZE];
@@ -236,7 +246,10 @@ static void flush_egress(struct ev_loop *loop, CONN_IO *conn_io) {
             return;
         }
 
-        ssize_t sent = send(conn_io->sock, out, written, 0);
+        int t = 5 << 5;
+        int sid = MULIP_ENABLE ? 5 : 0;
+        // set_tos(conn_io->ai_family, conn_io->socks[sid], t);
+        ssize_t sent = send(conn_io->socks[sid], out, written, 0);
         if (sent != written) {
             perror("failed to send");
             return;
@@ -246,7 +259,14 @@ static void flush_egress(struct ev_loop *loop, CONN_IO *conn_io) {
 
         if (++send_times > MAX_SEND_TIMES) {
             // feed the 'READ' state to watcher.
-            ev_feed_event(loop, conn_io->watcher, EV_READ);
+            // ev_feed_event(loop, conn_io->watcher, EV_READ);
+            if(MULIP_ENABLE) {
+                for(int i = 0;i < 8; ++i) {
+                    ev_feed_event(loop, &conn_io->watchers[i], EV_READ);
+                }
+            } else {
+                ev_feed_event(loop, &conn_io->watchers[0], EV_READ);
+            }
 
             // if (ev_is_pending(conn_io->watcher)) {
             if (true) {
@@ -265,7 +285,7 @@ static void flush_egress(struct ev_loop *loop, CONN_IO *conn_io) {
     ev_timer_again(loop, &conn_io->timer);
 }
 //  接收函数
-static void recv_cb(EV_P_ ev_io *w, int revents) {
+static void recv_cb(EV_P_ ev_io *w, int revents, int path) {
     // Print2File("dtp_client.h recv_cb :=======");
     static bool req_sent = false;
 
@@ -277,7 +297,7 @@ static void recv_cb(EV_P_ ev_io *w, int revents) {
 
     while (1) {
         //这里是不是读头info信息？
-        ssize_t read = recv(conn_io->sock, buf, sizeof(buf), 0);
+        ssize_t read = recv(conn_io->socks[path], buf, sizeof(buf), 0);
         // Print2File("ssize_t read = recv(conn_io->sock, buf, sizeof(buf), 0); %ld");
         // printf("read: %ld\n", read);
         if (read < 0) {
@@ -470,22 +490,71 @@ int dtp_client(const char *host, const char *port, JitterBuffer *pJBuffer) {
         perror("failed to resolve host");
         return -1;
     }
-    timeMainPlayer.evalTime("p","socket(peer->ai_family");
-    int sock = socket(peer->ai_family, SOCK_DGRAM, 0);
-    if (sock < 0) {
-        perror("failed to create socket");
+
+    struct addrinfo *local;
+    if (getaddrinfo(args.args[2], args.args[3], &hints, &local) != 0) {
+        log_error("failed to resolve local");
+        freeaddrinfo(local);
         return -1;
+    }
+    
+    int socks[8];
+
+    if (MULIP_ENABLE) {
+        for (int i = 0; i < 8; i++) {
+            socks[i] = socket(local->ai_family, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+            if (socks[i] < 0) {
+                log_error("failed to create socket");
+                return -1;
+            }
+            struct sockaddr_in6 *local_addr =
+                (struct sockaddr_in6 *)local->ai_addr;
+            in6_addr_set_byte(&local_addr->sin6_addr, 8, ip_cfg[i]);
+            if (bind(socks[i], (struct sockaddr *)local_addr,
+                     local->ai_addrlen) != 0) {
+                log_error("failed to bind socket %s", strerror(errno));
+                return -1;
+            }
+            struct sockaddr_in6 *peer_addr =
+                (struct sockaddr_in6 *)peer->ai_addr;
+            in6_addr_set_byte(&peer_addr->sin6_addr, 8, ip_cfg[i]);
+            if (connect(socks[i], peer->ai_addr, peer->ai_addrlen) != 0) {
+                log_error("failed to connect socket");
+                return -1;
+            }
+        }
+    } else {
+        socks[0] = socket(local->ai_family, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+        if (socks[0] < 0) {
+            log_error("failed to create socket");
+            return -1;
+        }
+        if (bind(socks[0], local->ai_addr, local->ai_addrlen) != 0) {
+            log_error("failed to bind socket");
+            return -1;
+        }
+        if (connect(socks[0], peer->ai_addr, peer->ai_addrlen) != 0) {
+            log_error("failed to connect socket");
+            return -1;
+        }
     }
 
-    if (fcntl(sock, F_SETFL, O_NONBLOCK) != 0) {
-        perror("failed to make socket non-blocking");
-        return -1;
-    }
+    // timeMainPlayer.evalTime("p","socket(peer->ai_family");
+    // int sock = socket(peer->ai_family, SOCK_DGRAM, 0);
+    // if (sock < 0) {
+    //     perror("failed to create socket");
+    //     return -1;
+    // }
 
-    if (connect(sock, peer->ai_addr, peer->ai_addrlen) < 0) {
-        perror("failed to connect socket");
-        return -1;
-    }
+    // if (fcntl(sock, F_SETFL, O_NONBLOCK) != 0) {
+    //     perror("failed to make socket non-blocking");
+    //     return -1;
+    // }
+
+    // if (connect(sock, peer->ai_addr, peer->ai_addrlen) < 0) {
+    //     perror("failed to connect socket");
+    //     return -1;
+    // }
 
     quiche_config *config = quiche_config_new(0xbabababa);
     if (config == NULL) {
@@ -549,24 +618,66 @@ int dtp_client(const char *host, const char *port, JitterBuffer *pJBuffer) {
         quiche_conn_set_tail(conn, TAILSIZE);
     }
 
-    conn_io->sock = sock;
+    // conn_io->sock = sock;
+    conn_io->socks = socks;
     conn_io->conn = conn;
     conn_io->recv_round = 1;
     conn_io->jitter = pJBuffer;
 
-    ev_io watcher;
+    // ev_io watcher;
 
     // struct ev_loop *loop = ev_default_loop(0);
     struct ev_loop *loop = ev_loop_new(EVFLAG_AUTO);
+    
+    ev_io watcher[8];
+    if (MULIP_ENABLE) {
+        ev_io_init(&watcher[0], on_recv_0, conn_io->socks[0], EV_READ);
+        ev_io_start(loop, &watcher[0]);
+        watcher[0].data = conn_io;  
+
+        ev_io_init(&watcher[1], on_recv_1, conn_io->socks[1], EV_READ);
+        ev_io_start(loop, &watcher[1]);
+        watcher[1].data = conn_io;
+
+        ev_io_init(&watcher[2], on_recv_2, conn_io->socks[2], EV_READ);
+        ev_io_start(loop, &watcher[2]);
+        watcher[2].data = conn_io;
+
+        ev_io_init(&watcher[3], on_recv_3, conn_io->socks[3], EV_READ);
+        ev_io_start(loop, &watcher[3]);
+        watcher[3].data = conn_io;
+
+        ev_io_init(&watcher[4], on_recv_4, conn_io->socks[4], EV_READ);
+        ev_io_start(loop, &watcher[4]);
+        watcher[4].data = conn_io;
+
+        ev_io_init(&watcher[5], on_recv_5, conn_io->socks[5], EV_READ);
+        ev_io_start(loop, &watcher[5]);
+        watcher[5].data = conn_io;
+
+        ev_io_init(&watcher[6], on_recv_6, conn_io->socks[6], EV_READ);
+        ev_io_start(loop, &watcher[6]);
+        watcher[6].data = conn_io;
+
+        ev_io_init(&watcher[7], on_recv_7, conn_io->socks[7], EV_READ);
+        ev_io_start(loop, &watcher[7]);
+        watcher[7].data = conn_io;
+    } else {
+        ev_io_init(&watcher[0], on_recv_0, conn_io->socks[0], EV_READ);
+        ev_io_start(loop, &watcher[0]);
+        watcher[0].data = conn_io;
+        // conn_io->watcher = &watcher[0];
+    }
+    conn_io->watchers = watcher;
 
     // recv_cb refrence to dtp_client , important!
     
     Print2FileInfo("(p)启动recv_cb函数处");
     timeMainPlayer.evalTime("p","recv_cb_Start");
-    ev_io_init(&watcher, recv_cb, conn_io->sock, EV_READ);
-    ev_io_start(loop, &watcher);
-    watcher.data = conn_io;
-    conn_io->watcher = &watcher;
+    // ev_io_init(&watcher, recv_cb, conn_io->sock, EV_READ);
+    // ev_io_start(loop, &watcher);
+    // watcher.data = conn_io;
+    // conn_io->watcher = &watcher;
 
     ev_init(&conn_io->timer, timeout_cb);
     conn_io->timer.data = conn_io;
@@ -591,9 +702,44 @@ int dtp_client(const char *host, const char *port, JitterBuffer *pJBuffer) {
     sem_post(pJBuffer->sem);
     ev_feed_signal(SIGUSR1);
 
+    for(int i = 0; i < 8; ++i) {
+        close(socks[i]);
+    }
+
     return 0;
 }
 
+static void on_recv_0(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 0);
+}
+
+static void on_recv_1(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 1);
+}
+
+static void on_recv_2(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 2);
+}
+
+static void on_recv_3(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 3);
+}
+
+static void on_recv_4(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 4);
+}
+
+static void on_recv_5(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 5);
+}
+
+static void on_recv_6(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 6);
+}
+
+static void on_recv_7(EV_P_ ev_io *w, int revents) {
+    recv_cb(loop, w, revents, 7);
+}
 
 
 
