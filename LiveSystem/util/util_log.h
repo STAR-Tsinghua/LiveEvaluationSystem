@@ -99,7 +99,7 @@ static void LogInTheFile(std::string fileName, std::string inputStr)
 }
 
 static void logTxtInDic(std::string logType, std::string which, std::string algoTime,std::string timeType, std::string detail){
-    std::string logs = "{'LogType': '"+logType+"', 'Which': '"+which+"', 'AlgoTime': '"+algoTime+"', 'TimeType': '"+timeType+"', 'Detail': '"+detail+"'}";
+    std::string logs = "{\"LogType\": \""+logType+"\", \"Which\": \""+which+"\", \"AlgoTime\": \""+algoTime+"\", \"TimeType\": \""+timeType+"\", \"Detail\": \""+detail+"\"}";
     std::string fileName = logType;
     LogInTheFile(fileName, logs);
 }

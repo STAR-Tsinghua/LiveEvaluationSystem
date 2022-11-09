@@ -575,13 +575,14 @@ void live_produce(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf){
     LiveCapture *lc = new LiveCapture();
     MediaEncoder *mc = new MediaEncoder();
     XTransport *xt = new XTransport();
+
     fprintf(stderr, "live_produce, config name: %s\n", conf);
     int camera = 0, resolution = 360;
     FILE* fconf = fopen(conf, "r");
     if(!fconf) {
       fprintf(stderr, "cannot open conf file\n");
     } else {
-      fscanf(fconf, "%d %d", &camera, &resolution);
+      fscanf(fconf, "# %d %d", &camera, &resolution);
       fprintf(stderr, "load conf: %d %d\n", camera, resolution);
       if(camera < 0 || camera > 4 || resolution <= 0) {
         fprintf(stderr, "error conf parameter\n");
@@ -590,8 +591,7 @@ void live_produce(BoundedBuffer<StreamPktVecPtr> *pBuffer, const char *conf){
       }
       fclose(fconf);
     }
-    
-    
+
     timeMainServer.evalTime("s","BeforePrepareLiveMedia");
     if(prepareLiveMedia(&(*lc),&(*mc),&(*xt), camera, resolution)){
         std::vector<StreamCtxPtr> vStmCtx;
