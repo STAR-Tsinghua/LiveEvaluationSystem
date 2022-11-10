@@ -101,8 +101,8 @@ void sdl_play(struct ev_loop *loop, ev_timer *w, int revents) {
 
 int main(int argc, char *argv[]) {
     argp_parse(&argp, argc, argv, 0, 0, &args);
-    printf("SERVER_IP %s SERVER_PORT %s CONFIG_FILE %s\n", args.args[0],
-             args.args[1], args.args[2]);
+    printf("SERVER_IP %s SERVER_PORT %s CLIENT_IP %s CLIENT_PORT %s [CONFIG_FILE %s]\n", args.args[0],
+             args.args[1], args.args[2], args.args[3], args.args[4]);
 
     timeMainPlayer.startAndWrite("player");
     // timeMainPlayer.evalTime("p","mainStartPlayer");
@@ -119,10 +119,10 @@ int main(int argc, char *argv[]) {
 
     const char *host = args.args[0];
     const char *port = args.args[1];
-    const char *conf = args.args[2];
+    const char *conf = args.args[5];
     
     if (conf) {
-        conf = argv[3];
+        // conf = argv[3];
     }else {
         conf = "./config/dtp.conf";
     }
