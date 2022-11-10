@@ -156,7 +156,10 @@ static void flush_egress(struct ev_loop *loop, CONN_IO *conn_io) {
             return;
         }
 
-        int sid = set_sock_tos_and_ip_with_blocks(stream_blocks, stream_blocks_num, conn_io->ai_family, conn_io->socks);
+        int sid = set_sock_tos_and_ip_with_blocks(
+                stream_blocks, stream_blocks_num, 
+                conn_io->ai_family, conn_io->socks,
+                &conn_io->peer_addr);
         
         ssize_t sent = sendto(conn_io->socks[sid], out, written, 0,
                               (struct sockaddr *) &conn_io->peer_addr,

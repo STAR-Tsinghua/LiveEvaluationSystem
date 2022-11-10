@@ -72,27 +72,33 @@ void set_tos(int ai_family, int sock, int tos) {
 /**
  * @brief Set the sock tos and ip with blocks from dtp send api
  * 
+ * can only set ipv6 ip address
+ * 
  * @param stream_blocks: DTP blocks from send api
  * @param stream_blocks_num: number of blocks
  * @param ai_family
  * @param socks 
+ * @param peer_addr
  * @return int: the socket id to send, -1 if any error
  */
 int set_sock_tos_and_ip_with_blocks(struct Block* stream_blocks, int stream_blocks_num,
-    int ai_family, int* socks
+    int ai_family, int* socks, struct sockaddr_storage* peer_addr
 ) {
     int t = 0;
     int sid = 0;
-    if(!TOS_ENABLE) return sid;
     if (stream_blocks_num > 0) {
         sid = tos(stream_blocks[0].block_deadline,
                   stream_blocks[0].block_priority);
         t = sid << 5;
         sid = MULIP_ENABLE ? sid : 0;
-        set_tos(ai_family, socks[sid], t);
-        // TODO: in6_addr_set_byte(
-        //        &((struct sockaddr_in6 *)&conn_io->peer_addr)->sin6_addr, 8,
-        //        ip_cfg[sid]);
+        if(TOS_ENABLE) {
+            set_tos(ai_family, socks[sid], t);
+        }
+        if(MULIP_ENABLE) {
+            in6_addr_set_byte(
+                &((struct sockaddr_in6 *)peer_addr)->sin6_addr, 8,
+                ip_cfg[sid]);
+        }
         return sid;
     } else {
         return 0;

@@ -96,9 +96,9 @@ rb:
 # dtp
 rd: libsodtp.so r_dtp_server r_dtp_play 
 	make cl_dtp
-	LD_LIBRARY_PATH=. ./r_dtp_server 127.0.0.1 9093 1>dtp_server.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_dtp_server fd01::1 9093 -m 1>dtp_server.log 2>&1 &
 	sleep 2s
-	LD_LIBRARY_PATH=. ./r_dtp_play 127.0.0.1 9093 127.0.0.1 9099 1>dtp_play.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_dtp_play fd01::1 9093 fd02::1 9099 -m 1>dtp_play.log 2>&1 &
 
 rdc: libsodtp.so r_dtp_play 
 	LD_LIBRARY_PATH=. ./r_dtp_play fd02::2 9093 fd03::3 9099 1>dtp_play.log 2>&1 &
