@@ -1,4 +1,6 @@
-# LiveStream Ubuntu 18.04
+# LiveStream System
+
+This project implements a simple live stream system based on DTP/quiche/UDP
 
 ## Download advice
 
@@ -14,7 +16,7 @@ DTP needs boringssl library, whose downloading may be frustrating in Mainland Ch
 
 ## Environment settings
 
-The system is tested on Ubuntu18.04.
+The system is tested on Ubuntu18.04 and Ubuntu20.04.
 
 ### Toolchain
 
@@ -59,9 +61,11 @@ You can refer to this blog for further information about installing FFmpeg from 
 
 You may have to install libx264 and/or libx265, just use `sudo apt install libx264-dev libx265-dev` to do so.
 
-### Opencv 3.4.0
+### Opencv (3.4.0 for Ubuntu 18.04/4.9.0 for Ubuntu20.04)
 
-It is similar to install Opencv as it is for FFmpeg. Use tag 3.4.0 for Opencv from github https://github.com/opencv/opencv.git . You need cmake to build Opencv.
+It is similar to install Opencv as it is for FFmpeg. Use tag 3.4.0 for example:
+
+Get Opencv from github https://github.com/opencv/opencv.git . You need `cmake` to build Opencv.
 
 You can refer to this blog for some advice https://blog.csdn.net/m0_38076563/article/details/79709862
 
@@ -81,6 +85,8 @@ You need to check that after running `cmake ..`, options of FFMPEG should all be
 
 You may have to configure link libraries for opencv (and/or ffmpeg). You can refer to the last several parts of https://blog.csdn.net/wangyjfrecky/article/details/80998303 for help of linking libraries.
 
+In Ubuntu 20.04, you may encounter compiling error when the process reaches near 99% using opencv 3.4.0. The current solution is updating the opencv version to 4.9.0. Refer to the following blog for more information: https://blog.csdn.net/shengliz/article/details/116739660.
+
 ### SDL 2.0
 
 Install this library by `sudo apt install libsdl2-dev`
@@ -91,7 +97,7 @@ Install this lib by `sudo apt install uthash-dev`
 
 ### Build essentials and CMake
 
-`sudo apt install build-essential make`
+`sudo apt install build-essential cmake`
 
 ## Compilation process and toolchains
 
@@ -131,6 +137,10 @@ $ cargo build --release
 
 Please note the version of rustc should be 1.53.0 (`rustc -V`). If not, you can use `rustup toolchain` to install it. It is found out that the latest rustc version may cause library linking problem.
 
+### Apply patches
+
+Run `apply_patch.sh` at the root directory of this project. This patch adds Cargo.lock file to both submodules to ensure correct depency version.
+
 ### Compile executable
 
 Go to `LiveSystem` and then use the commands
@@ -158,6 +168,17 @@ You may find some useful logs in log files generated in both `LiveSystem` and `L
 ## Commands
 
 The `command` directory contains some shell commands to run the server and client (for both Linux and Mac OS). You should check the `Makefile` to make sure you understand how to run the server and client.
+
+The following code shows a simple example to run all the live system targets (some features are only available in IPv6):
+
+```bash
+$ LD_LIBRARY_PATH=. ./r_dtp_server SERVER_IP SERVER_PORT [CONFIG_FILE(default: ./config/dtp.conf)]
+$ LD_LIBRARY_PATH=. ./r_dtp_play SERVER_IP SERVER_PORT CLIENT_IP CLIENT_PORT [CONFIG_FILE(default: ./config/dtp.conf)]
+$ LD_LIBRARY_PATH=. ./r_quiche_server SERVER_IP SERVER_PORT [CONFIG_FILE(default: ./config/quiche.conf)]
+$ LD_LIBRARY_PATH=. ./r_quiche_play SERVER_IP SERVER_PORT [CONFIG_FILE(default: ./config/quiche.conf)]
+$ LD_LIBRARY_PATH=. ./r_udp_server SERVER_IP SERVER_PORT [CONFIG_FILE(default: ./config/udp.conf)]
+$ LD_LIBRARY_PATH=. ./r_udp_play SERVER_IP SERVER_PORT [CONFIG_FILE(default: ./config/udp.conf)]
+```
 
 ## Original readme contents
 
