@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
     if (argc >= 4) {
         conf = argv[3];
     }else {
-        conf = "./config/ev_udp.conf";
+        conf = "./config/udp.conf";
     }
     logSysPrepare(conf);
     udp_server(host, port, conf);

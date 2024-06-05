@@ -119,11 +119,11 @@ int main(int argc, char *argv[]) {
 
     const char *host = args.args[0];
     const char *port = args.args[1];
-    const char *conf = args.args[5];
+    const char *conf = args.args[4];
     
     if (conf) {
         // conf = argv[3];
-    }else {
+    } else {
         conf = "./config/dtp.conf";
     }
 

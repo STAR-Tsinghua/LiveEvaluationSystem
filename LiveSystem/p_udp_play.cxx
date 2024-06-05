@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
     if (argc >= 4) {
         path = argv[3];
     }else {
-        path = "./config/ev_udp.conf";
+        path = "./config/udp.conf";
     }
     logSysPrepare(path);
 

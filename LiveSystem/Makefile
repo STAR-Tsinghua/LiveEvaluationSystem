@@ -90,18 +90,18 @@ rb:
 	make all
 
 # dtp
-rd: libsodtp.so r_dtp_server r_dtp_play 
+rd: libsodtp.so libdtp.so r_dtp_server r_dtp_play 
 	make cl_dtp
-	LD_LIBRARY_PATH=. ./r_dtp_server fd01::1 9093 -m 1>dtp_server.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_dtp_server 127.0.0.1 9093 1>dtp_server.log 2>&1 &
 	sleep 2s
-	LD_LIBRARY_PATH=. ./r_dtp_play fd01::1 9093 fd02::1 9099 -m 1>dtp_play.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_dtp_play 127.0.0.1 9093 127.0.0.1 9099 1>dtp_play.log 2>&1 &
 
-rdc: libsodtp.so r_dtp_play 
-	LD_LIBRARY_PATH=. ./r_dtp_play fd02::2 9093 fd03::3 9099 1>dtp_play.log 2>&1 &
+rdc: libsodtp.so libdtp.so r_dtp_play 
+	LD_LIBRARY_PATH=. ./r_dtp_play ::1 9093 ::1 9099 1>dtp_play.log 2>&1 &
 
-rds: libsodtp.so r_dtp_server 
+rds: libsodtp.so libdtp.so r_dtp_server 
 	make cl_dtp
-	LD_LIBRARY_PATH=. ./r_dtp_server fd02::2 9093 1>dtp_server.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_dtp_server ::1 9093 1>dtp_server.log 2>&1 &
 
 # udp
 ru: r_udp_server r_udp_play libsodtp.so
@@ -111,25 +111,25 @@ ru: r_udp_server r_udp_play libsodtp.so
 	LD_LIBRARY_PATH=. ./r_udp_play 127.0.0.1 9095 1> udp_player.log 2>&1 &
 
 ruc: r_udp_server r_udp_play libsodtp.so
-	LD_LIBRARY_PATH=. ./r_udp_play fd02::2 9095 1> udp_player.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_udp_play ::1 9095 1> udp_player.log 2>&1 &
 
 rus: r_udp_server r_udp_play libsodtp.so
 	make cl_udp
-	LD_LIBRARY_PATH=. ./r_udp_server fd02::2 9095 1> udp_server.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_udp_server ::1 9095 1> udp_server.log 2>&1 &
 
 # quiche
-rq: libsodtp.so r_quiche_server r_quiche_play 
+rq: libsodtp.so r_quiche_server r_quiche_play  libquiche.so
 	make cl_quiche
 	LD_LIBRARY_PATH=. ./r_quiche_server 127.0.0.1 9094 1>quiche_server.log 2>&1 &
 	sleep 2s
 	LD_LIBRARY_PATH=. ./r_quiche_play 127.0.0.1 9094 1>quiche_play.log 2>&1 &
 
-rqc: libsodtp.so r_quiche_play 
-	LD_LIBRARY_PATH=. ./r_quiche_play fd02::2 9094 1> quiche_player.log 2>&1 &
+rqc: libsodtp.so r_quiche_play libquiche.so
+	LD_LIBRARY_PATH=. ./r_quiche_play ::1 9094 1> quiche_player.log 2>&1 &
 
-rqs: r_quiche_server r_quiche_play 
+rqs: r_quiche_server r_quiche_play libquiche.so
 	make cl_quiche
-	LD_LIBRARY_PATH=. ./r_quiche_server fd02::2 9094 1> quiche_server.log 2>&1 &
+	LD_LIBRARY_PATH=. ./r_quiche_server ::1 9094 1> quiche_server.log 2>&1 &
 
 k:
 	../command/lhs_killBoth.sh
