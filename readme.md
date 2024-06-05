@@ -14,7 +14,14 @@ DTP needs boringssl library, whose downloading may be frustrating in Mainland Ch
 
 ## Environment settings
 
-The system is tested on Ubuntu18.04 virtual machine and it indicates that the system is operating under the following environments.
+The system is tested on Ubuntu18.04.
+
+### Toolchain
+
+- gcc: 9.4.0
+- cmake: 3.16.3
+- rustc: 1.53.0
+- go: 1.17.3
 
 ### FFmpeg version 4.1.3
 
@@ -48,7 +55,7 @@ Then configure the source code with `./configure`. The following configuration i
 
 `./configure --enable-shared --enable-gpl --enable-libx264 --enable-libx265 --prefix=/usr/local/ffmpeg`
 
-You can reference this blog for further information about installing FFmpeg from src code https://blog.csdn.net/wangyjfrecky/article/details/80998303 .
+You can refer to this blog for further information about installing FFmpeg from src code https://blog.csdn.net/wangyjfrecky/article/details/80998303 .
 
 You may have to install libx264 and/or libx265, just use `sudo apt install libx264-dev libx265-dev` to do so.
 
@@ -56,7 +63,7 @@ You may have to install libx264 and/or libx265, just use `sudo apt install libx2
 
 It is similar to install Opencv as it is for FFmpeg. Use tag 3.4.0 for Opencv from github https://github.com/opencv/opencv.git . You need cmake to build Opencv.
 
-You can reference this blog for some advice https://blog.csdn.net/m0_38076563/article/details/79709862
+You can refer to this blog for some advice https://blog.csdn.net/m0_38076563/article/details/79709862
 
 ```sh
 $ git clone https://github.com/opencv/opencv.git
@@ -70,9 +77,9 @@ $ make -j8
 $ sudo make install
 ```
 
-You need to check that after running `cmake ..`, options of FFMPEG should all be ON. If you cannot fine ffmpeg components, you may reference the following answer: https://stackoverflow.com/questions/5492919/cmake-cant-find-ffmpeg-in-custom-install-path .
+You need to check that after running `cmake ..`, options of FFMPEG should all be ON. If you cannot find ffmpeg components, you may refer to the following answer: https://stackoverflow.com/questions/5492919/cmake-cant-find-ffmpeg-in-custom-install-path .
 
-You may have to configure link libraries for opencv (and/or ffmpeg). You can reference the last several parts of https://blog.csdn.net/wangyjfrecky/article/details/80998303 for help of linking libraries.
+You may have to configure link libraries for opencv (and/or ffmpeg). You can refer to the last several parts of https://blog.csdn.net/wangyjfrecky/article/details/80998303 for help of linking libraries.
 
 ### SDL 2.0
 
@@ -81,6 +88,10 @@ Install this library by `sudo apt install libsdl2-dev`
 ### uthash.h
 
 Install this lib by `sudo apt install uthash-dev`
+
+### Build essentials and CMake
+
+`sudo apt install build-essential make`
 
 ## Compilation process and toolchains
 
@@ -95,6 +106,8 @@ Rust may be fetched and installed like this:
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
+
+Then use `rustup toolchain install 1.53.0` to install the specific version of toolchain.
 
 #### Go dependency
 
@@ -116,18 +129,20 @@ $ cd submodule/DTP
 $ cargo build --release
 ```
 
+Please note the version of rustc should be 1.53.0 (`rustc -V`). If not, you can use `rustup toolchain` to install it. It is found out that the latest rustc version may cause library linking problem.
+
 ### Compile executable
 
 Go to `LiveSystem` and then use the commands
 
-```sh 
-$ cp ../submodule/DTP/target/release/libquiche.so ./ # need to copy this file manually
-$ sudo make rb # r(run)b(binary(maybe)) Compile the executable, and create log directory.
+```sh
+$ make rb # r(run)b(binary(maybe)) Compile the executable, and create log directory.
 $ sudo make rd # r(run)d(dtp). Run dtp server and client locally
 $ sudo make k # k(kill) . Kill both server and client
 $ sudo make ru # (run udp). Run udp server and client locally
 $ sudo make k
 ```
+
 After running `make rd`, the system should be running with a pop-up window displaying live stream video from the camera.
 
 Please remember to kill both sides after test, or it would block the next test.

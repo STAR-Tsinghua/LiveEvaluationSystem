@@ -45,6 +45,8 @@ LiveSystem/r_dtp_play
 LiveSystem/r_udp_play
 LiveSystem/r_dtp_server
 LiveSystem/r_udp_server
+LiveSystem/r_quiche_server
+LiveSystem/r_quiche_play
 
 # Debug files
 *.dSYM/
