@@ -228,7 +228,7 @@ namespace Tools {
                 //当前从开始到现在的时间戳
                 std::string timeStampStr = std::to_string(getCurrentMillisecond());
                 if(timeType == "NULL"){
-                    std::string timeType = getTimeType();
+                    timeType = getTimeType();
                 } 
                 logTxtInDic(logType,which,timeStampStr,timeType,detail);
                 // if(logType=="RGB_Push"){
