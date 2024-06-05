@@ -44,10 +44,10 @@ LOGS_QUICHE = logs/ev_quiche
 all: $(TARGETS)
 
 # ================= dtp =================
-r_dtp_server : s_dtp_server.cxx
+r_dtp_server : s_dtp_server.cxx libdtp.so
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(DTP_INC) -L$(DTP_LIB) $(LIBS_DIR) -ldtp $(LIBS) $(OPENCVFLAGS)
 
-r_dtp_play : p_dtp_play.cxx libsodtp.so
+r_dtp_play : p_dtp_play.cxx libsodtp.so libdtp.so
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(DTP_INC) -L$(DTP_LIB) $(LIBS_DIR) -ldtp $(LIBS) -lsodtp
 
 # ================= udp =================
@@ -58,15 +58,11 @@ r_udp_play : p_udp_play.cxx libsodtp.so
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) $(LIBS_DIR) $(LIBS) -lsodtp
 
 # ================= quiche =================
-r_quiche_server : s_quiche_server.cxx
+r_quiche_server : s_quiche_server.cxx libquiche.so
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(QUICHE_INC) -L$(QUICHE_LIB) $(LIBS_DIR) $(LIBS) $(OPENCVFLAGS) -lssl -lquiche 
 
-r_quiche_play : p_quiche_play.cxx libsodtp.so
+r_quiche_play : p_quiche_play.cxx libsodtp.so libquiche.so
 	$(CX) $(CXFLAGS) -o $@ $^ $(INCS) -I$(QUICHE_INC) -L$(QUICHE_LIB) $(LIBS_DIR) -lquiche $(LIBS) -lsodtp
-
-main:
-	g++ main.cpp loopbuf.cpp -o a.out
-	./a.out
 
 clean:
 	rm -rf $(TARGETS)
